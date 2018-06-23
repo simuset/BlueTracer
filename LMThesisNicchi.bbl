@@ -1,0 +1,376 @@
+% $ biblatex auxiliary file $
+% $ biblatex version 2.3 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\entry{Bayer2005TTAnalyzeA}{inproceedings}{}
+  \name{author}{2}{}{%
+    {{}%
+     {Bayer}{B.}%
+     {Ulrich}{U.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Kr{\"u}gel}{K.}%
+     {Christopher}{C.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{BUKC1}
+  \strng{fullhash}{BUKC1}
+  \field{sortinit}{B}
+  \field{title}{TTAnalyze : A Tool for Analyzing Malware}
+  \field{year}{2005}
+\endentry
+
+\entry{Berdajs:2010:EAU:1815744.1815746}{article}{}
+  \name{author}{2}{}{%
+    {{}%
+     {Berdajs}{B.}%
+     {J.}{J.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Bosni\'{c}}{B.}%
+     {Z.}{Z.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {John Wiley \& Sons, Inc.}%
+  }
+  \keyw{API hooking, DLL injection, application extensions, detours,
+  programming}
+  \strng{namehash}{BJBZ1}
+  \strng{fullhash}{BJBZ1}
+  \field{sortinit}{B}
+  \verb{doi}
+  \verb 10.1002/spe.v40:7
+  \endverb
+  \field{issn}{0038-0644}
+  \field{number}{7}
+  \field{pages}{567\bibrangedash 584}
+  \field{title}{Extending Applications Using an Advanced Approach to DLL
+  Injection and API Hooking}
+  \verb{url}
+  \verb http://dx.doi.org/10.1002/spe.v40:7
+  \endverb
+  \field{volume}{40}
+  \list{location}{1}{%
+    {New York, NY, USA}%
+  }
+  \field{journaltitle}{Softw. Pract. Exper.}
+  \field{month}{06}
+  \field{year}{2010}
+\endentry
+
+\entry{Buescher:2011:BIS:2186328.2186347}{inproceedings}{}
+  \name{author}{3}{}{%
+    {{}%
+     {Buescher}{B.}%
+     {Armin}{A.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Leder}{L.}%
+     {Felix}{F.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Siebert}{S.}%
+     {Thomas}{T.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {Springer-Verlag}%
+  }
+  \strng{namehash}{BALFST1}
+  \strng{fullhash}{BALFST1}
+  \field{sortinit}{B}
+  \field{booktitle}{Proceedings of the 14th International Conference on Recent
+  Advances in Intrusion Detection}
+  \verb{doi}
+  \verb 10.1007/978-3-642-23644-0_14
+  \endverb
+  \field{isbn}{978-3-642-23643-3}
+  \field{pages}{262\bibrangedash 280}
+  \field{series}{RAID'11}
+  \field{title}{Banksafe Information Stealer Detection Inside the Web Browser}
+  \verb{url}
+  \verb http://dx.doi.org/10.1007/978-3-642-23644-0_14
+  \endverb
+  \list{location}{1}{%
+    {Menlo Park, CA}%
+  }
+  \field{year}{2011}
+  \warn{\item Can't use 'location' + 'address'}
+\endentry
+
+\entry{Cisco}{misc}{}
+  \field{sortinit}{C}
+  \field{title}{Cisco 2018 Annual Cybersecurity Report}
+  \verb{url}
+  \verb https://www.cisco.com/c/dam/m/hu_hu/campaigns/security-hub/pdf/acr-2018
+  \verb .pdf
+  \endverb
+  \list{institution}{1}{%
+    {Cisco}%
+  }
+  \field{year}{2018}
+\endentry
+
+\entry{BluePill}{misc}{}
+  \name{author}{3}{}{%
+    {{}%
+     {Cono~D'Elia}{C.~D.}%
+     {Daniele}{D.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Coppa}{C.}%
+     {Emilio}{E.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Demetrescu}{D.}%
+     {Camil}{C.}%
+     {}{}%
+     {}{}}%
+  }
+  \keyw{Dynamic analysis, malware}
+  \strng{namehash}{CDDCEDC1}
+  \strng{fullhash}{CDDCEDC1}
+  \field{sortinit}{C}
+  \field{title}{The DBI Blue Pill: Practical Analysis of Evasive Malware}
+\endentry
+
+\entry{DBI}{misc}{}
+  \field{sortinit}{D}
+  \field{title}{Dynamic Binary Instrumentation}
+  \verb{url}
+  \verb http://uninformed.org/index.cgi?v=7&a=1&p=3
+  \endverb
+  \field{year}{2007}
+\endentry
+
+\entry{DynamoRIO}{misc}{}
+  \field{sortinit}{D}
+  \field{title}{Dynamic Instrumentation Tool Platform}
+  \verb{url}
+  \verb http://www.dynamorio.org/
+  \endverb
+\endentry
+
+\entry{Egele:2008:SAD:2089125.2089126}{article}{}
+  \name{author}{4}{}{%
+    {{}%
+     {Egele}{E.}%
+     {Manuel}{M.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Scholte}{S.}%
+     {Theodoor}{T.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Kirda}{K.}%
+     {Engin}{E.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Kruegel}{K.}%
+     {Christopher}{C.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {ACM}%
+  }
+  \keyw{Dynamic analysis, malware}
+  \strng{namehash}{EM+1}
+  \strng{fullhash}{EMSTKEKC1}
+  \field{sortinit}{E}
+  \verb{doi}
+  \verb 10.1145/2089125.2089126
+  \endverb
+  \field{howpublished}{http://doi.acm.org/10.1145/2089125.2089126}
+  \field{issn}{0360-0300}
+  \field{number}{2}
+  \field{pages}{6:1\bibrangedash 6:42}
+  \field{title}{A Survey on Automated Dynamic Malware-analysis Techniques and
+  Tools}
+  \field{volume}{44}
+  \list{location}{1}{%
+    {New York, NY, USA}%
+  }
+  \field{journaltitle}{ACM Comput. Surv.}
+  \field{month}{03}
+  \field{year}{2008}
+\endentry
+
+\entry{Symantec}{misc}{}
+  \field{sortinit}{I}
+  \field{title}{Internet Security Threat Report, vol. 23}
+  \verb{url}
+  \verb https://www.symantec.com/content/dam/symantec/docs/reports/istr-23-2018
+  \verb -en.pdf
+  \endverb
+  \list{institution}{1}{%
+    {Symantec}%
+  }
+  \field{year}{2018}
+\endentry
+
+\entry{CodeProjectHooking}{misc}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Ivanov}{I.}%
+     {Ivo}{I.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{II1}
+  \strng{fullhash}{II1}
+  \field{sortinit}{I}
+  \field{title}{API hooking revealed}
+  \verb{url}
+  \verb https://www.codeproject.com/Articles/2082/API-hooking-revealed
+  \endverb
+  \field{year}{2002}
+\endentry
+
+\entry{HookingDetection}{article}{}
+  \name{author}{2}{}{%
+    {{}%
+     {Mohd~Shaid}{M.~S.}%
+     {Syed~Zainudeen}{S.~Z.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Maarof}{M.}%
+     {Mohd}{M.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{MSSZMM1}
+  \strng{fullhash}{MSSZMM1}
+  \field{sortinit}{M}
+  \field{pages}{294\bibrangedash 298}
+  \field{title}{In memory detection of Windows API call hooking technique}
+  \field{month}{08}
+  \field{year}{2015}
+\endentry
+
+\entry{Pin}{misc}{}
+  \field{sortinit}{P}
+  \field{title}{Pin - A Dynamic Binary Instrumentation Tool}
+  \verb{url}
+  \verb https://software.intel.com/en-us/articles/pin-a-dynamic-binary-instrume
+  \verb ntation-tool
+  \endverb
+  \list{institution}{1}{%
+    {Intel}%
+  }
+  \field{year}{2012}
+\endentry
+
+\entry{Rootkit}{inbook}{}
+  \name{author}{3}{}{%
+    {{}%
+     {Sparks}{S.}%
+     {Sherri}{S.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Embleton}{E.}%
+     {Shawn}{S.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Zou}{Z.}%
+     {Cliff~C.}{C.~C.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{SSESZCC1}
+  \strng{fullhash}{SSESZCC1}
+  \field{sortinit}{S}
+  \field{booktitle}{Handbook of Security and Networks}
+  \verb{doi}
+  \verb 10.1142/9789814273046_0014
+  \endverb
+  \verb{eprint}
+  \verb https://www.worldscientific.com/doi/pdf/10.1142/9789814273046_0014
+  \endverb
+  \field{pages}{345\bibrangedash 368}
+  \field{title}{WINDOWS ROOTKITS A GAME OF HIDE AND SEEK}
+  \verb{url}
+  \verb https://www.worldscientific.com/doi/abs/10.1142/9789814273046_0014
+  \endverb
+  \field{year}{2011}
+\endentry
+
+\entry{Stuttard:2014:ADC:2616217}{book}{}
+  \name{author}{6}{}{%
+    {{}%
+     {Stuttard}{S.}%
+     {Dafydd}{D.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Pinto}{P.}%
+     {Marcus}{M.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Ligh}{L.}%
+     {Michael~Hale}{M.~H.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Adair}{A.}%
+     {Steven}{S.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Hartstein}{H.}%
+     {Blake}{B.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Richard}{R.}%
+     {Ozh}{O.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {Wiley Publishing}%
+  }
+  \strng{namehash}{SD+1}
+  \strng{fullhash}{SDPMLMHASHBRO1}
+  \field{sortinit}{S}
+  \field{edition}{1st}
+  \field{isbn}{111890673X, 9781118906736}
+  \field{title}{Attack and Defend Computer Security Set}
+  \field{year}{2014}
+\endentry
+
+\lossort
+\endlossort
+
+\endinput
