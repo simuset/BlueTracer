@@ -4,6 +4,23 @@
 \usepackage[utf8]{inputenx}
 \usepackage{hyperref}
 \usepackage{tabularx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{ao}{rgb}{0.0, 0.5, 0.0}
+
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
 
 \usepackage[backend=bibtex]{biblatex}
 \bibliography{biblio.bib}
@@ -233,9 +250,39 @@ Finally, all the configuration options of the tool will be explained.
 \end{figure}
 
 \section{Thread Management}
-TLS structure
+
+Since the samples under analysis are typically multithreaded applications, let us go through the mechanisms exposed by Pin to manage threads and how those were employed in the implementation of the tool.
+
+Pin assigns to each thread an ID, a small number beginning at 0
+which is not the same as the operating system thread ID. A way to obtain such ID is by using as analysis routine argument \texttt{IARG\_THREAD\_ID}, which passes the thread ID assigned by Pin for the calling thread. This ID is typically used as an index of an array of thread data.
+In fact, the Pin API makes available an efficient thread local storage (TLS). In order to utilize it, it is first required to allocate a new TLS key via \texttt{PIN\_CreateThreadDataKey}, which can optionally take as input a pointer to a destructor function. After that, any thread of the process can use the TLS key, in addition to its Pin-specific thread ID, to store (\texttt{PIN\_SetThreadData}) and retrieve (\texttt{PIN\_GetThreadData}) values in its own slot. The starting value relative to the key in every thread is \texttt{NULL}.
+Pin makes also available call-backs when each thread starts (\texttt{PIN\_AddThreadStartFunction}) and ends (\texttt{PIN\_AddThreadFiniFunction}). This is typically where thread local data is allocated, manipulated and stored in a thread's local storage\cite{Pin}.
+
+In BlueTracer the TLS for each thread is as follows. Explain most important fields. Allocated in Onthreadstart and deallocated in thread exit.
+
+\vspace{0.5cm}
+\begin{lstlisting}[caption={My Caption},captionpos=b]
+typedef struct {
+ ...
+ syscall_tracer* syscallEntry;     // Pointer to NTAPI entry
+ vector<stackEntry>* shadowStack;  // Shadow stack
+ uint call_number;             	   // Calls counter							
+ 
+ buf_info_t* buffer;		   	   // Buffer for writing to file				 
+ FILE* OutFile;                    // Output file pointer
+ 
+ // Pointer to function for opening file/writing to file	
+ void(*file_write)(THREADID, buf_info_t*, FILE*, const char*, 	...);
+ 
+ ...
+} bluepill_tls;
+\end{lstlisting}
 
 \subsection{File Management}
+
+
+
+
 \section{NTAPI}
 \iffalse
 Talk about log structure when talking about how arguments are printed
