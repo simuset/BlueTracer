@@ -58,7 +58,7 @@ The typical technique used for function calls monitoring in dynamic malware anal
 
 A problem that all dynamic analysis techniques have to face, including function call monitoring by means of API hooking, is the widespread of evasive malwares. Such malwares check whether or not they are being executed in an adverse environment and conceal their harmful behaviours accordingly, like for example by carrying out an exit sequence \cite{BluePill}. Unfortunately, such anti-evasion mechanisms are frequently adopted my malicious samples. According to Symantec's Internet Security Report of March 2018, 18\% of new malware were virtual-machine-aware \cite{Symantec}. To make matters worse, the API hooking techniques presented in literature are easily detectable and are not coupled by any mechanism to hide their presence from evasive malwares.
 
-In this thesis we present \textbf{BlueTracer}, a robust library and system call tracer for Windows applications, specialized in the monitoring of evasive malwares. BlueTracer is based on the Intel Pin \cite{Pin} dynamic binary instrumentation (DBI) framework and is able to counteract malwares' anti-evasion measures thanks to its integration with BluePill, a software toolkit built on top of a DBI layer which allows the simulation of the execution environment a particular malware was designed for and conceals any virtualization artifacts and setup details which might set off evasion \cite{BluePill}. BlueTracer is capable of tracing the input values, the output values and the return values of an extremely wide range of system calls (including Windows Native APIs) and API calls. Moreover, it also supports the tracing of Windows callbacks functions and Windows asynchronous procedure calls (APC). To tool was tested on a benign application aimed at assessing how good an anti-malware system is against evasion techniques and on actual evasive malwares, proving to be effective in both tracing the samples' activity and remaining undetected.                
+The goal of this thesis is to present \textbf{BlueTracer}, a robust library and system call tracer for Windows applications, specialized in the monitoring of evasive malwares. BlueTracer is based on the Intel Pin \cite{Pin} dynamic binary instrumentation (DBI) framework and is able to counteract malwares' anti-evasion measures thanks to its integration with BluePill, a software toolkit built on top of a DBI layer which allows the simulation of the execution environment a particular malware was designed for and conceals any virtualization artifacts and setup details which might set off evasion \cite{BluePill}. BlueTracer is capable of tracing the input values, the output values and the return values of an extremely wide range of system calls (including Windows Native APIs) and API calls. Moreover, it also supports the tracing of Windows callbacks functions and Windows asynchronous procedure calls (APC). To tool was tested on a benign application aimed at assessing how good an anti-malware system is against evasion techniques and on actual evasive malwares, proving to be effective in both tracing the samples' activity and remaining undetected.                
 \\
 \textbf{Thesis Structure}. The remaining part of this thesis is structured as follows.
 Chapter 1 describes the major \textit{API hooking} techniques present in literature, outlining their stengths and weaknesses, especially from a detection point of view. \\
@@ -74,7 +74,7 @@ Finally, in Chapter 5, conclusions are presented, together with possible future 
 
 \mainmatter
 \chapter{API Hooking: State of The Art}
-In literature there are many different implementations of API hooking. In this chapter we will provide an outline of the various approaches utilized to hook functions in DLLs, outlining the benefits and the limitations of each technique, with a strong focus on their detection by malicious software. In particular, we will focus on user space API hooking of \texttt{Win32} binaries, since this is BlueTracer's current field of application. Obviously, as it is the norm in malware analysis, we also assume that the program under study is only available in binary form.
+In literature there are many different implementations of API hooking. The objective of this chapter is to provide an outline of the various approaches utilized to hook functions in DLLs, outlining the benefits and the limitations of each technique, with a strong focus on their detection by malicious software. In particular, the focus will be on user space API hooking of \texttt{Win32} binaries, since this is BlueTracer's current field of application. Obviously, as it is the norm in malware analysis, it also assumed that the program under study is only available in binary form.
 
 Depending on their underlying implementation, API hooking techniques can be divided in three broad categories: \textbf{Binary Rewriting Based}, \textbf{Virtul Machine Introspection (VMI) Based} and \textbf{Dynamic Binary Instrumentation (DBI) based}.   
 
@@ -205,7 +205,7 @@ There indeed exist DBI based API tracing tools that rely on the previously illus
 
 \begin{section}{Conclusion}
 
-In this chapter we have showed how the state of the art API hooking techniques suffer from a number of remarkable shortcomings, especially when dealing with evasive malwares. In fact, binary rewriting based hooking techniques are all easily detectable, while VMI, although harder to uncover, is affected by the \textit{semantic gap problem}. Finally, existing DBI based API tracing tools are not accompanied by adequate cloaking mechanisms and are limited in the amount of logged information. The aforementioned issues indicate that there is a need for a robust API tracer, specialized in the analysis of evasive malwares and with extensive logging capabilites. This is the rationale at the heart of BlueTracer. 
+In this chapter it was shown how the state of the art API hooking techniques suffer from a number of remarkable shortcomings, especially when dealing with evasive malwares. In fact, binary rewriting based hooking techniques are all easily detectable, while VMI, although harder to uncover, is affected by the \textit{semantic gap problem}. Finally, existing DBI based API tracing tools are not accompanied by adequate cloaking mechanisms and are limited in the amount of logged information. The aforementioned issues indicate that there is a need for a robust API tracer, specialized in the analysis of evasive malwares and with extensive logging capabilites. This is the rationale at the heart of BlueTracer. 
 
 \end{section}
 
@@ -214,7 +214,43 @@ In this chapter we have showed how the state of the art API hooking techniques s
 
 \chapter{Dynamic Binary Instrumentation and Intel Pin}
 
-\chapter{BlueTracer}
+\chapter{Implementation}
+In this chapter BlueTracer's implementation will be discussed, providing a detailed account on how the tool is organized, on the design choices which were made during its development process, on how encountered challenges were dealt with and on the decisions which were taken to improve performance.
+
+BlueTracer, being a part of Blue Pill, is also implemented using Pin, a dynamic binary instrumentation framework by Intel, which is vastly utilized for program analysis, testing of software and in the security field. The version of Pin used for the development of the tool is 3.5, in order to benefit from the notable improvements, both in terms of execution speed and offered features, which were introduced going from the 2.14 release to the 3.x series. Pin comes with its own OS-agnostic and compiler-agnostic runtime, called PinCRT. PinCRT exposes three layers: a generic operating system interface providing basic OS services (e.g. process and thread control), together with C and C++03 (without RTTI) runtime layers, for writing instrumentation and analysis routines \cite{Pin}.   
+
+BlueTracer has been organized primarily taking into account the rich set of APIs offered by Pin, which have led to the decision to split the tool in three parts: the first aimed at \textbf{native API tracing}, the second for \textbf{API tracing} and the last focused on \textbf{callbacks and APCs tracing} (\textit{Figure 3.1}). In particular, the tracing of native APIs also employs a different source of API information (\textit{Dr. Memory}'s system call data) than the ones utilized for tracing APIs (\textit{drltrace}'s configuration file or the information extracted from \textit{Pyrebox}'s database).
+
+This chapter will begin by describing how multi-threading was addressed in the tool, as this is central to all its components. Then, the implementation of each one of three aforementioned parts will be discussed in detail. 
+\iffalse
+Finally, all the configuration options of the tool will be explained.          
+\fi
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.8]{Figures/BlueTracer.pdf}
+\caption{\textit{BlueTracer's high level structure}}
+\end{figure}
+
+\section{Thread Management}
+TLS structure
+
+\subsection{File Management}
+\section{NTAPI}
+\iffalse
+Talk about log structure when talking about how arguments are printed
+\fi
+
+\section{API}
+
+
+\subsection{Shadow Stack}
+\subsection{Performance}
+\section{Callback and APC} 
+
+\iffalse
+\section{Tool Configuration}
+\fi
 
 \chapter{Experimental Results}
 

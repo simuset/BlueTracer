@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.24)  23 JUN 2018 19:02
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.24)  24 JUN 2018 16:09
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1179,7 +1179,7 @@ Package microtype Info: Loading generic settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-<sapienza-MLred-pos.pdf, id=60, 288.07625pt x 89.33376pt>
+<sapienza-MLred-pos.pdf, id=92, 288.07625pt x 89.33376pt>
 File: sapienza-MLred-pos.pdf Graphic file (type pdf)
 
 <use sapienza-MLred-pos.pdf>
@@ -1251,13 +1251,13 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <8> on input line 7.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <6> on input line 7.
-)
+ [6
+
+])
 \tf@toc=\write5
 \openout5 = `LMThesisNicchi.toc'.
 
- [6
-
-]
+ [7]
 Chapter 1.
 LaTeX Font Info:    Try loading font information for T1+lmtt on input line 77.
 (/usr/share/texmf/tex/latex/lm/t1lmtt.fd
@@ -1271,7 +1271,7 @@ Package microtype Info: Loading generic settings for font family
 
 
 ]
-<Figures/API-hooking-3.pdf, id=138, 578.16pt x 290.08376pt>
+<Figures/API-hooking-3.pdf, id=183, 578.16pt x 290.08376pt>
 File: Figures/API-hooking-3.pdf Graphic file (type pdf)
 
 <use Figures/API-hooking-3.pdf>
@@ -1282,7 +1282,7 @@ Overfull \hbox (36.11197pt too wide) in paragraph at lines 100--102
  []|  [] 
  []
 
-<Figures/IAT-3.pdf, id=140, 563.10374pt x 319.1925pt>
+<Figures/IAT-3.pdf, id=185, 563.10374pt x 319.1925pt>
 File: Figures/IAT-3.pdf Graphic file (type pdf)
  <use Figures/IAT-3.pdf>
 Package pdftex.def Info: Figures/IAT-3.pdf used on input line 112.
@@ -1303,7 +1303,7 @@ alid other resource which is no dict (key 'ProcSets', type <array>); ignored.
 
 pdfTeX warning: pdflatex (file ./Figures/IAT-3.pdf): PDF inclusion: invalid oth
 er resource which is no dict (key 'ProcSets', type <array>); ignored.
->] <Figures/Inline.pdf, id=214, 560.0925pt x 355.3275pt>
+>] <Figures/Inline.pdf, id=258, 560.0925pt x 355.3275pt>
 File: Figures/Inline.pdf Graphic file (type pdf)
 
 <use Figures/Inline.pdf>
@@ -1346,54 +1346,78 @@ Chapter 2.
 Chapter 3.
 [10
 
-]
+] <Figures/BlueTracer.pdf, id=328, 527.9725pt x 391.4625pt>
+File: Figures/BlueTracer.pdf Graphic file (type pdf)
+
+<use Figures/BlueTracer.pdf>
+Package pdftex.def Info: Figures/BlueTracer.pdf used on input line 231.
+(pdftex.def)             Requested size: 422.37857pt x 313.17041pt.
+
+Overfull \hbox (26.37857pt too wide) in paragraph at lines 231--232
+ [][] 
+ []
+
+[11 <./Figures/BlueTracer.pdf
+
+pdfTeX warning: pdflatex (file ./Figures/BlueTracer.pdf): PDF inclusion: invali
+d other resource which is no dict (key 'ProcSets', type <array>); ignored.
+>] [12]
 Chapter 4.
-[11
+[13
 
 ]
 Chapter 5.
-[12
+[14
 
 ]
 Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/lmr/m/sc/10.95'.
 (microtype)             Ignoring protrusion settings for this character.
- [13
+ [15
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 228.
- [14]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 228.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 264.
+ [16]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 264.
  (./LMThesisNicchi.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 228.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 228.
-Package rerunfilecheck Info: File `LMThesisNicchi.out' has not changed.
-(rerunfilecheck)             Checksum: D68C04F552BCF0112E3341E6A95626DF;1037.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 264.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 264.
+
+
+Package rerunfilecheck Warning: File `LMThesisNicchi.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `LMThesisNicchi.out':
+(rerunfilecheck)             Before: 8D0CD2507C448E7DFADC810A0238E1D1;1535
+(rerunfilecheck)             After:  B1EEAE268C49082A2477A64D6FC4F769;1470.
 Package logreq Info: Writing requests to 'LMThesisNicchi.run.xml'.
 \openout1 = `LMThesisNicchi.run.xml'.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 228.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 264.
  ) 
 Here is how much of TeX's memory you used:
- 15974 strings out of 493304
- 252656 string characters out of 6139871
- 630824 words of memory out of 5000000
- 19010 multiletter control sequences out of 15000+600000
- 88622 words of font info for 112 fonts, out of 8000000 for 9000
+ 16007 strings out of 493304
+ 253125 string characters out of 6139871
+ 631824 words of memory out of 5000000
+ 19022 multiletter control sequences out of 15000+600000
+ 89048 words of font info for 116 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 60i,12n,94p,1210b,1753s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dv
-ips/lm/lm-ts1.enc}</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/shar
-e/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/l
-m/lmcsc10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/tex
-mf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fonts/type1/public/lm/lmri1
-0.pfb></usr/share/texmf/fonts/type1/public/lm/lmss10.pfb></usr/share/texmf/font
-s/type1/public/lm/lmss17.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb
->
-Output written on LMThesisNicchi.pdf (21 pages, 492274 bytes).
+ 60i,12n,94p,1222b,1796s stack positions out of 5000i,500n,10000p,200000b,80000s
+pdfTeX warning (dest): name{section.3.5} has been referenced but does not exi
+st, replaced by a fixed one
+
+{/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dvip
+s/lm/lm-ts1.enc}</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/share/
+texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/lm/
+lmcsc10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/texmf
+/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.
+pfb></usr/share/texmf/fonts/type1/public/lm/lmss10.pfb></usr/share/texmf/fonts/
+type1/public/lm/lmss17.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb>
+Output written on LMThesisNicchi.pdf (24 pages, 595367 bytes).
 PDF statistics:
- 374 PDF objects out of 1000 (max. 8388607)
- 309 compressed objects within 4 object streams
- 57 named destinations out of 1000 (max. 500000)
- 27781 words of extra memory for PDF output out of 29859 (max. 10000000)
+ 460 PDF objects out of 1000 (max. 8388607)
+ 381 compressed objects within 4 object streams
+ 69 named destinations out of 1000 (max. 500000)
+ 27850 words of extra memory for PDF output out of 29859 (max. 10000000)
 

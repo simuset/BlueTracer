@@ -9,6 +9,13 @@
 \BOOKMARK [1][-]{section.1.3}{Dynamic Binary Instrumentation \(DBI\) \040Based Hooking}{chapter.1}% 9
 \BOOKMARK [1][-]{section.1.4}{Conclusion}{chapter.1}% 10
 \BOOKMARK [0][-]{chapter.2}{Dynamic Binary Instrumentation and Intel Pin}{}% 11
-\BOOKMARK [0][-]{chapter.3}{BlueTracer}{}% 12
-\BOOKMARK [0][-]{chapter.4}{Experimental Results}{}% 13
-\BOOKMARK [0][-]{chapter.5}{Conclusions and Future Developments}{}% 14
+\BOOKMARK [0][-]{chapter.3}{Implementation}{}% 12
+\BOOKMARK [1][-]{section.3.1}{Thread Management}{chapter.3}% 13
+\BOOKMARK [2][-]{subsection.3.1.1}{File Management}{section.3.1}% 14
+\BOOKMARK [1][-]{section.3.2}{NTAPI}{chapter.3}% 15
+\BOOKMARK [1][-]{section.3.3}{API}{chapter.3}% 16
+\BOOKMARK [2][-]{subsection.3.3.1}{Shadow Stack}{section.3.3}% 17
+\BOOKMARK [2][-]{subsection.3.3.2}{Performance}{section.3.3}% 18
+\BOOKMARK [1][-]{section.3.4}{Callback and APC}{chapter.3}% 19
+\BOOKMARK [0][-]{chapter.4}{Experimental Results}{}% 20
+\BOOKMARK [0][-]{chapter.5}{Conclusions and Future Developments}{}% 21
