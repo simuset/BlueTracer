@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.24)  24 JUN 2018 19:19
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.24)  25 JUN 2018 11:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1418,40 +1418,50 @@ d other resource which is no dict (key 'ProcSets', type <array>); ignored.
 >]
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on i
 nput line 264.
- [12] [13]
+ [12]
+Underfull \hbox (badness 10000) in paragraph at lines 294--297
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 294--297
+
+ []
+
+[13] [14]
 Chapter 4.
-[14
+[15
 
 ]
 Chapter 5.
-[15
+[16
 
 ]
 Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/lmr/m/sc/10.95'.
 (microtype)             Ignoring protrusion settings for this character.
- [16
+ [17
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 311.
- [17]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 311.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 332.
+ [18]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 332.
  (./LMThesisNicchi.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 311.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 311.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 332.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 332.
 Package rerunfilecheck Info: File `LMThesisNicchi.out' has not changed.
-(rerunfilecheck)             Checksum: B1EEAE268C49082A2477A64D6FC4F769;1470.
+(rerunfilecheck)             Checksum: BF81354D899717D9CF1D8191562F215A;1497.
 Package logreq Info: Writing requests to 'LMThesisNicchi.run.xml'.
 \openout1 = `LMThesisNicchi.run.xml'.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 311.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 332.
  ) 
 Here is how much of TeX's memory you used:
- 18223 strings out of 493304
- 281617 string characters out of 6139871
+ 18244 strings out of 493304
+ 281805 string characters out of 6139871
  670081 words of memory out of 5000000
  21189 multiletter control sequences out of 15000+600000
- 92625 words of font info for 121 fonts, out of 8000000 for 9000
+ 93264 words of font info for 127 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  60i,12n,97p,1222b,1796s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dv
@@ -1463,10 +1473,10 @@ pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf/fonts/
 type1/public/lm/lmss10.pfb></usr/share/texmf/fonts/type1/public/lm/lmss17.pfb><
 /usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb></usr/share/texmf/fonts/type1
 /public/lm/lmtt9.pfb>
-Output written on LMThesisNicchi.pdf (25 pages, 648569 bytes).
+Output written on LMThesisNicchi.pdf (26 pages, 653075 bytes).
 PDF statistics:
- 488 PDF objects out of 1000 (max. 8388607)
- 405 compressed objects within 5 object streams
- 84 named destinations out of 1000 (max. 500000)
+ 503 PDF objects out of 1000 (max. 8388607)
+ 419 compressed objects within 5 object streams
+ 93 named destinations out of 1000 (max. 500000)
  30402 words of extra memory for PDF output out of 35830 (max. 10000000)
 
