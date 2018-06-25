@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.24)  25 JUN 2018 11:13
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.24)  25 JUN 2018 18:40
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1233,7 +1233,7 @@ Package microtype Info: Loading generic settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 
-<sapienza-MLred-pos.pdf, id=88, 288.07625pt x 89.33376pt>
+<sapienza-MLred-pos.pdf, id=104, 288.07625pt x 89.33376pt>
 File: sapienza-MLred-pos.pdf Graphic file (type pdf)
 
 <use sapienza-MLred-pos.pdf>
@@ -1325,7 +1325,7 @@ Package microtype Info: Loading generic settings for font family
 
 
 ]
-<Figures/API-hooking-3.pdf, id=178, 578.16pt x 290.08376pt>
+<Figures/API-hooking-3.pdf, id=198, 578.16pt x 290.08376pt>
 File: Figures/API-hooking-3.pdf Graphic file (type pdf)
 
 <use Figures/API-hooking-3.pdf>
@@ -1336,7 +1336,7 @@ Overfull \hbox (36.11197pt too wide) in paragraph at lines 117--119
  []|  [] 
  []
 
-<Figures/IAT-3.pdf, id=180, 563.10374pt x 319.1925pt>
+<Figures/IAT-3.pdf, id=200, 563.10374pt x 319.1925pt>
 File: Figures/IAT-3.pdf Graphic file (type pdf)
  <use Figures/IAT-3.pdf>
 Package pdftex.def Info: Figures/IAT-3.pdf used on input line 129.
@@ -1357,7 +1357,7 @@ alid other resource which is no dict (key 'ProcSets', type <array>); ignored.
 
 pdfTeX warning: pdflatex (file ./Figures/IAT-3.pdf): PDF inclusion: invalid oth
 er resource which is no dict (key 'ProcSets', type <array>); ignored.
->] <Figures/Inline.pdf, id=253, 560.0925pt x 355.3275pt>
+>] <Figures/Inline.pdf, id=273, 560.0925pt x 355.3275pt>
 File: Figures/Inline.pdf Graphic file (type pdf)
 
 <use Figures/Inline.pdf>
@@ -1400,7 +1400,7 @@ Chapter 2.
 Chapter 3.
 [10
 
-] <Figures/BlueTracer.pdf, id=323, 527.9725pt x 391.4625pt>
+] <Figures/BlueTracer.pdf, id=343, 527.9725pt x 391.4625pt>
 File: Figures/BlueTracer.pdf Graphic file (type pdf)
 
 <use Figures/BlueTracer.pdf>
@@ -1428,42 +1428,64 @@ Underfull \hbox (badness 10000) in paragraph at lines 294--297
 
  []
 
-[13] [14]
+[13] <Figures/NTAPITracing.pdf, id=411, 557.08125pt x 334.24875pt>
+File: Figures/NTAPITracing.pdf Graphic file (type pdf)
+
+<use Figures/NTAPITracing.pdf>
+Package pdftex.def Info: Figures/NTAPITracing.pdf used on input line 319.
+(pdftex.def)             Requested size: 417.80992pt x 250.68594pt.
+
+Overfull \hbox (21.80992pt too wide) in paragraph at lines 319--320
+ [][] 
+ []
+
+[14] [15 <./Figures/NTAPITracing.pdf
+
+pdfTeX warning: pdflatex (file ./Figures/NTAPITracing.pdf): PDF inclusion: inva
+lid other resource which is no dict (key 'ProcSets', type <array>); ignored.
+>] [16]
 Chapter 4.
-[15
+[17
 
 ]
 Chapter 5.
-[16
+[18
 
 ]
 Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/lmr/m/sc/10.95'.
 (microtype)             Ignoring protrusion settings for this character.
- [17
+
+Overfull \hbox (9.2437pt too wide) in paragraph at lines 348--348
+[]\T1/lmr/m/n/10.95 (-20) Geoff Chap-pell. \T1/lmr/m/it/10.95 (-20) Na-tive API
+ Func-tions\T1/lmr/m/n/10.95 (-20) . 2017. \T1/lmr/m/sc/10.95 (-20) url\T1/lmr/
+m/n/10.95 (-20) : []$\T1/lmtt/m/n/10.95 https : / / www . geoffchappell .
+ []
+
+[19
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 332.
- [18]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 332.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 352.
+ [20]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 352.
  (./LMThesisNicchi.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 332.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 332.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 352.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 352.
 Package rerunfilecheck Info: File `LMThesisNicchi.out' has not changed.
-(rerunfilecheck)             Checksum: BF81354D899717D9CF1D8191562F215A;1497.
+(rerunfilecheck)             Checksum: 5E744745F2234749302CD663A07AC00A;1824.
 Package logreq Info: Writing requests to 'LMThesisNicchi.run.xml'.
 \openout1 = `LMThesisNicchi.run.xml'.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 332.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 352.
  ) 
 Here is how much of TeX's memory you used:
- 18244 strings out of 493304
- 281805 string characters out of 6139871
+ 18266 strings out of 493304
+ 282182 string characters out of 6139871
  670081 words of memory out of 5000000
- 21189 multiletter control sequences out of 15000+600000
- 93264 words of font info for 127 fonts, out of 8000000 for 9000
+ 21199 multiletter control sequences out of 15000+600000
+ 93347 words of font info for 128 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 60i,12n,97p,1222b,1796s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 60i,12n,97p,1276b,1793s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dv
 ips/lm/lm-ts1.enc}</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/shar
 e/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/l
@@ -1473,10 +1495,10 @@ pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf/fonts/
 type1/public/lm/lmss10.pfb></usr/share/texmf/fonts/type1/public/lm/lmss17.pfb><
 /usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb></usr/share/texmf/fonts/type1
 /public/lm/lmtt9.pfb>
-Output written on LMThesisNicchi.pdf (26 pages, 653075 bytes).
+Output written on LMThesisNicchi.pdf (28 pages, 762033 bytes).
 PDF statistics:
- 503 PDF objects out of 1000 (max. 8388607)
- 419 compressed objects within 5 object streams
- 93 named destinations out of 1000 (max. 500000)
- 30402 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 577 PDF objects out of 1000 (max. 8388607)
+ 478 compressed objects within 5 object streams
+ 102 named destinations out of 1000 (max. 500000)
+ 30439 words of extra memory for PDF output out of 35830 (max. 10000000)
 

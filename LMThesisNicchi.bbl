@@ -120,6 +120,25 @@
   \warn{\item Can't use 'location' + 'address'}
 \endentry
 
+\entry{NTAPI2}{misc}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Chappell}{C.}%
+     {Geoff}{G.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{CG1}
+  \strng{fullhash}{CG1}
+  \field{sortinit}{C}
+  \field{title}{Native API Functions}
+  \verb{url}
+  \verb https://www.geoffchappell.com/studies/windows/win32/ntdll/api/native.ht
+  \verb m
+  \endverb
+  \field{year}{2017}
+\endentry
+
 \entry{Cisco}{misc}{}
   \field{sortinit}{C}
   \field{title}{Cisco 2018 Annual Cybersecurity Report}
@@ -287,6 +306,24 @@
     {Intel}%
   }
   \field{year}{2012}
+\endentry
+
+\entry{NTAPI1}{misc}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Russinovich}{R.}%
+     {Mark}{M.}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{RM1}
+  \strng{fullhash}{RM1}
+  \field{sortinit}{R}
+  \field{title}{Inside the Native API}
+  \verb{url}
+  \verb http://persephone.cps.unizar.es/~spd/pub/windows/ntdll.htm
+  \endverb
+  \field{year}{1998}
 \endentry
 
 \entry{Rootkit}{inbook}{}

@@ -309,6 +309,26 @@ In order to bypass this limitation of the Pin's framework, the following strateg
 Talk about log structure when talking about how arguments are printed
 \fi
 
+Windows Native APIs are employed to call operating system services in kernel mode in a controlled way.  
+In fact, all core Windows components, which possess direct access to hardware and services in charge of handling the computer's resources (e.g. memory), operate in kernel mode. This means that, every time a user mode application desires to carry out certain actions, like for instance starting a thread or allocating virtual memory, they must rely on kernel mode  services. The Windows Native API corresponds to the system call interface of standard monolithic operating systems, such as the majority of UNIX-like systems, with the difference that in the latter case the system call interface is documented and can be utilized directly by applications. Instead, due to Windows' architecture, Windows Native APIs are concealed to the programmer by the higher level Windows (\texttt{Win32}) APIs \cite{NTAPI1}. User mode Windows Native APIs, which are identified by their \texttt{Nt} prefix and are exported by \texttt{ntdll}, have caught the attention of malware writers since they are seen as a way of bypassing the documented APIs with the objective of performing a series of actions without being discovered \cite{NTAPI2}. For this reason it is a good idea to also trace them, in addition to the ordinary Windows APIs.  
+
+Pin provides a set of APIs aimed at assisting the extraction of information relative to the system calls made by the pinned application, also including information relative to Windows Native APIs. In particular, in Blue Pill (and consequently in BlueTracer) \texttt{PIN\_AddSyscallEntryFunction} and  \texttt{PIN\_AddSyscallExitFunction} were used for this purpose. In fact, these allow to register notification functions which are called immediately before and after the execution of a system call \cite{Pin}. In BlueTracer, the function in charge of gathering Native API information before execution is \texttt{TraceSysCallEntry} while the one responsible for collecting Native API information after execution is \texttt{TraceSysCallExit}. They have been both been embedded in Blue Pill's notification functions and their overall structure is detailed in \textit{Figure 3.2}.
+\\
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.75]{Figures/NTAPITracing.pdf}
+\caption{\textit{Native APIs Tracing Workflow}}
+\end{figure}
+\\
+Following \textit{Figure 3.2}, let us now thoroughly analyze the main steps which take place when Native APIs are traced.
+
+\subsection{Main Image Check}
+\subsection{Native API Name Resolution}
+\subsection{Native API Information Representation and Retrieval}
+\subsection{Native API Logging}
+Note: Include enum resolution here
+
+
 \section{API}
 
 
