@@ -336,6 +336,35 @@
   \field{year}{1998}
 \endentry
 
+\entry{Sikorski:2012:PMA:2181153}{book}{}
+  \name{author}{2}{}{%
+    {{}%
+     {Sikorski}{S.}%
+     {Michael}{M.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Honig}{H.}%
+     {Andrew}{A.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {No Starch Press}%
+  }
+  \strng{namehash}{SMHA1}
+  \strng{fullhash}{SMHA1}
+  \field{sortinit}{S}
+  \field{edition}{1st}
+  \field{isbn}{1593272901, 9781593272906}
+  \field{title}{Practical Malware Analysis: The Hands-On Guide to Dissecting
+  Malicious Software}
+  \list{location}{1}{%
+    {San Francisco, CA, USA}%
+  }
+  \field{year}{2012}
+\endentry
+
 \entry{Rootkit}{inbook}{}
   \name{author}{3}{}{%
     {{}%

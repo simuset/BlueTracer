@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.24)  26 JUN 2018 11:15
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2017.8.24)  26 JUN 2018 16:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1453,62 +1453,66 @@ Package pdftex.def Info: Figures/StackMainImage.pdf used on input line 340.
 
 pdfTeX warning: pdflatex (file ./Figures/StackMainImage.pdf): PDF inclusion: in
 valid other resource which is no dict (key 'ProcSets', type <array>); ignored.
->] [18]
+>]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <9> on input line 360.
+ [18] [19]
 Chapter 4.
-[19
+[20
 
 ]
 Chapter 5.
-[20
+[21
 
 ]
 Package microtype Info: Character `029' is missing
 (microtype)             in font `T1/lmr/m/sc/10.95'.
 (microtype)             Ignoring protrusion settings for this character.
 
-Overfull \hbox (9.2437pt too wide) in paragraph at lines 377--377
+Overfull \hbox (9.2437pt too wide) in paragraph at lines 402--402
 []\T1/lmr/m/n/10.95 (-20) Geoff Chap-pell. \T1/lmr/m/it/10.95 (-20) Na-tive API
  Func-tions\T1/lmr/m/n/10.95 (-20) . 2017. \T1/lmr/m/sc/10.95 (-20) url\T1/lmr/
 m/n/10.95 (-20) : []$\T1/lmtt/m/n/10.95 https : / / www . geoffchappell .
  []
 
-[21
+[22
 
 ]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 381.
- [22]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 381.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 406.
+ [23]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 406.
  (./LMThesisNicchi.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 381.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 381.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 406.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 406.
 Package rerunfilecheck Info: File `LMThesisNicchi.out' has not changed.
 (rerunfilecheck)             Checksum: 5E744745F2234749302CD663A07AC00A;1824.
 Package logreq Info: Writing requests to 'LMThesisNicchi.run.xml'.
 \openout1 = `LMThesisNicchi.run.xml'.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 381.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 406.
  ) 
 Here is how much of TeX's memory you used:
- 18286 strings out of 493304
- 282504 string characters out of 6139871
+ 18316 strings out of 493304
+ 282916 string characters out of 6139871
  670081 words of memory out of 5000000
- 21206 multiletter control sequences out of 15000+600000
- 93926 words of font info for 131 fonts, out of 8000000 for 9000
+ 21219 multiletter control sequences out of 15000+600000
+ 103814 words of font info for 139 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
  60i,12n,97p,1276b,1793s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc}{/usr/share/texmf/fonts/enc/dv
 ips/lm/lm-ts1.enc}</usr/share/texmf/fonts/type1/public/lm/lmbx10.pfb></usr/shar
 e/texmf/fonts/type1/public/lm/lmbx12.pfb></usr/share/texmf/fonts/type1/public/l
 m/lmcsc10.pfb></usr/share/texmf/fonts/type1/public/lm/lmr10.pfb></usr/share/tex
-mf/fonts/type1/public/lm/lmr7.pfb></usr/share/texmf/fonts/type1/public/lm/lmr9.
-pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></usr/share/texmf/fonts/
-type1/public/lm/lmss10.pfb></usr/share/texmf/fonts/type1/public/lm/lmss17.pfb><
-/usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb></usr/share/texmf/fonts/type1
-/public/lm/lmtt9.pfb>
-Output written on LMThesisNicchi.pdf (30 pages, 808362 bytes).
+mf/fonts/type1/public/lm/lmr6.pfb></usr/share/texmf/fonts/type1/public/lm/lmr7.
+pfb></usr/share/texmf/fonts/type1/public/lm/lmr8.pfb></usr/share/texmf/fonts/ty
+pe1/public/lm/lmr9.pfb></usr/share/texmf/fonts/type1/public/lm/lmri10.pfb></usr
+/share/texmf/fonts/type1/public/lm/lmss10.pfb></usr/share/texmf/fonts/type1/pub
+lic/lm/lmss17.pfb></usr/share/texmf/fonts/type1/public/lm/lmtt10.pfb></usr/shar
+e/texmf/fonts/type1/public/lm/lmtt9.pfb>
+Output written on LMThesisNicchi.pdf (31 pages, 848658 bytes).
 PDF statistics:
- 615 PDF objects out of 1000 (max. 8388607)
- 508 compressed objects within 6 object streams
- 110 named destinations out of 1000 (max. 500000)
- 30956 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 637 PDF objects out of 1000 (max. 8388607)
+ 527 compressed objects within 6 object streams
+ 116 named destinations out of 1000 (max. 500000)
+ 34028 words of extra memory for PDF output out of 35830 (max. 10000000)
 

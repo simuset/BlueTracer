@@ -345,15 +345,40 @@ Having outlined the general situation, it is finally possible to describe how th
 
 \begin{enumerate}
 \item The first check involves discovering whether or not \texttt{sysenter} is called directly from the main executable. As Pin intercepts Native APIs right before the execution of \texttt{sysenter}, this can be trivially done by checking if the instruction pointer value obtained in \texttt{TraceSysCallEntry} falls within the main executable memory address range.
-\item Secondly, it is required to examine if the Native API return address belongs to the main executable. As a result of what shown in \textit{Figure 3.3} such return address is obtained by adding 4 to the stack pointer and retrieving the pointed value, where the stack pointer can be retrieved in Pin through the use of \texttt{PIN\_GetContextReg}. The resulting value is then, once more, compared with the main executable memory address range.
+\item Secondly, it is required to examine if the Native API return address belongs to the main executable. As a result of what shown in \textit{Figure 3.3} such return address is obtained by adding 4 to the stack pointer and retrieving the pointed value, where the stack pointer can be obtained in Pin through the use of \texttt{PIN\_GetContextReg}. The resulting value is then, once more, compared with the main executable memory address range.
 \end{enumerate}
 
 \subsection{Native API Name Resolution}
 
-One of the arguments which is passed to the notification functions registered with syscall entry is the system call number. 
+Previously, it was stated how it is possible to register a callback function to be executed before Native APIs through the use of \texttt{PIN\_AddSyscallEntryFunction}. Such callback functions, named \texttt{SYSCALL\_ENTRY\_CALLBACK}s, receive a set of parameters, including \texttt{ctx}, the application's register state immediately before the system call execution, and \texttt{std}, the system call standard. In Blue Pill, these two parameters are used to invoke \texttt{PIN\_GetSyscallNumber} inside its \texttt{SYSCALL\_ENTRY\_CALLBACK}. Such API returns the number (ID) of the Native API to be executed in the provided context \cite{Pin}.
 
+Blue Pill employs a mechanism which allows it to obtain the Native API name from its number, since the hooking functions it employs are indexed by name and not by ordinal. This choice was made because the identifiers vary depending on the Windows version, even among different Service Pack versions. For the same reason, the information needed by BlueTracer to correctly log Native APIs is also indexed by Native API name and, consequently, BlueTracer also utilizes the aforementioned Native API name resolution mechanism.
+
+The idea is to create an array, named \texttt{syscallIDs}, where Native API names are indexed by their IDs, by parsing \texttt{ntdll}'s export information. The export data of a PE is stored in the \texttt{IMAGE\_EXPORT\_DIRECTORY} structure located in the header. In our case, the most relevant fields of this structure are:
+
+\begin{itemize}
+\item The \texttt{AddressOfFunctions} array, which contains RVAs \footnote{A RVA (Relative Virtual Address) is essentially an offset within the PE image in memory} pointing to the actual exported functions and is indexed by an export ordinal.
+\item The \texttt{AddressOfNames} array, which is an array of 32-bit RVAs pointing to symbol strings.
+\item The \texttt{AddressOfNameOrdinals} array, which is an array of 16-bit ordinals existing in parallel with \texttt{AddressOfNames}, i.e. they possess the same number of elements and there is a direct relation between equivalent indices \cite{Sikorski:2012:PMA:2181153}.  
+\end{itemize}
+
+\newpage
+
+With this in mind, \texttt{syscallIDs} is built by carrying out the following actions for every element \texttt{iName} in \texttt{AddressOfNames}:
+
+\begin{enumerate}
+\item The corresponding \texttt{AddressOfNameOrdinals} element is retrieved, i.e. the one with the same index. Let us call this value \texttt{iOrdinal}.
+\item \texttt{iOrdinal} is used to index in \texttt{AddressOfFunctions}. This time the obtained value is the RVA pointing to the exported function.
+\item The pointed function is expected to begin \texttt{mov eax, syscall\_number}. As a result of this, the first byte should be \texttt{B8h} and the syscall number can be obtained by considering the next four bytes.  
+\end{enumerate}
+
+By following the above procedure, every element in \texttt{AddressOfNames} can be therefore mapped to the corresponding syscall number. 
 
 \subsection{Native API Information Representation and Retrieval}
+
+
+
+
 \subsection{Native API Logging}
 Note: Include enum resolution here
 
