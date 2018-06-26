@@ -34,20 +34,20 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.2.1}Main Image Check}{16}{subsection.3.2.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.2}Native API Name Resolution}{16}{subsection.3.2.2}
+\contentsline {subsection}{\numberline {3.2.2}Native API Name Resolution}{18}{subsection.3.2.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.3}Native API Information Representation and Retrieval}{16}{subsection.3.2.3}
+\contentsline {subsection}{\numberline {3.2.3}Native API Information Representation and Retrieval}{18}{subsection.3.2.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.4}Native API Logging}{16}{subsection.3.2.4}
+\contentsline {subsection}{\numberline {3.2.4}Native API Logging}{18}{subsection.3.2.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.3}API}{16}{section.3.3}
+\contentsline {section}{\numberline {3.3}API}{18}{section.3.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.1}Shadow Stack}{16}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.1}Shadow Stack}{18}{subsection.3.3.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.2}Performance}{16}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.2}Performance}{18}{subsection.3.3.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.4}Callback and APC}{16}{section.3.4}
+\contentsline {section}{\numberline {3.4}Callback and APC}{18}{section.3.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Experimental Results}{17}{chapter.4}
+\contentsline {chapter}{\numberline {4}Experimental Results}{19}{chapter.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Conclusions and Future Developments}{18}{chapter.5}
+\contentsline {chapter}{\numberline {5}Conclusions and Future Developments}{20}{chapter.5}

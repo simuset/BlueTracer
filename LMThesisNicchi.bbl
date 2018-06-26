@@ -242,6 +242,16 @@
   \field{year}{2008}
 \endentry
 
+\entry{MalwareTech}{misc}{}
+  \field{sortinit}{I}
+  \field{title}{Intercepting all System Calls by Hooking KiFastSystemCall}
+  \verb{url}
+  \verb https://www.malwaretech.com/2015/04/intercepting-all-system-calls-by.ht
+  \verb ml
+  \endverb
+  \field{year}{2015}
+\endentry
+
 \entry{Symantec}{misc}{}
   \field{sortinit}{I}
   \field{title}{Internet Security Threat Report, vol. 23}

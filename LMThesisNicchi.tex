@@ -323,14 +323,43 @@ Pin provides a set of APIs aimed at assisting the extraction of information rela
 Following \textit{Figure 3.2}, let us now thoroughly analyze the main steps which take place when Native APIs are traced.
 
 \subsection{Main Image Check}
+In order to filter the logged information relative to Native APIs, BlueTracer allows the analyst to decide, through the use of a boolean parameter (\texttt{MainImage}) in the configuration file, whether or not only Native APIs called invoked directly from the main executable of the pinned application should be traced. Therefore, as it can be seen in \textit{Figure 3.2}, the first thing which is done in \texttt{TraceSysCallEntry}, assuming that the \texttt{MainImage} configuration parameter has been set to \texttt{true}, is to determine if the Native API call is taking place directly from the main executable.
+
+To this end, Pin's \texttt{IMG} APIs are employed, where in Pin an \texttt{IMG} represents all the data structures relative to binaries and shared libraries \cite{Pin}. Specifically, in Blue Pill, \texttt{IMG\_AddInstrumentFunction} is utilized to register a callback which is invoked each time an image is loaded. Inside such callback, which takes as one of the input parameters the \texttt{IMG} object representing the image being loaded, the following steps are taken:
+\begin{enumerate}
+\item \texttt{IMG\_IsMainExecutable} is employed to determine if the image being loaded is the main executable of the pinned application.
+\item If this is the case, \texttt{IMG\_HighAddress} and \texttt{IMG\_LowAddress} are invoked. These two APIs return the highest address and the lowest address respectively of any code or data loaded by the image corresponding the the \texttt{IMG} object they take as input. By employing these APIs is therefore possible to determine the address range relative to the main executable. 
+\end{enumerate}  
+
+Having obtained the main executable address range in this way, it is then employed in \texttt{TraceSysCallEntry} to learn if the Native API call is occuring directly from the main image. Internally, before entering kernel mode every Native API executes some common code, i.e. each Native API stores its ordinal in the \texttt{eax} register and invokes \texttt{KiFastSystemCall}, where the \texttt{sysenter} instruction is used to actually enter kernel mode. When \texttt{sysenter} is executed, the kernel obtains the ordinal number from \texttt{eax} and utilizes it to call the corresponding function, prior to going back to user mode \cite{MalwareTech}.
+
+In Pin, the Native API is intercepted right before \texttt{sysenter} is executed. This could be inferred by the fact that, in \texttt{TraceSysCallEntry}, the instruction pointer (obtainable via the \texttt{PIN\_GetContextReg} API) contains \texttt{sysenter}'s address. In light of this, in addition to the fact that each Native API calls \texttt{KiFastSystemCall} without setting a stack frame, the application's stack during the execution of \texttt{TraceSysCallEntry} is in the following state (\textit{Figure 3.3}).
+\\
+\begin{figure}[h]
+\centering
+\includegraphics[scale=1]{Figures/StackMainImage.pdf}
+\caption{\textit{Stack before} \texttt{sysenter} \textit{execution}}
+\end{figure}     
+
+Having outlined the general situation, it is finally possible to describe how the main image check is carried out:
+
+\begin{enumerate}
+\item The first check involves discovering whether or not \texttt{sysenter} is called directly from the main executable. As Pin intercepts Native APIs right before the execution of \texttt{sysenter}, this can be trivially done by checking if the instruction pointer value obtained in \texttt{TraceSysCallEntry} falls within the main executable memory address range.
+\item Secondly, it is required to examine if the Native API return address belongs to the main executable. As a result of what shown in \textit{Figure 3.3} such return address is obtained by adding 4 to the stack pointer and retrieving the pointed value, where the stack pointer can be retrieved in Pin through the use of \texttt{PIN\_GetContextReg}. The resulting value is then, once more, compared with the main executable memory address range.
+\end{enumerate}
+
 \subsection{Native API Name Resolution}
+
+One of the arguments which is passed to the notification functions registered with syscall entry is the system call number. 
+
+
 \subsection{Native API Information Representation and Retrieval}
 \subsection{Native API Logging}
 Note: Include enum resolution here
 
 
 \section{API}
-
+In tracing APIs most of the idea seen in Native API tracing also apply, with a few differences.
 
 \subsection{Shadow Stack}
 \subsection{Performance}
