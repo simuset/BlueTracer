@@ -38,16 +38,16 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {subsection}{\numberline {3.2.3}Native API Information Representation and Retrieval}{19}{subsection.3.2.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2.4}Native API Logging}{19}{subsection.3.2.4}
+\contentsline {subsection}{\numberline {3.2.4}Native API Logging}{21}{subsection.3.2.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.3}API}{19}{section.3.3}
+\contentsline {section}{\numberline {3.3}API}{21}{section.3.3}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.1}Shadow Stack}{19}{subsection.3.3.1}
+\contentsline {subsection}{\numberline {3.3.1}Shadow Stack}{21}{subsection.3.3.1}
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3.2}Performance}{19}{subsection.3.3.2}
+\contentsline {subsection}{\numberline {3.3.2}Performance}{21}{subsection.3.3.2}
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3.4}Callback and APC}{19}{section.3.4}
+\contentsline {section}{\numberline {3.4}Callback and APC}{21}{section.3.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {4}Experimental Results}{20}{chapter.4}
+\contentsline {chapter}{\numberline {4}Experimental Results}{22}{chapter.4}
 \defcounter {refsection}{0}\relax 
-\contentsline {chapter}{\numberline {5}Conclusions and Future Developments}{21}{chapter.5}
+\contentsline {chapter}{\numberline {5}Conclusions and Future Developments}{23}{chapter.5}

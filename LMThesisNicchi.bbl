@@ -177,6 +177,14 @@
   \field{title}{The DBI Blue Pill: Practical Analysis of Evasive Malware}
 \endentry
 
+\entry{DrMemory}{misc}{}
+  \field{sortinit}{D}
+  \field{title}{Dr.Memory}
+  \verb{url}
+  \verb http://drmemory.org/
+  \endverb
+\endentry
+
 \entry{DBI}{misc}{}
   \field{sortinit}{D}
   \field{title}{Dynamic Binary Instrumentation}

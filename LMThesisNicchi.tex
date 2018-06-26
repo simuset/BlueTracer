@@ -75,7 +75,7 @@ The typical technique used for function calls monitoring in dynamic malware anal
 
 A problem that all dynamic analysis techniques have to face, including function call monitoring by means of API hooking, is the widespread of evasive malwares. Such malwares check whether or not they are being executed in an adverse environment and conceal their harmful behaviours accordingly, like for example by carrying out an exit sequence \cite{BluePill}. Unfortunately, such anti-evasion mechanisms are frequently adopted my malicious samples. According to Symantec's Internet Security Report of March 2018, 18\% of new malware were virtual-machine-aware \cite{Symantec}. To make matters worse, the API hooking techniques presented in literature are easily detectable and are not coupled by any mechanism to hide their presence from evasive malwares.
 
-The goal of this thesis is to present \textbf{BlueTracer}, a robust library and system call tracer for Windows applications, specialized in the monitoring of evasive malwares. BlueTracer is based on the Intel Pin \cite{Pin} dynamic binary instrumentation (DBI) framework and is able to counteract malwares' anti-evasion measures thanks to its integration with BluePill, a software toolkit built on top of a DBI layer which allows the simulation of the execution environment a particular malware was designed for and conceals any virtualization artifacts and setup details which might set off evasion \cite{BluePill}. BlueTracer is capable of tracing the input values, the output values and the return values of an extremely wide range of system calls (including Windows Native APIs) and API calls. Moreover, it also supports the tracing of Windows callbacks functions and Windows asynchronous procedure calls (APC). To tool was tested on a benign application aimed at assessing how good an anti-malware system is against evasion techniques and on actual evasive malwares, proving to be effective in both tracing the samples' activity and remaining undetected.                
+The goal of this thesis is to present \textbf{BlueTracer}, a robust library and system call tracer for Windows applications, specialized in the monitoring of evasive malwares. BlueTracer is based on the Intel Pin \cite{Pin} dynamic binary instrumentation (DBI) framework and is able to counteract malwares' anti-evasion measures thanks to its integration with BluePill, a software toolkit built on top of a DBI layer which allows the simulation of the execution environment a particular malware was designed for and conceals any virtualization artifacts and setup details which might set off evasion \cite{BluePill}. BlueTracer is capable of tracing the input values, the output values and the return values of an extremely wide range of system calls (including Windows Native APIs) and API calls. Moreover, it also supports the tracing of Windows callbacks functions and Windows asynchronous procedure calls (APC). The tool was tested on a benign application aimed at assessing how good an anti-malware system is against evasion techniques and on actual evasive malwares, proving to be effective in both tracing the samples' activity and remaining undetected.                
 \\
 \textbf{Thesis Structure}. The remaining part of this thesis is structured as follows.
 Chapter 1 describes the major \textit{API hooking} techniques present in literature, outlining their stengths and weaknesses, especially from a detection point of view. \\
@@ -372,11 +372,70 @@ With this in mind, \texttt{syscallIDs} is built by carrying out the following ac
 \item The pointed function is expected to begin \texttt{mov eax, syscall\_number}. As a result of this, the first byte should be \texttt{B8h} and the syscall number can be obtained by considering the next four bytes.  
 \end{enumerate}
 
-By following the above procedure, every element in \texttt{AddressOfNames} can be therefore mapped to the corresponding syscall number. 
+By following the above procedure, every element in \texttt{AddressOfNames} can be therefore mapped to the corresponding identifier. 
 
 \subsection{Native API Information Representation and Retrieval}
 
+When tracing Native APIs, it is wanted to record as much data as possible as well as correctly formatting the arguments' values. To do this, it is required to have access to some kind of source of Native API related information, which can assist the tracer in the logging activity by, for example, providing the number of arguments a Native API takes as input, listing the arguments' types and differentiating between input and output arguments.
+In BlueTracer, this information was adapted from the Native API data provided by Dr.Memory \cite{DrMemory}, a memory monitoring tool based on the DynamoRIO DBI framework.
 
+For each Native API, the information related to it is contained in a \texttt{struct} of type \texttt{\_syscall\_info\_t} (\textit{Listing 3.2}). Most fields of such \texttt{struct} are self-explanatory. In particular, \texttt{num} is a \texttt{struct} storing two values indicating the system call number; these are filled in dynamically by Dr.Memory but are not needed by BlueTracer. Furthermore, the \texttt{flags} field is utilized to notify whether or not all the details of the Native API are known, as most Native APIs are undocumented. Undoubtedly though, a major role is played by the \texttt{arg} array, which is made up by \texttt{sysinfo\_arg\_t} \texttt{struct}s (\textit{Listing 3.2}) containing the data of the Native API arguments. This array is initialized with size \texttt{MAX\_ARGS\_IN\_ENTRY} (i.e. 18), since a Native API can have at most 18 arguments. 
+\\
+\begin{lstlisting}[caption={\texttt{struct} containing Native API related information},captionpos=b]
+	typedef struct _syscall_info_t {
+
+		drsys_sysnum_t num;			// Native API ID
+		const char *name;			// Native API Name
+		uint flags; 				// SYSINFO_ flags
+		uint return_type; 			// Return type
+		int arg_count;				// Number of arguments
+
+		// Array of arguments
+		sysinfo_arg_t arg[MAX_ARGS_IN_ENTRY];
+
+		...
+	}
+\end{lstlisting}
+
+\begin{lstlisting}[caption={\texttt{struct} containing information associated to a Native API argument},captionpos=b]
+	typedef struct _sysinfo_arg_t {
+		int param; 				    // Parameter Ordinal
+		int size; 				    // Size
+		uint flags; 				// SYSARG_ flags
+		int type; 				    // Type
+		const char *type_name; 	    // Symbolic Name of the arg Type
+	} sysinfo_arg_t;
+\end{lstlisting}
+
+In \texttt{\_sysinfo\_arg\_t}, other than \texttt{param} and \texttt{size}, that are straightforward, the following fields are also present:
+\begin{itemize}
+\item \texttt{flags}, which stores an \texttt{OR} of flags describing the argument's characteristics. The most important ones are:
+
+\begin{itemize}
+\item \texttt{SYSARG\_READ (R)} : input argument. 
+\item \texttt{SYSARG\_WRITE (W)} : output argument.
+\item \texttt{SYSARG\_INLINED} : non-memory argument, i.e the whole value is in parameter slot.
+\item \texttt{SYSARG\_HAS\_TYPE (HT)} : argument with a type specifier. In fact, a non \texttt{SYSARG\_INLINED} argument is by default of type \texttt{struct} (\texttt{DRSYS\_TYPE\_STRUCT}), unless specified otherwise with \texttt{SYSARG\_HAS\_TYPE}. 
+\end{itemize}
+
+\item \texttt{type}, which is an \texttt{enum} value indicating the data type of the parameter
+
+\item \texttt{type\_name}, that is a string indicating the symbolic name of the \texttt{arg} type. In case the argument value   
+
+\end{itemize}
+
+\begin{lstlisting}[caption={\texttt{struct} representing a Native API},captionpos=b]
+	{ { 0,0 },"NtAllocateVirtualMemory", OK, RNTST, 6,
+	{
+		{ 0, WIN_SIZE(HANDLE), SYSARG_INLINED, DRSYS_TYPE_HANDLE },
+		{ 1, WIN_SIZE(PVOID), R | WR | HT, DRSYS_TYPE_POINTER },
+		{ 2, WIN_SIZE(ULONG), SYSARG_INLINED, DRSYS_TYPE_UNSIGNED_INT },
+		{ 3, WIN_SIZE(ULONG), R | WR | HT, DRSYS_TYPE_UNSIGNED_INT },
+		{ 4, WIN_SIZE(ULONG), SYSARG_INLINED, DRSYS_TYPE_UNSIGNED_INT, "MEM_COMMIT" },
+		{ 5, WIN_SIZE(ULONG), SYSARG_INLINED, DRSYS_TYPE_UNSIGNED_INT, "PAGE_NOACCESS" },
+	}
+\end{lstlisting}
+  
 
 
 \subsection{Native API Logging}
