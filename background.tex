@@ -1,14 +1,12 @@
 % !TEX root = LMThesisNicchi.tex
 
-\chapter{API Hooking: State of The Art}
+\chapter{Background}
+
 In literature there are many different implementations of API hooking. The objective of this chapter is to provide an outline of the various approaches utilized to hook functions in DLLs, outlining the benefits and the limitations of each technique, with a strong focus on their detection by malicious software. In particular, the focus will be on user space API hooking of \texttt{Win32} binaries, since this is BlueTracer's current field of application. Obviously, as it is the norm in malware analysis, it also assumed that the program under study is only available in binary form.
 
-Depending on their underlying implementation, API hooking techniques can be divided in three broad categories: \textbf{Binary Rewriting Based}, \textbf{Virtul Machine Introspection (VMI) Based} and \textbf{Dynamic Binary Instrumentation (DBI) based}.   
+Depending on their underlying implementation, API hooking techniques can be divided in three broad categories: \textbf{Binary Rewriting} based, \textbf{Virtul Machine Introspection (VMI)} based and \textbf{Dynamic Binary Instrumentation (DBI)} based.   
 
-\iffalse
-backmatter turns off chapter numbering
-\fi
-\begin{section}{Binary Rewriting Based Hooking}
+\section{Binary Rewriting}
 
 Binary rewriting based hooking involves inserting hooks at the API entries, via one of the following two approaches:
 \begin{enumerate}
@@ -29,7 +27,7 @@ The main techniques which use the first approach are \textit{Import Address Tabl
 \caption{\textit{API hooking techniques classification}}
 \end{figure}
 
-\subsection{Import Address Table (IAT) patching}
+\subsection{Import Address Table Patching}
 
 In the header of every Portable Executable (PE) file there is an Import Address Table (IAT) for every dynamic-link library (DLL) that is included by the executable \cite{Berdajs:2010:EAU:1815744.1815746} (\textit{Figure 1.3}). This table is utilized to indicate the location of DLL-imported functions in virtual memory and is filled by the Windows loader with the actual function memory addresses after the executable is loaded in memory.
 
@@ -50,7 +48,7 @@ Despite being extremely simple to implement, IAT patching suffers from a couple 
     \item It is ineffective when function pointers are acquired dynamically, e.g. via \texttt{LoadLibrary} and \texttt{GetProcAddress} \cite{Buescher:2011:BIS:2186328.2186347}.
 \end{itemize}
 
-\subsection{Export Address Table (EAT) patching}
+\subsection{Export Address Table Patching}
 
 Export Address Table (EAT) patching is similar to IAT patching, with the difference that DLL export address tables are patched instead. The export address table (EAT) contains the name of every function exported by the DLL together with the relative virtual address (RVA) where the function can be found, which is relative to the DLL base address when loaded in memory. To hook an API function via EAT patching all that is needed is to overwrite the corresponding address in the table with the address of another function.
 
@@ -65,7 +63,7 @@ In the Proxy DLL approach to hooking, also known as Trojan DLL, the DLL containi
 Even though a Proxy DLL is trivial to implement, it is also extremely easy to detect since the original DLL is substituted with another file, which is very likely to have a different size. Moreover, checksums could be employed to detect the presence of a Trojan DLL.
 
 
-\subsection{Inline hooking}
+\subsection{Inline Hooking}
 
 In \textit{inline hooking} the API to be hooked has its initial instructions (at least the first 5 bytes) overwritten with an unconditional jump to a replacement function. In order to ensure that the API's original functionality is not lost due to the modification of its entry point, a \textit{trampoline function} is created, consisting of a copy of the overwritten instructions and an unconditional jump back to the unaltered portion of the original function. As a result of this, the replacement function can invoke the original function by calling the trampoline, after performing all the desired analysis operations \cite{Berdajs:2010:EAU:1815744.1815746}.
 \textit{Figure 4} illustrates a program's execution flow before and after the use of \textit{inline hooking}.
@@ -76,8 +74,6 @@ In \textit{inline hooking} the API to be hooked has its initial instructions (at
 \caption{\textit{(a) Ordinary API call execution flow \\
 				  (b) API call with inline hooking}}
 \end{figure}
-
-\newpage
 
 \textit{Inline Hooking}, which was made famous by its employment  in the Microsoft \textit{Detours} Windows API hooking library, is one of the most used API hooking techniques since it offers a number of advantages:
 \begin{itemize}
@@ -101,10 +97,10 @@ Contrarily to inline hooking, a debugger can be used to hook functions whose ent
 
 On the other hand, a debugger is much easier to detect. In fact, there exist specific Windows APIs whose purpose is to find out whether or not the current process is being debugged. For example, \texttt{IsDebuggerPresent} allows to determine if the calling process is running under a debugger, while \texttt{CheckRemoteDebuggerPresent} checks for the presence of a debugger in a separate process. 
 In addition, the \texttt{INT 3} instruction in an API entry point immediately gives away the debugger's presence \cite{HookingDetection}.
-\end{section}
 
-\begin{section}{Virtual Machine Introspection (VMI) \\ 
-Based Hooking}
+
+
+\section{Virtual Machine Introspection}
 
 Virtual Machine Introspection (VMI) based hooking relies on the idea of executing the target program in an emulated environment, typically with QEMU being used as virtual machine monitor (VMM). Function calls are monitored by comparing the virtual processor's instruction pointer with the RVAs of DLLs' exported functions when added to the DLL base address. Function arguments are also monitored and this is done by providing them to callback routines, which perform the appropriate tracking operations.
 
@@ -114,12 +110,12 @@ Moreover, VMI based hooking is harder to detect with respect to the previously i
 The significant drawback of VMI based hooking is that it incurs in the \textit{semantic gap} problem, i.e. the issue of deducing high-level information from the raw system information by making sense of the CPU state and memory contents \cite{Egele:2008:SAD:2089125.2089126}. VMI based hooking tools
 might need an in-depth knowledge of kernel data structures or other details at low-level, which could constitute a complication when dealing with proprietary operating systems. For this reason, as of right now, VMI is not as effective in practice as a traditional debugger when investigating a sample.
 
-\end{section}
 
-\begin{section}{Dynamic Binary Instrumentation (DBI) \\
-Based Hooking}
+\section{Dynamic Binary Instrumentation}
 
-Dynamic Binary Instrumentation (DBI) is an analysis technique in which the behavior of a binary application is inspected at run-time via the injection of instrumentation code. Such code, after being injected, executes as a component of the ordinary instruction flow, allowing to learn information about the behavior and the state of a sample at different points during its execution \cite{DBI}. In DBI based hooking, the learnt information refers to which APIs are called and, possibly, with which arguments and return values. 
+Dynamic Binary Instrumentation (DBI) is an analysis technique in which the behavior of a binary application is inspected at run-time via the injection of instrumentation code. Such code, after being injected, executes as a component of the ordinary instruction flow, allowing to learn information about the behavior and the state of a sample at different points during its execution \cite{DBI}. We will further elaborate on DBI throughout\mynote{add ref} Chapter~\ref{...}.
+
+In DBI based hooking, the learnt information refers to which APIs are called and, possibly, with which arguments and return values. 
 
 There indeed exist DBI based API tracing tools that rely on the previously illustrated idea, namely \textit{drstrace} and \textit{drltrace}, which are both built on top of the DynamoRIO \cite{DynamoRIO} DBI framework. In particular, \textit{drstrace} is a system call tracer for Windows, while \textit{drltrace} is an API calls tracer for both Windows and Linux applications. These tools, however suffer from two notable drawbacks:
 
@@ -128,10 +124,6 @@ There indeed exist DBI based API tracing tools that rely on the previously illus
 \item They are limited in the amount of information recorded relative to the traced APIs. This applies particularly to \textit{drltace}, which, unlike \textit{drstrace}, does not log return values and output values for arguments, in addition to not providing a mechanism for translating enumerations' constants to the appropriate name. Furthermore, both tools do not take into consideration Windows callbacks and asynchronous procedure calls (APC).
 \end{itemize}
 
-\end{section}
+\section{Conclusion}
 
-\begin{section}{Conclusion}
-
-In this chapter it was shown how the state of the art API hooking techniques suffer from a number of remarkable shortcomings, especially when dealing with evasive malwares. In fact, binary rewriting based hooking techniques are all easily detectable, while VMI, although harder to uncover, is affected by the \textit{semantic gap problem}. Finally, existing DBI based API tracing tools are not accompanied by adequate cloaking mechanisms and are limited in the amount of logged information. The aforementioned issues indicate that there is a need for a robust API tracer, specialized in the analysis of evasive malwares and with extensive logging capabilites. This is the rationale at the heart of BlueTracer. 
-
-\end{section}
+In this chapter we showed how the state of the art API hooking techniques suffer from a number of remarkable shortcomings, especially when dealing with evasive malware. In fact, binary rewriting based hooking techniques are all easily detectable, while VMI, although harder to uncover, is affected by the \textit{semantic gap problem}. Finally, existing DBI-based API tracing tools are not accompanied by adequate cloaking mechanisms and are limited in the amount of logged information. The aforementioned issues indicate that there is a need for a robust API tracer, specialized in the analysis of evasive malware and with extensive logging capabilities. This is the rationale at the heart of BlueTracer. 

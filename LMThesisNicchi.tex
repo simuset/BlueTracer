@@ -1,4 +1,4 @@
-\documentclass[binding=0.6cm,LaM,english,noexaminfo,oneside]{sapthesis} % LaM for a Laurea Magistrale
+\documentclass[LaM,english,noexaminfo,oneside]{sapthesis} % LaM for a Laurea Magistrale
 \usepackage{microtype}
 \usepackage{babel}
 \usepackage[utf8]{inputenx}
@@ -29,7 +29,7 @@
 \usepackage[backend=bibtex]{biblatex}
 \bibliography{biblio.bib}
 
-\setlength{\parindent}{4em}
+%\setlength{\parindent}{4em}
 \renewcommand{\baselinestretch}{1.5}
 
 \hypersetup{pdftitle={My thesis},pdfauthor={Francesco Biccari}}
@@ -67,10 +67,9 @@
 \mainmatter
 
 \input{introduction}
-\input{hooking}
+\input{background}
 \cleardoublepage
 \phantomsection % Give this command only if hyperref is loaded
-\input{dbi}
 \input{implementation}
 \input{evaluation}
 \input{conclusions}
