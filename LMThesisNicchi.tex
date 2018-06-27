@@ -379,7 +379,7 @@ By following the above procedure, every element in \texttt{AddressOfNames} can b
 When tracing Native APIs, it is wanted to record as much data as possible as well as correctly formatting the arguments' values. To do this, it is required to have access to some kind of source of Native API related information, which can assist the tracer in the logging activity by, for example, providing the number of arguments a Native API takes as input, listing the arguments' types and differentiating between input and output arguments.
 In BlueTracer, this information was adapted from the Native API data provided by Dr.Memory \cite{DrMemory}, a memory monitoring tool based on the DynamoRIO DBI framework.
 
-For each Native API, the information related to it is contained in a \texttt{struct} of type \texttt{\_syscall\_info\_t} (\textit{Listing 3.2}). Most fields of such \texttt{struct} are self-explanatory. In particular, \texttt{num} is a \texttt{struct} storing two values indicating the system call number; these are filled in dynamically by Dr.Memory but are not needed by BlueTracer. Furthermore, the \texttt{flags} field is utilized to notify whether or not all the details of the Native API are known, as most Native APIs are undocumented. Undoubtedly though, a major role is played by the \texttt{arg} array, which is made up by \texttt{sysinfo\_arg\_t} \texttt{struct}s (\textit{Listing 3.2}) containing the data of the Native API arguments. This array is initialized with size \texttt{MAX\_ARGS\_IN\_ENTRY} (i.e. 18), since a Native API can have at most 18 arguments. 
+For each Native API, the information related to it is contained in a \texttt{struct} of type \texttt{syscall\_info\_t} (\textit{Listing 3.2}). Most fields of such \texttt{struct} are self-explanatory. In particular, \texttt{num} is a \texttt{struct} storing two values indicating the system call number; these are filled in dynamically by Dr.Memory but are not needed by BlueTracer. Furthermore, the \texttt{flags} field is utilized to notify whether or not all the details of the Native API are known, as most Native APIs are undocumented. Undoubtedly though, a major role is played by the \texttt{arg} array, which is made up by \texttt{sysinfo\_arg\_t} \texttt{struct}s (\textit{Listing 3.2}) containing the data of the Native API arguments. This array is initialized with size \texttt{MAX\_ARGS\_IN\_ENTRY} (i.e. 18), since a Native API can have at most 18 arguments. 
 \\
 \begin{lstlisting}[caption={\texttt{struct} containing Native API related information},captionpos=b]
 	typedef struct _syscall_info_t {
@@ -394,7 +394,7 @@ For each Native API, the information related to it is contained in a \texttt{str
 		sysinfo_arg_t arg[MAX_ARGS_IN_ENTRY];
 
 		...
-	}
+	} syscall_info_t;
 \end{lstlisting}
 
 \begin{lstlisting}[caption={\texttt{struct} containing information associated to a Native API argument},captionpos=b]
@@ -407,7 +407,7 @@ For each Native API, the information related to it is contained in a \texttt{str
 	} sysinfo_arg_t;
 \end{lstlisting}
 
-In \texttt{\_sysinfo\_arg\_t}, other than \texttt{param} and \texttt{size}, that are straightforward, the following fields are also present:
+In \texttt{sysinfo\_arg\_t}, other than \texttt{param} and \texttt{size}, that are straightforward, the following fields are also present:
 \begin{itemize}
 \item \texttt{flags}, which stores an \texttt{OR} of flags describing the argument's characteristics. The most important ones are:
 
@@ -415,16 +415,18 @@ In \texttt{\_sysinfo\_arg\_t}, other than \texttt{param} and \texttt{size}, that
 \item \texttt{SYSARG\_READ (R)} : input argument. 
 \item \texttt{SYSARG\_WRITE (W)} : output argument.
 \item \texttt{SYSARG\_INLINED} : non-memory argument, i.e the whole value is in parameter slot.
-\item \texttt{SYSARG\_HAS\_TYPE (HT)} : argument with a type specifier. In fact, a non \texttt{SYSARG\_INLINED} argument is by default of type \texttt{struct} (\texttt{DRSYS\_TYPE\_STRUCT}), unless specified otherwise with \texttt{SYSARG\_HAS\_TYPE}. 
+\item \texttt{SYSARG\_HAS\_TYPE (HT)} : argument with a type specifier. In fact, a non \texttt{SYSARG\_INLINED} argument is by default of type \texttt{struct} (\texttt{DRSYS\_TYPE\_STRUCT}), unless specified otherwise by \texttt{SYSARG\_HAS\_TYPE}. 
 \end{itemize}
 
 \item \texttt{type}, which is an \texttt{enum} value indicating the data type of the parameter
 
-\item \texttt{type\_name}, that is a string indicating the symbolic name of the \texttt{arg} type. In case the argument value   
+\item \texttt{type\_name}, a string indicating the symbolic name of the \texttt{arg} type, which is typically filled dynamically based on the \texttt{type} value. In case the argument value is a named constant, the \texttt{type\_name} field contains the name of the enumeration the constant belongs to. In fact, for each one of these enumerations, BlueTracer has access to a \texttt{struct} specific for that enumeration containing the constant values and their corresponding name. This information was also provided by Dr.Memory and is employed to translate constants to the appropriate name, as it will be explained in the next section. 
 
 \end{itemize}
 
-\begin{lstlisting}[caption={\texttt{struct} representing a Native API},captionpos=b]
+To make things clearer, an instance of \texttt{syscall\_info\_t} for the Native API \texttt{NtAllocateVirtualMemory} was provided in the listing below (\textit{Listing 3.4}).
+\\
+\begin{lstlisting}[caption={Instance of \texttt{syscall\_info\_t} relative to \texttt{NtAllocateVirtualMemory}},captionpos=b]
 	{ { 0,0 },"NtAllocateVirtualMemory", OK, RNTST, 6,
 	{
 		{ 0, WIN_SIZE(HANDLE), SYSARG_INLINED, DRSYS_TYPE_HANDLE },
@@ -435,15 +437,109 @@ In \texttt{\_sysinfo\_arg\_t}, other than \texttt{param} and \texttt{size}, that
 		{ 5, WIN_SIZE(ULONG), SYSARG_INLINED, DRSYS_TYPE_UNSIGNED_INT, "PAGE_NOACCESS" },
 	}
 \end{lstlisting}
-  
 
+In \textit{3.2.2} it was explained how BlueTracer obtains a Native API name from its ID. After that, as shown in \textit{Figure 3.2}, there must be a way to, given a specific Native API name, retrieve the corresponding \texttt{syscall\_info\_t struct}. This is done by building an hash map during the tool's initialization which maps the Native API name to the appropriate \texttt{struct}. Such idea is also adopted for named constants enumerations since a hash map is also constructed with the objective of associating the name of a named constant enumeration to the corresponding \texttt{struct}.    
 
 \subsection{Native API Logging}
-Note: Include enum resolution here
+With reference to \textit{Figure 3.2}, let us consider the point in \texttt{TraceSysCallEntry} where the \texttt{syscall\_info\_t struct} relative to the Native API being traced was successfully retrieved. Before describing how the logging of "known" Native APIs is performed, it is worth mentioning that, in case a \texttt{struct} describing a certain Native API is not found, BlueTracer just logs the name of the Native API and the input value of a user-specified number of arguments (4 by default).
 
+The first step towards logging "known" Native APIs is allocating and initializing a \texttt{syscall\_tracer struct} (\textit{Listing 3.5}) representing the specific Native API being traced. This \texttt{struct} is built starting from the data present in the previously retrieved  \texttt{syscall\_info\_t struct} and it is at the heart of the logging of the Native API.
+\\
+\begin{lstlisting}[caption={\texttt{struct} representing the Native API being traced},captionpos=b]
+	typedef struct _syscall_tracer {
+		ADDRINT syscall_number;			// Native API ID
+		const char * syscall_name;		// Native API Name
+		int argcount;				    // Number of Arguments
+
+		// Array of arguments
+		drsys_arg_t arguments[MAX_ARGS_IN_ENTRY];
+
+		drsys_arg_t retval;			    // Return value
+		int syscall_counter;			// Native API Counter
+	} syscall_tracer;
+\end{lstlisting}
+
+Even for \texttt{syscall\_tracer}, each field is self-explanatory. The only one which was not encountered before is the \texttt{syscall\_counter} field. The rationale behind this field is that, in the log, each traced call has a unique integer associated to it, utilized to group together the information relative to the call in post-processing. The next identifier to be assigned is stored in the \texttt{call\_number} field of the thread local storage (\textit{Listing 3.1}). Therefore, \texttt{syscall\_counter} simply contains the unique identifier associated to the Native API in the log. The arguments of a specific Native API are represented via the \texttt{drsys\_arg\_t} struct (\textit{Listing 3.6}).
+\\
+\begin{lstlisting}[caption={\texttt{struct} representing the an argument of the Native API being traced},captionpos=b]
+typedef struct _drsys_arg_t {
+
+	// Whether operating pre-call (if true) or post-system call (if false)
+	bool pre;
+
+	int ordinal;			    // Parameter Ordinal				
+	int size;			        // Size	
+	uint flags;			        // SYSARG_ flags
+	int type;			        // Type
+	const char *type_name;		// Symbolic Name of the arg Type
+
+	// String describing the symbolic name of a named constant's enum
+	const char *enum_name;
+
+	// Argument value
+	ADDRINT value;
+	
+} drsys_arg_t
+\end{lstlisting}
+
+\texttt{drsys\_arg\_t}'s fields are mostly the same of \texttt{sysinfo\_arg\_t}, with three additions:
+\begin{itemize}
+\item \texttt{pre}, which is a boolean flag set to \texttt{true} when the logging is occurring before the Native API is executed (i.e. in \texttt{TraceSysCallEntry} and set to false when the logging is occurring after the Native API is executed (i.e. in \texttt{TraceSysCallExit}).
+\item \texttt{enum\_name}, a string containing the symbolic name of the enumeration a named constant belongs to. In most cases, this is the symbolic name associated to the first constant of the enumeration. Such field was introduced to decouple type name and enumeration name.
+\item \texttt{value}, an \texttt{ADDRINT}\footnote{The ADDRINT type is defined by Pin and represents a memory address} containing the value of the argument. This is obtained through the \texttt{PIN\_GetSyscallArgument} API, which takes as input the context before the execution of the system call, the system call standard and the ordinal number of the argument whose value is requested.  
+\end{itemize}
+
+As previously mentioned in section 3.1.1, each thread possesses its own log file, whose pointer resides in the thread local storage, and writes on it by means of the \texttt{file\_write} function, also located in the thread local storage (\textit{Listing 3.1}). The first Native API component being logged is its name and this is done with the following format:
+\\ 
+\texttt{\textasciitilde\textasciitilde[System ID of thread]\textasciitilde\textasciitilde} \texttt{ [Call Counter] [Image Name]![Native API Name]}  
+In the context of Native APIs, the name of the image is always \texttt{ntdll}, but this is not the case when tracing APIs.
+
+Argument logging is done via the \texttt{print\_arg} function (\textit{Listing 3.7}).
+
+\newpage
+\begin{lstlisting}[caption={\texttt{print\_arg} function},captionpos=b]
+static void print_arg(drsys_arg_t* curr_arg, bluepill_tls* tdata, uint syscall_counter) {
+
+	...
+
+	// Constant Resolution
+	if (curr_arg->enum_name != NULL) {
+		if (get_arg_symname(curr_arg, tdata))
+			return;
+	}
+
+	switch (curr_arg->type) {
+		case DRSYS_TYPE_VOID:	      print_simple_value(curr_arg, true, tdata); break;
+		case DRSYS_TYPE_POINTER:      print_simple_value(curr_arg, true, tdata); break;
+		case DRSYS_TYPE_BOOL:         print_simple_value(curr_arg, false, tdata); break;
+		case DRSYS_TYPE_INT:          print_simple_value(curr_arg, false, tdata); break;
+		case DRSYS_TYPE_SIGNED_INT:   print_simple_value(curr_arg, false, tdata); break;
+		case DRSYS_TYPE_UNSIGNED_INT: print_simple_value(curr_arg, false, tdata); break;
+		case DRSYS_TYPE_HANDLE:       print_simple_value(curr_arg, false, tdata); break;
+		case DRSYS_TYPE_NTSTATUS:     print_simple_value(curr_arg, false, tdata); break;
+		case DRSYS_TYPE_ATOM:         print_simple_value(curr_arg, false, tdata); break;
+	default: {
+		if (curr_arg->value == 0) {
+			(tdata->file_write)(tdata->threadid, tdata->buffer, tdata->OutFile, "<null>");
+		}
+		else if (!TEST(SYSARG_READ, curr_arg->flags)) {
+			(tdata->file_write)(tdata->threadid, tdata->buffer,
+			tdata->OutFile, PFX, curr_arg->value);
+		}
+
+		else {
+			if (!print_known_compound_type(curr_arg, tdata))
+				(tdata->file_write)(tdata->threadid, tdata->buffer, tdata->OutFile, "<NYI>");
+		}
+
+	}
+}
+\end{lstlisting}
+ 
 
 \section{API}
 In tracing APIs most of the idea seen in Native API tracing also apply, with a few differences.
+-> Same diagram as NTAPI with 2 sources AND shadow stack
 
 \subsection{Shadow Stack}
 \subsection{Performance}
