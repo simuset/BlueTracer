@@ -367,12 +367,25 @@ To conclude this section, let us show how a traced Native API looks like in the 
     basewidth = {.48em}
 }
 
-\section{API}
-In tracing APIs most of the idea seen in Native API tracing also apply, with a few differencess.
--> Same diagram as NTAPI with 2 sources AND shadow stack
+\section{APIs Tracing}
 
-\subsection{Shadow Stack}
-\subsection{Performance}
+In Microsoft Windows, APIs are implemented as functions provided by a set of dynamic-link libraries. These, also known as DLLs, constitute Microsoft's way of implementing the concept of shared libraries in the Windows operating system. Therefore, the functions they make available can be employed by different applications \cite{DLL}. Windows APIs offer a plethora of functionalities which belong to many different categories, ranging from base services (e.g. file management) to user interface functions and network operations \cite{WinAPI}. In light of this, a Windows API has rich semantic information associated to it and tracing the sequence of APIs a malware calls provides analysts with a very high-level view of the sample's behavior. This is why BlueTracer's API tracer component is undoubtedly the most important one. 
+\\
+\begin{figure}[h]
+\centering
+\includegraphics[scale=0.662]{Figures/APITracing.pdf}
+\caption{\textit{APIs Tracing Workflow}}
+\end{figure}
+
+ 
+When tracing APIs, most of the concepts seen in Native API tracing also apply, but there are also significant differences, both in the steps that were carried out and in the Pin APIs which were employed, as it can be observed from the diagram in \textit{Figure 3.4}.
+
+Now let us illustrate the actions being performed during API tracing by analyzing in detail each one of the three components of \textit{Figure 3.4}.
+
+\subsection{APIs Instrumentation}
+\subsection{API Analysis before Execution}
+\subsection{API Analysis after Execution}
+
 \section{Callback and APC} 
 
 \iffalse
