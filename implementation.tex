@@ -16,7 +16,7 @@ Finally, all the configuration options of the tool will be explained.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.8\textwidth]{Figures/BlueTracer.pdf}
+\includegraphics[width=0.85\textwidth]{Figures/BlueTracer.pdf}
 \caption{\textit{BlueTracer's high level structure}}
 \end{figure}
 
@@ -63,8 +63,6 @@ In order to bypass this limitation of the Pin's framework, the following strateg
 \begin{enumerate}
 \item When initializing the thread local data in \texttt{OnThreadStart}, \texttt{file\_write} is set to point to a function named \texttt{file\_open}.
 \item The first time a thread attempts to write data to file \texttt{file\_open} is invoked.
-\\
-\\
 \item \texttt{file\_open} carries out the following actions:
 \begin{enumerate}
 \item Opens the tracer's log file (this is safe since the file is not opened in a callback)
@@ -265,9 +263,14 @@ As previously mentioned in section 3.1.1, each thread possesses its own log file
 \texttt{\textasciitilde\textasciitilde[System ID of thread]\textasciitilde\textasciitilde} \texttt{ [Call Counter] [Image Name]![Native API Name]}  
 In the context of Native APIs, the name of the image is always \texttt{ntdll}, but this is not the case when tracing APIs.
 
-Argument logging is done via the \texttt{print\_arg} function (\textit{Listing 3.7}).
+Argument logging is done via the \texttt{print\_arg} function (\textit{Listing 3.7}), which is structured as follows:
 
-\newpage
+\begin{itemize}
+\item Firstly, it is determined if the argument being logged is a named constant, i.e. it is checked if \texttt{enum\_name} is different from \texttt{NULL}. In that case, the \texttt{get\_arg\_syname} function is invoked, which is in charge of, given the input named constant value, finding the corresponding name and recording it to the log. The named constant resolution is carried out by initially fetching the \texttt{struct} containing all the members of the enumeration the named constant belongs to, through the use of the aforementioned hashmap. Then, it is determined if there is a perfect match between the argument value and one of the values of the \texttt{struct}'s entries. If this occurs, then the associated symbolic name is simply retrieved from the \texttt{struct}'s entry. Otherwise, a linear search is performed to unveil possible composite named constants (e.g. \texttt{FILE\_SHARED\_READ | FILE\_SHARED\_WRITE}).    
+
+\end{itemize}
+
+\vspace{1em}
 \begin{lstlisting}[caption={\texttt{print\_arg} function},captionpos=b]
 static void print_arg(drsys_arg_t* curr_arg, bluepill_tls* tdata, uint syscall_counter) {
 
@@ -293,23 +296,79 @@ static void print_arg(drsys_arg_t* curr_arg, bluepill_tls* tdata, uint syscall_c
 		if (curr_arg->value == 0) {
 			(tdata->file_write)(tdata->threadid, tdata->buffer, tdata->OutFile, "<null>");
 		}
-		else if (!TEST(SYSARG_READ, curr_arg->flags)) {
+		else if (curr_arg->pre && !TEST(SYSARG_READ, curr_arg->flags)) {
 			(tdata->file_write)(tdata->threadid, tdata->buffer,
 			tdata->OutFile, PFX, curr_arg->value);
 		}
-
 		else {
 			if (!print_known_compound_type(curr_arg, tdata))
 				(tdata->file_write)(tdata->threadid, tdata->buffer, tdata->OutFile, "<NYI>");
 		}
-
 	}
+	...
 }
 \end{lstlisting}
- 
+
+\begin{itemize}
+\item Then, if the argument's type is primitive (e.g. \texttt{int}, \texttt{bool}, etc.),  \texttt{print\_simple\_value} is invoked to record its value. In particular the second parameter of this function is a boolean which is set to \texttt{true} if it is wanted to print the argument's value with leading zeros (e.g. if the argument is of pointer type and the address it stores is being logged ) and \texttt{false} otherwise. The way \texttt{print\_simple\_value} operates is quite straightforward:
+\begin{enumerate}
+\item At the beginning the argument's value is simply logged, with leading zeroes or not depending on the previously mentioned parameter
+\item Then, if the argument is a pointer, it is determined if the value it points to needs to be logged. This occurs if the argument is being processed before the Native API execution (i.e. \texttt{pre} is \texttt{true}) and is an input parameter (i.e. SYSARG\_READ is contained in \texttt{flags}) or if the argument is being processed after the Native API execution (i.e. \texttt{pre} is \texttt{false}) and is an output parameter (i.e. SYSARG\_WRITE is contained in \texttt{flags}). The pointed value is obtained through the use of \texttt{PIN\_SafeCopy}, which copies the specified number of bytes from a source memory region to a destination memory region, guaranteeing safe return to the caller even if such regions are inaccessible.  
+\end{enumerate}      
+
+\item Finally, if the argument's type is not a primitive one, it is checked if it is \texttt{null} and if it is a complex output parameter being traced before the Native API execution, situation in which only the address stored in the pointer is logged. If none of these two scenarios are true, then the tracer finds itself in the situation where it is required to log the value of a complex type. This is performed through the invocation of \texttt{print\_known\_compound}. As of right now, such function differentiates between four complex types, namely \texttt{UNICODE\_STRING}, \texttt{OBJECT\_ATTRIBUTES}, \texttt{IO\_STATUS\_BLOCK} and \texttt{LARGE\_INTEGER}, and logs the argument's value accordingly. If the argument's type is a complex type that is not supported, the symbolic value \texttt{<NYI>} (not yet implemented) is recorded.    
+
+\end{itemize}
+
+Once the arguments' input values are logged, then the reference to the \texttt{syscall\_tracer struct} representing the Native API under analysis is stored in thread local data (\textit{Listing 3.1}). This is done so that, after the Native API's execution, the corresponding \texttt{syscall\_tracer} data structure can be accessed from \texttt{TraceSysCallExit}. In fact, as mentioned in section 3.2, the \texttt{bluepill\_tls struct} associated to the running thread can be retrieved in any analysis function by means of \texttt{PIN\_GetThreadData}.
+
+In \texttt{TraceSysCallExit}, after the value of \texttt{syscallEntry} has been fetched from the thread local storage, then it is determined whether the Native API has succeeded by checking if the output of \texttt{PIN\_GetSyscallErrno} is equal to zero, where \texttt{PIN\_GetSyscallErrno} is a Pin API returning the error code of the system call which has just returned with the provided context. Afterwards, \texttt{PIN\_GetSyscallReturn} is utilized to get the return value of the Native API and, with this information, the corresponding \texttt{drsys\_arg\_t} data structure is built. Successively, the Native API return value is logged, together with the output arguments, using once again \texttt{print\_arg} (\textit{Listing 3.7}). Finally, the \texttt{syscall\_tracer struct} representing the Native API being traced is deallocated.
+
+To conclude this section, let us show how a traced Native API looks like in the log file (\textit{Figure 3.4}). As it can be observed, the adopted log format is quite intuitive. In fact, the idea was to have a log which is both easy to read by the analyst but also easy to parse and post-process.      
+\\
+
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Log relative to a \texttt{NtOpenFile} call},captionpos=b]
+~~2868~~ 1072 ntdll.dll!NtOpenFile
+1072 	arg 0: 0x000fe810 (type=HANDLE*, size=0x4)
+1072 	arg 1: 0x100020 (type=unsigned int, size=0x4)
+1072 	arg 2: len=0x18, root=0x0, name=210/538 "\??\C:\Windows\WinSxS\
+		x86_microsoft.windows.gdiplus_6595b64144ccf1df_1.1.7601.23894_none_5c0be957a009922e", 
+		att=0x40, sd=0x00000000, sqos=0x00000000 (type=OBJECT_ATTRIBUTES*, size=0x4)
+1072 	arg 3: 0x000fe7c0 (type=IO_STATUS_BLOCK*, size=0x4)
+1072 	arg 4: FILE_SHARE_READ|FILE_SHARE_WRITE (type=named constant, value=0x3, size=0x4)
+1072 	arg 5: FILE_DIRECTORY_FILE|FILE_SYNCHRONOUS_IO_NONALERT
+ 		(type=named constant, value=0x21, size=0x4)
+1072    succeeded =>
+1072 	arg 0: 0x000fe810 => 0x58 (type=HANDLE*, size=0x4)
+1072 	arg 3: status=0x0, info=0x1 (type=IO_STATUS_BLOCK*, size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
 
 \section{API}
-In tracing APIs most of the idea seen in Native API tracing also apply, with a few differences.
+In tracing APIs most of the idea seen in Native API tracing also apply, with a few differencess.
 -> Same diagram as NTAPI with 2 sources AND shadow stack
 
 \subsection{Shadow Stack}
