@@ -7,7 +7,7 @@ In this chapter we discuss the implementation of BlueTracer, providing a detaile
 
 BlueTracer\mynote{This section requires significant extensions}, being a part of Blue Pill, is also implemented using Pin, a dynamic binary instrumentation framework by Intel, which is vastly utilized for program analysis, testing of software and in the security field. The version of Pin used for the development of the tool is 3.5, in order to benefit from the notable improvements, both in terms of execution speed and offered features, which were introduced going from the 2.14 release to the 3.x series. Pin comes with its own OS-agnostic and compiler-agnostic runtime, called PinCRT. PinCRT exposes three layers: a generic operating system interface providing basic OS services (e.g. process and thread control), together with C and C++03 (without RTTI) runtime layers, for writing instrumentation and analysis routines \cite{Pin}.   
 
-BlueTracer has been organized primarily taking into account the rich set of APIs offered by Pin, which have led to the decision to split the tool in three parts: the first aimed at \textbf{native APIs tracing}, the second for \textbf{APIs tracing} and the last focused on \textbf{callbacks and APCs tracing} (\textit{Figure 3.1}). In particular, the tracing of native APIs also employs a different source of API information (\textit{Dr. Memory}'s system call data) than the ones utilized for tracing APIs (\textit{drltrace}'s configuration file or the information extracted from \textit{Pyrebox}'s database).
+BlueTracer has been organized primarily taking into account the rich set of APIs offered by Pin, which have led to the decision to split the tool in three parts: the first aimed at \textbf{native APIs tracing}, the second for \textbf{APIs tracing} and the last focused on \textbf{callbacks and APCs tracing} (\textit{Figure 3.1}). In particular, the tracing of native APIs also employs a different source of API information (\textit{Dr. Memory}'s system call data) than the ones utilized for tracing APIs (\textit{drltrace}'s configuration file or the information extracted from \textit{PyREbox}'s database).
 
 This chapter will begin by describing how multi-threading was addressed in the tool, as this is central to all its components. Then, the implementation of each one of three aforementioned parts will be discussed in detail. 
 \iffalse
@@ -150,7 +150,7 @@ In BlueTracer, this information was adapted from the Native API data provided by
 
 For each Native API, the information related to it is contained in a \texttt{struct} of type \texttt{syscall\_info\_t} (\textit{Listing 3.2}). Most fields of such \texttt{struct} are self-explanatory. In particular, \texttt{num} is a \texttt{struct} storing two values indicating the system call number; these are filled in dynamically by Dr.Memory but are not needed by BlueTracer. Furthermore, the \texttt{flags} field is utilized to notify whether or not all the details of the Native API are known, as most Native APIs are undocumented. Undoubtedly though, a major role is played by the \texttt{arg} array, which is made up by \texttt{sysinfo\_arg\_t} \texttt{struct}s (\textit{Listing 3.2}) containing the data of the Native API arguments. This array is initialized with size \texttt{MAX\_ARGS\_IN\_ENTRY} (i.e. 18), since a Native API can have at most 18 arguments. 
 \\
-\begin{lstlisting}[caption={\texttt{struct} containing Native API related information},captionpos=b]
+\begin{lstlisting}[caption={\texttt{struct} containing Native API-related information},captionpos=b]
 	typedef struct _syscall_info_t {
 
 		drsys_sysnum_t num;			// Native API ID
@@ -400,11 +400,97 @@ The first step taken towards APIs tracing is APIs instrumentation, i.e. placing 
 
 Having given a general outline on how \texttt{AddAnalysisRoutine} works, let us now describe its underlying details.
 
-Source of information description. drltrace vs. pyrebox. Hashmaps vs double hashmap. Structs used to represent library calls.
+Similarly to what occurs for NTAPIs tracing, in order to log as much information as possible and to correctly record the arguments' values, it is necessary to have a source of API information, providing some kind of assistance during the tracing activity. When dealing with APIs, BlueTracer allows the user to choose between two possible sources of API information: \textit{drltrace}'s configuration file or the data extracted from \textit{PyREbox}'s database. By default, the latter is employed as it embodies a greater amount of information, including variable names and named constants' enumerations.
+
+\textit{drltrace} (already mentioned in section 2.3) comes with its own external configuration file, in which each line contains information relative to an API, as it can be observed from the sample configuration file entry below (\textit{Listing 3.9}).      
+\\
+\lstset{
+    language=C++,
+    frame=single, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Sample entry in \textit{drltrace} configuration file},captionpos=b]
+bool|GetUILanguageInfo|DWORD|wchar*|__out wchar*|__inout DWORD*|__out DWORD*
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+
+Each piece of information in an entry is separated by \texttt{|}. The first bit of data is the API's return type, the second is the API's name and the rest of the entry is made up by the arguments' types. In particular, the \texttt{\_\_out} token is used to mark output arguments, while \texttt{\_\_inout} is utilized to identify input and output arguments. In case there is no token, it means that the argument is just an input one. 
+
+Before API instrumentation takes place, BlueTracer parses the aforementioned configuration file and, for every entry, builds a \texttt{sysinfo\_arg\_t struct} (\textit{Listing 3.2}) for each argument in the entry. It was decided to reuse \texttt{sysinfo\_arg\_t struct} since its fields were fitting with respect to the arguments' information which had to be stored. Therefore, after this parsing process, each configuration file entry is represented by an <API name, \texttt{vector} of \texttt{sysinfo\_arg\_t}s> pair. Such pairs are then utilized to build an hashmap, which maps the API name to the corresponding arguments. This hashmap is used in step 3 of the APIs instrumentation process to, given the API name, fetch the appropriate information. In particular, it is important to note that, from a performance point of view, it is much better to include the information retrieval operations in the image instrumentation function, rather than in the analysis ones, as the former are executed just once for every image, while the latter are invoked each time an API is called by the pinned application.
+
+The other source of API information employed by BlueTracer is \textit{PyREbox}'s database. \textit{PyREbox} is a Python scriptable reverse engineering sandbox based on QEMU and VMI techniques, the goal of which is to provide support for reverse engineering through its dynamic analysis capabilities \cite{Pyrebox}. \textit{PyREbox} is equipped with its own API tracer, which relies on the information contained in a sqlite database to correctly log the APIs' parameters. Such database was, in turn, generated by utilizing as its core the data from the \textit{Deviare}\footnote{Deviare is an open-source hooking engine for instrumenting arbitrary \texttt{Win32} functions \cite{Deviare}} project and then employing a crawler for parsing the Microsoft online documentation with the goal of marking which parameters are input parameters and which are output parameters. The resulting database is incredibly richer in API information than \textit{drltrace}'s configuration file. In fact, the number of APIs for which data is stored is much higher, argument names are also included, as well as the contents of named constants' enumerations, information which \textit{drltrace}'s configuration file does not provide at all.
+
+In order to extract the APIs information from PyREbox's database, a Python script was employed, which, for every API, instantiates a \texttt{libcall\_info\_t struct} (\textit{Listing 3.10}) in a \texttt{.cpp} file.
+\\
+\begin{lstlisting}[caption={\texttt{struct} containing API-related information from PyREbox's database},captionpos=b]
+typedef struct _libcall_info_t {
+	const char* func_name;     			// API name
+	int argnum;				   			// Number of Args
+	libcall_arg_info_t lib_args[20];	// Array of arguments
+} libcall_info_t
+\end{lstlisting}
+\vspace{1cm}
+
+The most important field of such \texttt{struct} is surely the arguments' array, which is made up of \texttt{libcall\_arg\_info\_t} data structures (\textit{Listing 3.11}) containing the information relative each argument of an API, including an entry specific for the return value data. The array size was set to 20, since it was observed from the database data that the API with the most parameters had 19 arguments. This time, it was decided not to reuse NTAPI's \texttt{sysinfo\_arg\_t struct} (\textit{Listing 3.2}) to store the API's arguments information due to its lack of the field storing the argument name. 
+\\
+\begin{lstlisting}[caption={\texttt{struct} containing information associated to an API argument},captionpos=b]
+typedef struct _libcall_arg_info_t {
+
+	int arg_num;				// Arg Ordinal
+	const char* arg_name;		// Arg Name
+	int arg_type;             	// Arg Type
+	char* arg_type_name;		// Arg Type Name
+	int size;					// Size
+	bool in_out_flag;			// Input/Output Flag
+
+} libcall_arg_info_t;
+\end{lstlisting}   
+
+Although \texttt{libcall\_arg\_info\_t}'s fields seem to be pretty self-explanatory, let us quickly go through them to reveal some details which are not so obvious:
+
+\begin{itemize}
+\item \texttt{arg\_num} is an \texttt{int} which contains the argument's ordinal. In case the return value is being represented, it is set to -1.
+\item \texttt{arg\_name} is a string containing the argument name as reported by Microsoft's official documentation.
+\item \texttt{arg\_type} is an \texttt{int} from an enumeration representing the argument's type. In particular, differently from the strategy adopted from Native APIs, in case of a pointer the \texttt{NKT\_DBOBJCLASS\_Pointer} enumeration member is ORed with an \texttt{int} representing the pointed type. The same thing happens in case of a pointer to a pointer but with the \texttt{NKT\_DBOBJCLASS\_PointerPointer} flag being used instead. This was done to reflect how API information is stored inside the database.
+\item \texttt{arg\_type\_name} is a string which is used in the three specific scenarios below, according the type of the argument, and is \texttt{null} otherwise:
+\begin{enumerate}
+\item To store the symbolic name of an enumeration.
+\item To store the \texttt{struct} type of the argument.
+\item To store the \texttt{union} type of the argument.
+\end{enumerate}
+\item \texttt{size} is an \texttt{int} storing the argument's size. In case of a pointer (or a pointer to a pointer) the size of the last pointed element is stored.
+\item \texttt{in\_out\_flag} 
+\end{itemize}
+
+\iffalse
+is blablabla, VMI. It uses a database blablabla, providing loads of info, even enums which drltrace does not provide. Due to the huge amount of data it was decided to split the info by DLL, so a cpp file per dll. To access the info a dobule hashmap was employed (maybe little diagram ? ).
+\fi
+
 
 
 
 \subsection{API Analysis before Execution}
+
+The workflow is mostly the same as NTAPI's with one major difference: the shadow stack.
+
 \subsection{API Analysis after Execution}
 
 \section{Callback and APC} 
