@@ -266,7 +266,7 @@ In the context of Native APIs, the name of the image is always \texttt{ntdll}, b
 Argument logging is done via the \texttt{print\_arg} function (\textit{Listing 3.7}), which is structured as follows:
 
 \begin{itemize}
-\item Firstly, it is determined if the argument being logged is a named constant, i.e. it is checked if \texttt{enum\_name} is different from \texttt{NULL}. In that case, the \texttt{get\_arg\_syname} function is invoked, which is in charge of, given the input named constant value, finding the corresponding name and recording it to the log. The named constant resolution is carried out by initially fetching the \texttt{struct} containing all the members of the enumeration the named constant belongs to, through the use of the aforementioned hashmap. Then, it is determined if there is a perfect match between the argument value and one of the values of the \texttt{struct}'s entries. If this occurs, then the associated symbolic name is simply retrieved from the \texttt{struct}'s entry. Otherwise, a linear search is performed to unveil possible composite named constants (e.g. \texttt{FILE\_SHARED\_READ | FILE\_SHARED\_WRITE}).    
+\item Firstly, it is determined if the argument being logged is a named constant, i.e. it is checked if \texttt{enum\_name} is different from \texttt{NULL}. In that case, the \texttt{get\_arg\_syname} function is invoked, which is in charge of, given the input named constant value, finding the corresponding name and recording it to the log. The named constant resolution is carried out by initially fetching the \texttt{struct} containing all the members of the enumeration the named constant belongs to, through the use of the aforementioned hash map. Then, it is determined if there is a perfect match between the argument value and one of the values of the \texttt{struct}'s entries. If this occurs, then the associated symbolic name is simply retrieved from the \texttt{struct}'s entry. Otherwise, a linear search is performed to unveil possible composite named constants (e.g. \texttt{FILE\_SHARED\_READ | FILE\_SHARED\_WRITE}).    
 
 \end{itemize}
 
@@ -400,7 +400,7 @@ The first step taken towards APIs tracing is APIs instrumentation, i.e. placing 
 
 Having given a general outline on how \texttt{AddAnalysisRoutine} works, let us now describe its underlying details.
 
-Similarly to what occurs for NTAPIs tracing, in order to log as much information as possible and to correctly record the arguments' values, it is necessary to have a source of API information, providing some kind of assistance during the tracing activity. When dealing with APIs, BlueTracer allows the user to choose between two possible sources of API information: \textit{drltrace}'s configuration file or the data extracted from \textit{PyREbox}'s database. By default, the latter is employed as it embodies a greater amount of information, including variable names and named constants' enumerations.
+Similarly to what occurs for NTAPI tracing, in order to log as much information as possible and to correctly record the arguments' values, it is necessary to have a source of API information, providing some kind of assistance during the tracing activity. When dealing with APIs, BlueTracer allows the user to choose between two possible sources of API information: \textit{drltrace}'s configuration file or the data extracted from \textit{PyREbox}'s database. By default, the latter is employed as it embodies a greater amount of information, including variable names and named constants' enumerations.
 
 \textit{drltrace} (already mentioned in section 2.3) comes with its own external configuration file, in which each line contains information relative to an API, as it can be observed from the sample configuration file entry below (\textit{Listing 3.9}).      
 \\
@@ -434,22 +434,22 @@ bool|GetUILanguageInfo|DWORD|wchar*|__out wchar*|__inout DWORD*|__out DWORD*
 
 Each piece of information in an entry is separated by \texttt{|}. The first bit of data is the API's return type, the second is the API's name and the rest of the entry is made up by the arguments' types. In particular, the \texttt{\_\_out} token is used to mark output arguments, while \texttt{\_\_inout} is utilized to identify input and output arguments. In case there is no token, it means that the argument is just an input one. 
 
-Before API instrumentation takes place, BlueTracer parses the aforementioned configuration file and, for every entry, builds a \texttt{sysinfo\_arg\_t struct} (\textit{Listing 3.2}) for each argument in the entry. It was decided to reuse \texttt{sysinfo\_arg\_t struct} since its fields were fitting with respect to the arguments' information which had to be stored. Therefore, after this parsing process, each configuration file entry is represented by an <API name, \texttt{vector} of \texttt{sysinfo\_arg\_t}s> pair. Such pairs are then utilized to build an hashmap, which maps the API name to the corresponding arguments. This hashmap is used in step 3 of the APIs instrumentation process to, given the API name, fetch the appropriate information. In particular, it is important to note that, from a performance point of view, it is much better to include the information retrieval operations in the image instrumentation function, rather than in the analysis ones, as the former are executed just once for every image, while the latter are invoked each time an API is called by the pinned application.
+Before API instrumentation takes place, BlueTracer parses the aforementioned configuration file and, for every entry, builds a \texttt{sysinfo\_arg\_t struct} (\textit{Listing 3.2}) for each argument in the entry. It was decided to reuse \texttt{sysinfo\_arg\_t struct} since its fields were fitting with respect to the arguments' information which had to be stored. Therefore, after this parsing process, each configuration file entry is represented by an <API name, \texttt{vector} of \texttt{sysinfo\_arg\_t}s> pair. Such pairs are then utilized to build an hash map, which maps the API name to the corresponding arguments. This hash map is used in step 3 of the APIs instrumentation process to, given the API name, fetch the appropriate information. In particular, it is important to note that, from a performance point of view, it is much better to include the information retrieval operations in the image instrumentation function, rather than in the analysis ones, as the former are executed just once for every image, while the latter are invoked each time an API is called by the pinned application.
 
 The other source of API information employed by BlueTracer is \textit{PyREbox}'s database. \textit{PyREbox} is a Python scriptable reverse engineering sandbox based on QEMU and VMI techniques, the goal of which is to provide support for reverse engineering through its dynamic analysis capabilities \cite{Pyrebox}. \textit{PyREbox} is equipped with its own API tracer, which relies on the information contained in a sqlite database to correctly log the APIs' parameters. Such database was, in turn, generated by utilizing as its core the data from the \textit{Deviare}\footnote{Deviare is an open-source hooking engine for instrumenting arbitrary \texttt{Win32} functions \cite{Deviare}} project and then employing a crawler for parsing the Microsoft online documentation with the goal of marking which parameters are input parameters and which are output parameters. The resulting database is incredibly richer in API information than \textit{drltrace}'s configuration file. In fact, the number of APIs for which data is stored is much higher, argument names are also included, as well as the contents of named constants' enumerations, information which \textit{drltrace}'s configuration file does not provide at all.
 
-In order to extract the APIs information from PyREbox's database, a Python script was employed, which, for every API, instantiates a \texttt{libcall\_info\_t struct} (\textit{Listing 3.10}) in a \texttt{.cpp} file.
+In order to extract information relative to the APIs from PyREbox's database, a Python script was employed, which, for every API, instantiates a \texttt{libcall\_info\_t struct} (\textit{Listing 3.10}) in a \texttt{.cpp} file.
 \\
 \begin{lstlisting}[caption={\texttt{struct} containing API-related information from PyREbox's database},captionpos=b]
 typedef struct _libcall_info_t {
 	const char* func_name;     			// API name
 	int argnum;				   			// Number of Args
-	libcall_arg_info_t lib_args[20];	// Array of arguments
+	libcall_arg_info_t lib_args[19];	// Array of arguments
 } libcall_info_t
 \end{lstlisting}
 \vspace{1cm}
 
-The most important field of such \texttt{struct} is surely the arguments' array, which is made up of \texttt{libcall\_arg\_info\_t} data structures (\textit{Listing 3.11}) containing the information relative each argument of an API, including an entry specific for the return value data. The array size was set to 20, since it was observed from the database data that the API with the most parameters had 19 arguments. This time, it was decided not to reuse NTAPI's \texttt{sysinfo\_arg\_t struct} (\textit{Listing 3.2}) to store the API's arguments information due to its lack of the field storing the argument name. 
+The most important field of such \texttt{struct} is surely the arguments' array, which is made up of \texttt{libcall\_arg\_info\_t} data structures (\textit{Listing 3.11}) containing the information relative each argument of an API, including an entry specific for the return value data. The array size was set to 19, since it was observed from the database data that the API with the most parameters had 18 arguments. This time, it was decided not to reuse NTAPI's \texttt{sysinfo\_arg\_t struct} (\textit{Listing 3.2}) to store the API's arguments information due to its lack of the field storing the argument name. 
 \\
 \begin{lstlisting}[caption={\texttt{struct} containing information associated to an API argument},captionpos=b]
 typedef struct _libcall_arg_info_t {
@@ -473,23 +473,79 @@ Although \texttt{libcall\_arg\_info\_t}'s fields seem to be pretty self-explanat
 \item \texttt{arg\_type\_name} is a string which is used in the three specific scenarios below, according the type of the argument, and is \texttt{null} otherwise:
 \begin{enumerate}
 \item To store the symbolic name of an enumeration.
-\item To store the \texttt{struct} type of the argument.
-\item To store the \texttt{union} type of the argument.
+\item To store the \texttt{struct} type name.
+\item To store the \texttt{union} type name.
 \end{enumerate}
-\item \texttt{size} is an \texttt{int} storing the argument's size. In case of a pointer (or a pointer to a pointer) the size of the last pointed element is stored.
-\item \texttt{in\_out\_flag} 
+\item \texttt{size} is an \texttt{int} storing the argument's size. In case of a pointer (or a pointer to a pointer) the size of the pointed type is stored.
+\item \texttt{in\_out\_flag} is a \texttt{bool} which is set to \texttt{INOUT} (i.e \texttt{true}) if the represented argument is an output argument and \texttt{IN} (i.e. \texttt{false}) otherwise. This means that, by default, all the arguments are considered as input arguments and are therefore traced before the API execution, while only the arguments for which \texttt{in\_out\_flag} is \texttt{true} are traced after the API's execution.
 \end{itemize}
 
-\iffalse
-is blablabla, VMI. It uses a database blablabla, providing loads of info, even enums which drltrace does not provide. Due to the huge amount of data it was decided to split the info by DLL, so a cpp file per dll. To access the info a dobule hashmap was employed (maybe little diagram ? ).
-\fi
+To give a better idea on how API data is represented, an instance of \texttt{libcall\_arg\_info\_t} containing the information associated to \texttt{WriteFileEx} can be observed below (\textit{Listing 3.12}).
+\\
+\begin{lstlisting}[caption={Instance of \texttt{libcall\_arg\_info\_t} relative to \texttt{WriteFileEx}},captionpos=b]
+	{ "WriteFileEx",5,
+	{ 
+		{-1, "Return value", NKT_DBFUNDTYPE_SignedDoubleWord, 0, 4, INOUT },
+		{0, "hFile", NKT_DBFUNDTYPE_UnsignedDoubleWord, 0, 4, IN },
+		{1, "lpBuffer", NKT_DBFUNDTYPE_Void | NKT_DBOBJCLASS_Pointer, 0, 0, IN },
+		{2, "nNumberOfBytesToWrite", NKT_DBFUNDTYPE_UnsignedDoubleWord, 0, 4, IN },
+		{3, "lpOverlapped", NKT_DBOBJCLASS_Struct | NKT_DBOBJCLASS_Pointer,
+		 "_OVERLAPPED", 160, INOUT },
+		{4, "lpCompletionRoutine", NKT_DBOBJCLASS_Typedef, 0, 0, IN },
+	}
+	}
+\end{lstlisting}
 
+Due to the high amount of APIs for which information was stored in the \texttt{PyREbox} database, it was decided to group API data by DLL. Specifically, for every DLL a corresponding \texttt{.cpp} file was created to store the API-related information under the form of \texttt{libcall\_arg\_info\_t} instances, one for each "known" API exported by that DLL. Furthermore, in order to make API data retrieval more efficient, it was chosen to employ a two-level hash map approach for this purpose. Given the DLL name (easily obtainable in the image callback via the use of \texttt{IMG\_Name}), the first level hash map is utilized to retrieve the DLL-specific second level hash map, which, in turn, maps the API name to the appropriate \texttt{struct} instance (\textit{Figure 3.5}). This is how API information retrieval is carried out in case \textit{PyREbox} database is used as API data source.
+\\
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\textwidth]{Figures/HashMap.pdf}
+\caption{\textit{PyREbox API Information Retrieval}}
+\end{figure}
 
+Let us conclude this section by explaining how analysis routines are inserted before and after the API execution during the API instrumentation procedure outlined in page 31. In BlueTracer such operation heavily relies on the use of the \texttt{RTN\_InsertCall}, which allows to insert analysis functions relative to a \texttt{RTN} object. This API takes as input the following parameters:
+\begin{itemize}
+\item The routine object (\texttt{RTN}) representing the function under analysis.
+\item A member of the \texttt{IPOINT} enumeration which determines where the analysis function is inserted in relation to the instrumented object. It can be either \texttt{IPOINT\_BEFORE}, in which case the analysis code is placed before the instrumented function, or \texttt{IPOINT\_AFTER}, in which case the analysis code is placed after the instrumented function.
+\item The analysis function to be called.
+\item The arguments to pass to the analysis function, specified via members of the \texttt{IARG\_TYPE} enumeration. If the analysis function is placed before the instrumented object, then such arguments may also include the parameters' values of the function being instrumented. However, for this to occur the pair <\texttt{IARG\_FUNCARG\_ENTRYPOINT\_VALUE}, argument number> needs to be included for each of the analyzed function's parameters. Conversely, to obtain the instrumented function's result, \texttt{IARG\_FUNCRET\_EXITPOINT\_VALUE} is required. Obviously, this is possible only if the analysis function is placed after the instrumented object.
+\end{itemize}
 
+In BlueTracer, the number of arguments of the API being traced is known only after the API-related information has been retrieved. Because of this and given Pin's way of passing the arguments to the analysis functions, a \texttt{switch} had to be employed when adding analysis functions before the API execution. Such \texttt{switch}, given the API arguments' number, places the appropriate analysis function, i.e. the one with the number of <\texttt{IARG\_FUNCARG\_ENTRYPOINT\_VALUE}, argument number> pairs equal to the number of arguments the API takes. This is done in order to ensure that the analysis function receives all the values of the API's arguments before the API's execution. As a result, in BlueTracer there are 19 (one for zero arguments as well) different API \texttt{IPOINT\_BEFORE} analysis functions, named \texttt{PrintInfoBefore[Arguments' Number]}, which vary only in the number of APIs' argument values they receive in input. Obviously this is true just for "known" APIs. In case the API under analysis is not "known", then the number of API argument values is always the same and the \texttt{switch} is not required.
+
+Let us now dissect an invocation of \texttt{RTN\_InsertCall} to further clarify how BlueTracer adds analysis code before the execution of an API (\textit{Listing 3.13}).  
+\begin{lstlisting}[caption={\texttt{RTN\_InsertCall} invocation to add analysis code before an API's execution},captionpos=b]
+RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)PrintInfoBefore[Number of API Args],
+ 	IARG_FAST_ANALYSIS_CALL,
+	IARG_ADDRINT, argNumber,
+	IARG_ADDRINT, libPointer, IARG_ADDRINT, rtn_name, IARG_ADDRINT, img_name,
+	IARG_REG_VALUE, REG_STACK_PTR,
+	IARG_THREAD_ID,
+	IARG_RETURN_IP,
+	[Number of API Args]_ARGS
+	IARG_END);
+\end{lstlisting}
+
+In particular, the arguments which are passed to the analysis routine are:
+\begin{itemize}
+\item \texttt{IARG\_FAST\_ANALYSIS\_CALL}. This is not a real argument but rather a way to enable faster linkage for calls to analysis functions with the objective of improving performance \cite{Pin}.
+\item \texttt{argNumber}, a constant value containing the number of the analyzed API's arguments.
+\item \texttt{libPointer}, a reference to the previously retrieved data structure containing API-related data.
+\item \texttt{rtn\_name}, the API name.
+\item \texttt{img\_name}, the DLL name.
+\item The stack pointer value before the API's execution, given by the \texttt{<IARG\_REG\_VALUE, REG\_STACK\_PTR>} pair. This is necessary for the shadow stack management, which will be detailed in the next section.
+\item The thread ID assigned by Pin for the calling thread, passed via \texttt{IARG\_THREAD\_ID}. This is necessary in order to access the thread local storage from the analysis function.
+\item The API return address, provided by \texttt{IARG\_RETURN\_IP}. This is employed in the main image check, similarly to what explained in Section 3.3.1.
+\item The API argument values. In order to make the code more readable a macro was used in this case.
+\end{itemize}
+
+For what concerns the addition of analysis code after the API's execution, the aforementioned \texttt{switch} is not necessary since \texttt{IARG\_FUNCRET\_EXITPOINT\_VALUE} is valid only at the entry point of an analysis routine and, therefore, no API argument value is passed at this stage. The analysis function which is placed after the API's execution, named \texttt{PrintInfoAfter} essentially receives the same parameters as the ones from \textit{Listing 3.13}, with the major difference that the API's return value is passed via \texttt{IARG\_FUNCARG\_EXITPOINT\_VALUE} instead of the API arguments' values.
 
 \subsection{API Analysis before Execution}
 
-The workflow is mostly the same as NTAPI's with one major difference: the shadow stack.
+In this section we will describe how API are analyzed before execution, i.e. the x function in Figure y.
+The workflow here is mostly the same as NTAPI's with one major difference the introduction of a shadow stack used to store API entries in the TLS, which will be motivated later in the section.
 
 \subsection{API Analysis after Execution}
 
