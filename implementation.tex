@@ -544,12 +544,63 @@ For what concerns the addition of analysis code after the API's execution, the a
 
 \subsection{API Analysis before Execution}
 
-In this section we will describe how API are analyzed before execution, i.e. the x function in Figure y.
-The workflow here is mostly the same as NTAPI's with one major difference the introduction of a shadow stack used to store API entries in the TLS, which will be motivated later in the section.
+In this section we will describe how APIs are analyzed before execution, i.e. the main steps that are carried out in the \texttt{PrintInfoBefore} functions, an overview of which is given in \textit{Figure 3.4}.
+The workflow in this case is mostly the same as the one for NTAPIs' analysis, with one major difference, that is the introduction of a shadow stack used to store API entries in the thread local storage, which will be motivated later in the section.
+
+The first thing which is done is determining whether or not the API under analysis has been invoked directly from the main executable of the Pin application. The concepts involved here are exactly the same as the ones applying to the main image check done for Native APIs, which was detailed in \textit{Section 3.3.1}. In short, it is checked if the API's return address, which is passed to the analysis function through the use of \texttt{IARG\_RETURN\_IP}, falls into the main executable memory address range, which was previously determined via \texttt{IMG\_HighAddress} and \texttt{IMG\_LowAddress}.
+
+Afterwards, similarly to what occurs when logging "known" Native APIs, a \texttt{apicall\_t struct} (\textit{Listing 3.14}) representing the specific API being traced is allocated and initialized. The fields of such \texttt{struct} are all trivial and, as what done for Native API tracing, the API arguments are represented via a \texttt{drsys\_arg\_t} (\textit{Listing 3.6}) array with size \texttt{MAX\_ARGS\_CONFIG} (i.e. 18) as this is the maximum number of observed arguments for any "known" API. In particular, the \texttt{drsys\_arg\_t struct} could be reused in the context of APIs since, unlike \texttt{sysinfo\_arg\_t}, its fields could hold all API arguments' data, both from the \textit{drltrace} configuration file and the \textit{PyREBox} database, including the argument name. 
+\\
+\begin{lstlisting}[caption={\texttt{struct} representing the API being traced},captionpos=b]
+typedef struct _apicall_t {;
+
+	const char* img_name;							// DLL Name
+	const char* rtn_name;							// API Name
+
+	drsys_arg_t arguments[MAX_ARGS_CONFIG];			// Array of Arguments
+	drsys_arg_t retval;								// Return Value
+	int count;										// Arg Count
+
+} apicall_t;
+\end{lstlisting}
+
+Such \texttt{struct} is initialized utilizing the API-related information, which was fetched beforehand during instrumentation and was passed to the analysis function via \texttt{libPointer}, as well as the values of the API arguments, which were provided to the analysis function through \texttt{IARG\_FUNCARG\_ENTRYPOINT\_VALUE} as already discussed in \textit{Section 3.4.1}.
+
+Then, the logging of the API proceeds exactly the same as for Native APIs: the API call is recorded employing an identical log format in order to maintain uniformity and the input values of the arguments are logged through the use of a \texttt{print\_arg} function operating exactly in the same way as the one in \textit{Listing 3.7}.
+
+As previously hinted at, the major element which distinguishes API tracing from Native API tracing is that the former employs a shadow stack to store in the thread local storage references to the data structures representing the APIs being traced. Let us explain in detail the motivation behind such choice. It is typical for an API to call another API during its execution, forming a sort of nesting. For this reason, just storing in the thread locale storage the reference relative to the next API to be executed is not enough as this would lead to the analysis of just the most "inner" API, completely ignoring the "outer" APIs which invoked the "inner" one. Therefore, it is necessary to store not just the reference corresponding to the next API in line to be executed but rather all the references relative to the APIs for which execution has started and not yet finished. A fitting data structure to solve this issue is a shadow stack, where, for each API, the corresponding data structure is placed on top of the stack before its execution and popped from the stack after its execution has terminated, allowing both "inner" and "outer" APIs to be traced. This is why each thread has access to its own shadow stack via the \texttt{shadowStack} field in the thread local data (\textit{Listing 3.1}).
+
+Therefore, in light of what just stated, the last operations which are done when tracing an API before its execution are allocating a shadow stack entry (\textit{Listing 3.15}), initializing it and placing it on top of the shadow stack in the thread local data, so that it can be retrieved after the API's execution.
+\\
+\begin{lstlisting}[caption={\texttt{struct} representing a shadow stack entry},captionpos=b]
+typedef struct _stackEntry {
+	apicall_t* apiInfo;    // API Call Reference
+	ADDRINT  currentSP;    // Stack Pointer Register Content
+	THREADID threadID;     // Thread ID
+	uint api_counter;	   // Call Counter
+} stackEntry;
+\end{lstlisting}       
+
+\texttt{stackEntry}'s fields are all, once again, self-explanatory. A big role in the stack realignment procedure is placed by the \texttt{currentSP} field, as it will be explained in the next section. Such field stores the stack pointer's value before the API's execution, which was passed to the analysis function with the <\texttt{IARG\_REG\_VALUE}, \texttt{REG\_STACK\_PTR}> pair.
 
 \subsection{API Analysis after Execution}
 
+
+
+\iffalse
+- Shadow Stack Realignment
+-> Remove all entries BEFORE in the stack
+-> Remove all entries with a lower stack pointer
+\fi
+
+The resulting log format is very similar to the one employed for Native APIs in order to mantain the format uniform throughtout the log.
+
 \section{Callback and APC} 
+
+In this section callbacks and APCs -> Both rely on the use of the OnContextChange API.
+
+\subsection{Callbacks}
+\subsection{APC}
 
 \iffalse
 \section{Tool Configuration}
