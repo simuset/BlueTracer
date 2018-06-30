@@ -595,17 +595,24 @@ As a result of this, the correct stack entry has to be fetched by iterating thro
 \begin{itemize}
 \item The DLL name.
 \item The API name.
-\item The stack pointer value, which has to be the same before and after the API's execution.
+\item The stack pointer value. In fact, for a given API, the stack pointer value before its execution has to be equal to the stack pointer value after its execution.
 \end{itemize} 
 
+Once the appropriate shadow stack entry has been retrieved, the API return value, which is passed to the analysis function via \texttt{IARG\_FUNCARG\_EXITPOINT\_VALUE}, is set in the \texttt{apicall\_t struct} so that it can be logged, together with the output arguments, once again utilizing the ideas behind \texttt{print\_arg} (\textit{Listing 3.7}). 
+
+The last operation carried out by \texttt{PrintInfoAfter}, after the API under analysis has been traced, is the re-alignment of the shadow stack, i.e. the deallocation of all the stack entries belonging to APIs which have terminated their execution. In fact, due to the previously mentioned issue involving Pin's instrumentation of routines, it is necessary to manually remove from the shadow stack all the entries relative to the APIs for which the corresponding \texttt{IPOINT\_AFTER} analysis function is not executed. Such shadow stack re-alignment procedure works as follows:
+
+\begin{enumerate}
+\item The previously fetched shadow stack entry is removed.
+\item All the shadow stack entries on top of the previously retrieved entry are removed. Due to their position in the stack, these entries are relative to APIs which have been called after the traced API. Such APIs, given the fact that the traced API has terminated its execution, have also finished to execute, but their relative entries have not been deallocated accordingly due to Pin's issue with routine instrumentation.
+\item All the entries with a lower stack pointer value than the stack pointer value stored in the retrieved entry are removed. In fact, such entries refer, once again, to APIs which have been invoked before the traced APIs but their corresponding entries have not been deallocated accordingly.   
+\end{enumerate}
 
 \iffalse
 - Shadow Stack Realignment
 -> Remove all entries BEFORE in the stack
 -> Remove all entries with a lower stack pointer
 \fi
-
-The resulting log format is very similar to the one employed for Native APIs in order to mantain the format uniform throughtout the log.
 
 \section{Context Change} 
 
