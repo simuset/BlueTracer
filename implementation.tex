@@ -614,12 +614,47 @@ The last operation carried out by \texttt{PrintInfoAfter}, after the API under a
 -> Remove all entries with a lower stack pointer
 \fi
 
-\section{Context Change} 
+\section{Context Change Analysis} 
 
-In this section callbacks and APCs -> Both rely on the use of the OnContextChange API.
+Pin has to intercept the delivery of asynchronous events from the kernel in order to keep control of the application.  
+Microsoft Windows employs two mechanisms aimed at dispatching asynchronous events to user mode, i.e. callbacks and asynchronous procedure calls (APCs), both of which lead to a context change in the application \cite{5452079}.
+ 
+In order to have a complete picture of the malware sample's activity, it is clearly relevant to also log the occurrences of such asynchronous events and to record as much information as possible related to them. Luckily, Pin provides an API which perfectly meets these needs, named \texttt{PIN\_AddContextChangeFunction}.
+ 
+This API allows to register a notification function to execute just before the pinned application changes context because of the reception of an asynchronous event, like for instance a callback or a Windows APC. In BlueTracer, the idea is to use such registered notification function to extract and log information relative to the context change. The notification function in question is of type \texttt{CONTEXT\_CHANGE\_CALLBACK} and the most important arguments it takes as input are:
+\begin{itemize}
+\item A member of the \texttt{CONTEXT\_CHANGE\_REASON} enumeration indicating the reason for the context change. This is the parameter allowing BlueTracer to distinguish between callbacks and APCs. In fact, in the case of callbacks it is set to \texttt{CONTEXT\_CHANGE\_REASON\_CALLBACK}, while in the case of APCs it is set to \texttt{CONTEXT\_CHANGE\_REASON\_APC}. 
+\item The application's register state before the context change. It is \texttt{null} if the context change is caused by a callback.
+\item The application's register state after the context change.  
+\end{itemize}      
 
-\subsection{Callbacks}
-\subsection{APC}
+Having outlined the tools made available by Pin to deal with the application's context change, let us now explain in detail how callbacks tracing and Windows APCs tracing is carried out in BlueTracer.
+
+\subsection{Callbacks Tracing}
+
+The Windows kernel frequently needs to make callbacks in user mode with the goal of carrying out specific tasks, such as the invocation of hooks defined by the application, the provision of event notifications and the exchange of data with user mode. These calls are commonly referred to as user mode callbacks \cite{UMCallbacks}. 
+
+To make calls from user mode to kernel mode, the user mode callback dispatcher (\texttt{KiUserCallbackDispatcher}) is employed. This function takes two arguments, a number indicating the callback to be invoked and a structure pointer which the callback receives as input, containing several parameters packed in a contiguous memory block \cite{UCDispatcher}. \texttt{KiUserCallbackDispatcher} operates in the following way:
+
+\begin{enumerate}
+\item It accesses the \texttt{KernelCallbackTable} in the process environment block \\ (PEB) \footnote{The process environment block (PEB) is a data structure employed in Windows operating systems to represent a user mode process \cite{KCT}}. The \texttt{KernelCallbackTable} is an array of function pointers, where each entry contains a reference to a callback routine \cite{KCT}.
+\item It uses the callback number to locate the right routine in the array and invokes it, providing it with the aforementioned input data structure.   
+\end{enumerate}
+
+In case of a user mode callback, in Pin the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function is invoked right before \texttt{KiUserCallbackDispatcher}'s execution, obviously with the reason paramater set to \texttt{CONTEXT\_CHANGE\_REASON\_CALLBACK}. 
+
+In light of what just stated, it is natural for BlueTracer's logging activity, taking place in the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function, to involve the record of a callback occurrence, together with the name of the callback that is about to be invoked. Unfortunately, tracing the callback's arguments would require further work since they are packed in a data structure, as previously explained.
+
+To further clarify how the tracing of callbacks takes place in BlueTracer, let us show how the stack looks like right before the execution of \texttt{KiUserCallbackDispatcher}, i.e. when the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function is called (\textit{Figure 3.6}). Note that the return address is \texttt{null}. 
+
+It is worth mentioning that, in Win32, kernel mode to user mode callbacks are used exclusively by User32 for windowing related aspects. For this reason, in order for the kernelcallback table to not be null it has to be ensured at user32 is loaded. Moreover, it is also checked if callbacks belong to user32.dll.  
+  
+The final output of the log looks like this:
+
+
+
+
+\subsection{Windows Asynchronous Procedure Calls Tracing}
 
 \iffalse
 \section{Tool Configuration}
