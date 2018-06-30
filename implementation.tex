@@ -564,7 +564,7 @@ typedef struct _apicall_t {;
 } apicall_t;
 \end{lstlisting}
 
-Such \texttt{struct} is initialized utilizing the API-related information, which was fetched beforehand during instrumentation and was passed to the analysis function via \texttt{libPointer}, as well as the values of the API arguments, which were provided to the analysis function through \texttt{IARG\_FUNCARG\_ENTRYPOINT\_VALUE} as already discussed in \textit{Section 3.4.1}.
+The \texttt{apicall\_t struct} is initialized utilizing the API-related information, which was fetched beforehand during instrumentation and was passed to the analysis function via \texttt{libPointer}, as well as the values of the API arguments, which were provided to the analysis function through \texttt{IARG\_FUNCARG\_ENTRYPOINT\_VALUE} as already discussed in \textit{Section 3.4.1}.
 
 Then, the logging of the API proceeds exactly the same as for Native APIs: the API call is recorded employing an identical log format in order to maintain uniformity and the input values of the arguments are logged through the use of a \texttt{print\_arg} function operating exactly in the same way as the one in \textit{Listing 3.7}.
 
@@ -581,10 +581,22 @@ typedef struct _stackEntry {
 } stackEntry;
 \end{lstlisting}       
 
-\texttt{stackEntry}'s fields are all, once again, self-explanatory. A big role in the stack realignment procedure is placed by the \texttt{currentSP} field, as it will be explained in the next section. Such field stores the stack pointer's value before the API's execution, which was passed to the analysis function with the <\texttt{IARG\_REG\_VALUE}, \texttt{REG\_STACK\_PTR}> pair.
+\texttt{stackEntry}'s fields are all, once again, self-explanatory. A big role in the shadow stack management is taken by the \texttt{currentSP} field, as it will be explained in the next section. Such field stores the stack pointer's value before the API's execution, which was passed to the analysis function with the <\texttt{IARG\_REG\_VALUE}, \texttt{REG\_STACK\_PTR}> pair.
 
 \subsection{API Analysis after Execution}
 
+Lastly, let us detail the most important operations performed towards tracing API-related information after the API execution. These are carried out in the \texttt{PrintInfoAfter} function and can be observed from \textit{Figure 3.4}.
+
+At the beginning of \texttt{PrintInfoAfter}, the first thing which needs to be done in order to proceed with the logging is the retrieval from the shadow stack of the stack entry representing the API under analysis. A reference to the shadow stack can be easily acquired by gaining access to the thread local storage via \texttt{PIN\_GetThreadData}. However, it is not enough to pop the top of the shadow stack to obtain the wanted stack entry. This is due to a limitation of Pin in the instrumentation of routine objects.
+
+In fact, the addition of analysis routines after a function's execution with \texttt{IPOINT\_AFTER} is implemented by instrumenting each return instruction. This does not guarantee the success of the instrumentation, meaning that, for some routines, the associated \texttt{IPOINT\_AFTER} analysis function is not executed. Therefore, in our case, it is possible that the stack entry on top of the shadow stack refers to API for which \texttt{PrintInfoAfter} has not been invoked and, therefore, the corresponding stack entry has not been popped.
+
+As a result of this, the correct stack entry has to be fetched by iterating through the shadow stack, looking for the entry for which the values of a set of fields coincide with the values of the corresponding parameters being passed as arguments to the analysis function. Such fields are:
+\begin{itemize}
+\item The DLL name.
+\item The API name.
+\item The stack pointer value, which has to be the same before and after the API's execution.
+\end{itemize} 
 
 
 \iffalse
@@ -595,7 +607,7 @@ typedef struct _stackEntry {
 
 The resulting log format is very similar to the one employed for Native APIs in order to mantain the format uniform throughtout the log.
 
-\section{Callback and APC} 
+\section{Context Change} 
 
 In this section callbacks and APCs -> Both rely on the use of the OnContextChange API.
 
