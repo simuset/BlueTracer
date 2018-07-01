@@ -698,8 +698,36 @@ Context change caused by callback -> USER32.dll!LoadMenuW
 
 \subsection{Windows Asynchronous Procedure Calls Tracing}
 
+\iffalse
+Windows Asynchronous Procedure Calls (APCs) are employed to ... .
+They are used for ...
+A specific type is user-mode APCs.
 
+A user mode APC invocation involves APCDispatcher. where the argument is the address of the function.
+\fi
 
+Windows Asynchronous Procedure Calls (APCs) are employed to alter a thread's ordinary execution path and reroute it to execute some other code. An important concept related to APCs is that, every time an APC is scheduled, it is intended for a specific thread.
+
+APCs are utilized in many situations. Some examples are:
+
+\begin{itemize}
+\item The I{\textbackslash}O Manager employs an APC to terminate an I{\textbackslash}O operation inside the thread which started it.
+\item There exists a particular APC which is used to forcibly enter in a process' execution when it has to terminate.
+\item Some APIs, like \texttt{ReadFileEx} and \texttt{WriteFileEx}, utilize APCs when performing asynchronous I{\textbackslash}O operations.   
+\end{itemize} 
+
+APCs are of different types, one of which is user mode APCs. These usually call user mode code and are normally dispatched when the thread willingly enters into an alertable state. This means that, typically, user mode APCs do not asynchronously force themselves into the targeted thread, but they can be seen more like a set of work items in a queue, which the thread processes when he decides to do so \cite{APC1}.
+
+Just like \texttt{KiUserCallbackDispatcher} for user mode callbacks, APCs are channelled by means of a single dispatcher function inside \texttt{ntdll}, named \texttt{KiUserApcDispatcher}. Such function receives as input a set of paramaters, including the address of the APC routine to be invoked and the references to two data structures in which the APC's arguments are stored \cite{APC2}.  
+ 
+If a user mode APC takes place, in Pin the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function is called immediately before the execution of \texttt{KiUserApcDispatcher}, with the reason parameter, this time, set to \texttt{CONTEXT\_CHANGE\_REASON\_APC}. Therefore, the course of action taken by BlueTracer to record user mode APCs is exactly the same as the ones for user mode callbacks, i.e. tracing the APC occurrence as well as the name of the APC that is about to be executed. Once again, however, BlueTracer does not yet support arguments' tracing in this scenario since, also in this case, the arguments are packed in data structures.
+
+Let us now go through the steps employed by BlueTracer to trace user mode APCs:
+\begin{enumerate}
+\item The stack pointer value is retrieved, exactly in the same way as explained for user mode callbacks in section 3.5.1
+\item The address of the APC to be invoked is obtained by adding 4 to the stack pointer and fetching the pointed value. In fact, such address is located right on top of the APC's dispatcher return address.
+\end{enumerate}
+ 
 \iffalse
 \section{Tool Configuration}
 \fi
