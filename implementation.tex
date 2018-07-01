@@ -725,8 +725,13 @@ If a user mode APC takes place, in Pin the registered \texttt{CONTEXT\_CALLBACK\
 Let us now go through the steps employed by BlueTracer to trace user mode APCs:
 \begin{enumerate}
 \item The stack pointer value is retrieved, exactly in the same way as explained for user mode callbacks in section 3.5.1
-\item The address of the APC to be invoked is obtained by adding 4 to the stack pointer and fetching the pointed value. In fact, such address is located right on top of the APC's dispatcher return address.
+\item The address of the APC to be invoked is obtained by adding 4 to the stack pointer and fetching the pointed value. In fact, in the stack, the APC address is located right on top of the APC's dispatcher return address, which is pointed by the stack pointer.
+\item Given the address of the APC to be invoked, the corresponding \texttt{RTN} object is created via \texttt{RTN\_FindByAddress}. Similarly, from the APC address, the \texttt{IMG} object representing the DLL exporting the APC is also built, this time through the use of \texttt{IMG\_FindByAddress}.
+\item The APC name and the DLL name are determined by invoking \texttt{RTN\_Name} and \texttt{IMG\_Name} respectively on the objects created in the previous step.
+\item The APC-related data is recorded in the log. This includes the APC occurrence, the name of the DLL exporting the APC and the APC name. 
 \end{enumerate}
+ 
+The resulting log format is exactly the same as the one adopted for user mode callbacks. 
  
 \iffalse
 \section{Tool Configuration}
