@@ -4,11 +4,11 @@
 
 In literature there are many different implementations of API hooking. The objective of this chapter is to provide an outline of the various approaches utilized to hook functions in DLLs, outlining the benefits and the limitations of each technique, with a strong focus on their detection by malicious software. In particular, the focus will be on user space API hooking of \texttt{Win32} binaries, since this is BlueTracer's current field of application. Obviously, as it is the norm in malware analysis, it also assumed that the program under study is only available in binary form.
 
-Depending on their underlying implementation, API hooking techniques can be divided in three broad categories: \textbf{Binary Rewriting} based, \textbf{Virtul Machine Introspection (VMI)} based and \textbf{Dynamic Binary Instrumentation (DBI)} based.   
+Depending on their underlying implementation, API hooking techniques can be divided in three broad categories: \textbf{Binary Rewriting}, \textbf{Virtul Machine Introspection (VMI)} and \textbf{Dynamic Binary Instrumentation (DBI)}.   
 
 \section{Binary Rewriting}
 
-Binary rewriting based hooking involves inserting hooks at the API entries, via one of the following two approaches:
+Binary rewriting-based hooking involves inserting hooks at the API entries, via one of the following two approaches:
 \begin{enumerate}
 \item Redirecting all \texttt{call} instructions so that the hook is called instead of the original function.
 \item Rewriting the function of interest such that, before its invocation, the hook is executed. 
@@ -16,7 +16,7 @@ Binary rewriting based hooking involves inserting hooks at the API entries, via 
 
 In both cases the hook function gains access to all the arguments present on the stack, thus being able to carry out all the required analysis operations.
 
-The main techniques which use the first approach are \textit{Import Address Table (IAT) Patching}, \textit{Export Address Table (EAT) patching} and \textit{Proxy DLL}. On the other hand, the most significant techniques which use the second approach are \textit{inline hooking} and \textit{debugger based hooking} (\textit{Figure 1.1}).
+The main techniques which use the first approach are \textit{Import Address Table (IAT) Patching}, \textit{Export Address Table (EAT) patching} and \textit{Proxy DLL}. On the other hand, the most significant techniques which use the second approach are \textit{inline hooking} and \textit{debugger-based hooking} (\textit{Figure 1.1}).
 
 
 
@@ -89,7 +89,7 @@ Unfortunately though, \textit{inline hooking} is also affected by some limitatio
 \item It needs additional modifications in the case where the function's entry points includes specific instructions, like ones which contain relative memory addresses. In fact, such instructions cannot be executed from a trampoline as the trampoline is located in a different memory location than the one of the original program code \cite{Berdajs:2010:EAU:1815744.1815746}.
 \end{itemize}
 
-\subsection{Debugger Based Hooking}
+\subsection{Debugger-Based Hooking}
 
 Hooking through the use of a debugger is realized by instructing the debugger to position a breakpoint at the entry point of the target API function. The placement of a breakpoint involves overwriting the initial instructions of the target API functions with CPU specific instructions, like \texttt{INT 3} for \texttt{IA-32}. These lead the CPU to throw a debug exception in case they are pointed by the current instruction pointer (IP). The exception is then intercepted by the debugger, which is able to deduce the API which is being called by the application from the address at which the exception took place \cite{HookingDetection}. Moreover, the debugger also has total control over the memory contents and the CPU state of the process being debugged.
 
@@ -102,28 +102,48 @@ In addition, the \texttt{INT 3} instruction in an API entry point immediately gi
 
 \section{Virtual Machine Introspection}
 
-Virtual Machine Introspection (VMI) based hooking relies on the idea of executing the target program in an emulated environment, typically with QEMU being used as virtual machine monitor (VMM). Function calls are monitored by comparing the virtual processor's instruction pointer with the RVAs of DLLs' exported functions when added to the DLL base address. Function arguments are also monitored and this is done by providing them to callback routines, which perform the appropriate tracking operations.
+Hooking based on Virtual Machine Introspection (VMI) relies on the idea of executing the target program in an emulated environment, typically with QEMU being used as virtual machine monitor (VMM). Function calls are monitored by comparing the virtual processor's instruction pointer with the RVAs of DLLs' exported functions when added to the DLL base address. Function arguments are also monitored and this is done by providing them to callback routines, which perform the appropriate tracking operations.
 
 In theory, a PC emulator allows to have functionalities similar to the ones of a debugger, i.e. the code being monitored can be stopped at any arbitrary point during its execution, allowing its registers and virtual memory to be inspected, with the added advantage of not being subject to the aforementioned issues related to breakpoints.
-Moreover, VMI based hooking is harder to detect with respect to the previously illustrated hooking techniques, since emulation is utilized to execute an unknown binary with a complete operating system in software, without the sample being never ran directly on the processor \cite{Bayer2005TTAnalyzeA}.
+Moreover, VMI-based hooking is harder to detect with respect to the previously illustrated hooking techniques, since emulation is utilized to execute an unknown binary with a complete operating system in software, without the sample being never ran directly on the processor \cite{Bayer2005TTAnalyzeA}.
 
-The significant drawback of VMI based hooking is that it incurs in the \textit{semantic gap} problem, i.e. the issue of deducing high-level information from the raw system information by making sense of the CPU state and memory contents \cite{Egele:2008:SAD:2089125.2089126}. VMI based hooking tools
+The significant drawback of VMI-based hooking is that it incurs in the \textit{semantic gap} problem, i.e. the issue of deducing high-level information from the raw system information by making sense of the CPU state and memory contents \cite{Egele:2008:SAD:2089125.2089126}. VMI-based hooking tools
 might need an in-depth knowledge of kernel data structures or other details at low-level, which could constitute a complication when dealing with proprietary operating systems. For this reason, as of right now, VMI is not as effective in practice as a traditional debugger when investigating a sample.
 
 
 \section{Dynamic Binary Instrumentation}
 
-Dynamic Binary Instrumentation (DBI) is an analysis technique in which the behavior of a binary application is inspected at run-time via the injection of instrumentation code. Such code, after being injected, executes as a component of the ordinary instruction flow, allowing to learn information about the behavior and the state of a sample at different points during its execution \cite{DBI}. We will further elaborate on DBI throughout\mynote{add ref} Chapter~\ref{...}.
+\iffalse
+- Program analysis: source vs binary. As opposed to source analysis, in which ..., in binary analysis the idea is blablabla. The employed technique here is instrumentation.
+- Instrumentation is blablabla. It can be either static or dynamic, where in both cases it is mandatory blablabla.
+- Dynamic is better because blabla.
+- Its main drawback is performance but recent frameworks blablabla
+\fi
 
-In DBI based hooking, the learnt information refers to which APIs are called and, possibly, with which arguments and return values. 
+Instrumentation is commonly referred to as the act of adding extra analysis code to a program. There are two main instrumentation techniques being employed in dynamic binary analysis, where the main difference is constituted by when the instrumentation process takes place:
 
-There indeed exist DBI based API tracing tools that rely on the previously illustrated idea, namely \textit{drstrace} and \textit{drltrace}, which are both built on top of the DynamoRIO \cite{DynamoRIO} DBI framework. In particular, \textit{drstrace} is a system call tracer for Windows, while \textit{drltrace} is an API calls tracer for both Windows and Linux applications. These tools, however suffer from two notable drawbacks:
+\begin{itemize}
+\item \textit{Static Binary Instrumentation}, which takes place before the application is executed and involves the rewriting of object code or executable code.
+\item \textit{Dynamic Binary Instrumentation} (DBI), 	which happens at run-time. The analysis code can be injected by a specific program attached to the target process or by an external process \cite{Nethercote2004CI}. 
+\end{itemize}   
+
+Dynamic Binary Instrumentation (DBI) is, therefore, a dynamic binary analysis technique in which the behavior of an application is inspected at run-time via the injection of analysis code. Such code, after being injected, executes as a component of the ordinary instruction flow, allowing to learn information about the behavior and the state of a sample at different points during its execution \cite{DBI}. Typically, DBI tools make use of a Just In Time (JIT) compiler to instrument the binary under analysis at run-time, the purpose of which is to translate \texttt{x86} code into an intermediate representation \cite{polino_arancino_2017}.
+
+DBI, conversely from static binary instrumentation does not need any preprocessing of the program to be analyzed. This is what makes it more appealing for developers for profiling and tracing purposes. On top of that, DBI can be utilized for any program while static techniques are restricted in the code they can instrument, e.g. they cannot employed for code that is dynamically generated \cite{6658603}. The main drawback of DBI is that the instrumentation cost is encountered at run time, leading to performance degradation. However, in recent years, this issue has been mitigated by the introduction of generic DBI frameworks, which are accurately optimized to minimize the execution overhead \cite{Nethercote2004CI}.
+
+In DBI-based hooking, the idea is to use DBI with the objective of learning information at run-time relative to which APIs are called by the sample being analyzed and, possibly, with which arguments and return values. 
+
+There indeed exist DBI-based API tracing tools that rely on the previously illustrated idea, namely \textit{drstrace} and \textit{drltrace}, which are both built on top of the DynamoRIO \cite{DynamoRIO} DBI framework. In particular, \textit{drstrace} is a system call tracer for Windows, while \textit{drltrace} is an API calls tracer for both Windows and Linux applications. They both produce a textual log, in which the invoked APIs are recorded, together with their arguments' values and return values.
+
+In order to evaluate the effectiveness of such tools in the context of evasive malware analysis, a series of experiments involving them was carried out. In particular, both tools were employed to analyze 1000 random samples from the Arancino\footnote{Arancino is a dynamic protection framework aimed at providing protection from anti-instrumentation attacks \cite{polino_arancino_2017}} dataset of malware samples (about 20\% of the total). Each malware sample was ran for 5 minutes in a VirtualBox environment with Windows 7 \texttt{x86} SP1 as the guest operating system. The analysis of the resulting logs showed that both tools possess critical shortcomings when analysing evasive malware. In particular: 
 
 \begin{itemize}
 \item They are not equipped with any mechanism aimed at cloaking the execution environment in order to prevent a malicious sample from detecting the DBI.
 \item They are limited in the amount of information recorded relative to the traced APIs. This applies particularly to \textit{drltace}, which, unlike \textit{drstrace}, does not log return values and output values for arguments, in addition to not providing a mechanism for translating enumerations' constants to the appropriate name. Furthermore, both tools do not take into consideration Windows callbacks and asynchronous procedure calls (APC).
 \end{itemize}
 
+This highlights how the current DBI-based methods are lacking when having to deal with the dynamic analysis of evasive malware and that there is much room for improvement in this area.
+
 \section{Conclusion}
 
-In this chapter we showed how the state of the art API hooking techniques suffer from a number of remarkable shortcomings, especially when dealing with evasive malware. In fact, binary rewriting based hooking techniques are all easily detectable, while VMI, although harder to uncover, is affected by the \textit{semantic gap problem}. Finally, existing DBI-based API tracing tools are not accompanied by adequate cloaking mechanisms and are limited in the amount of logged information. The aforementioned issues indicate that there is a need for a robust API tracer, specialized in the analysis of evasive malware and with extensive logging capabilities. This is the rationale at the heart of BlueTracer. 
+In this chapter we showed how the state of the art API hooking techniques suffer from a number of remarkable shortcomings, especially when dealing with evasive malware. In fact, binary rewriting-based hooking techniques are all easily detectable, while VMI, although harder to uncover, is affected by the \textit{semantic gap problem}. Finally, existing DBI-based API tracing tools are not accompanied by adequate cloaking mechanisms and are limited in the amount of logged information. The aforementioned issues indicate that there is a need for a robust API tracer, specialized in the analysis of evasive malware and with extensive logging capabilities. This is the rationale at the heart of BlueTracer. 
