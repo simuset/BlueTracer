@@ -339,7 +339,7 @@ To conclude this section, let us show how a traced Native API looks like in the 
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
 }
-\begin{lstlisting}[caption={Log relative to a \texttt{NtOpenFile} call},captionpos=b]
+\begin{lstlisting}[caption={Log entry relative to a \texttt{NtOpenFile} call},captionpos=b]
 ~~2868~~ 1072 ntdll.dll!NtOpenFile
 1072 	arg 0: 0x000fe810 (type=HANDLE*, size=0x4)
 1072 	arg 1: 0x100020 (type=unsigned int, size=0x4)
@@ -547,7 +547,7 @@ For what concerns the addition of analysis code after the API's execution, the a
 In this section we will describe how APIs are analyzed before execution, i.e. the main steps that are carried out in the \texttt{PrintInfoBefore} functions, an overview of which is given in \textit{Figure 3.4}.
 The workflow in this case is mostly the same as the one for NTAPIs' analysis, with one major difference, that is the introduction of a shadow stack used to store API entries in the thread local storage, which will be motivated later in the section.
 
-The first thing which is done is determining whether or not the API under analysis has been invoked directly from the main executable of the Pin application. The concepts involved here are exactly the same as the ones applying to the main image check done for Native APIs, which was detailed in \textit{Section 3.3.1}. In short, it is checked if the API's return address, which is passed to the analysis function through the use of \texttt{IARG\_RETURN\_IP}, falls into the main executable memory address range, which was previously determined via \texttt{IMG\_HighAddress} and \texttt{IMG\_LowAddress}.
+The first thing which is done is determining whether or not the API under analysis has been invoked directly from the main executable of the Pin application. The concepts involved here are essentially the ones applying to the main image check done for Native APIs, which was detailed in \textit{Section 3.3.1}. In short, it is checked if the API's return address, which is passed to the analysis function through the use of \texttt{IARG\_RETURN\_IP}, falls into the main executable memory address range, which was previously determined via \texttt{IMG\_HighAddress} and \texttt{IMG\_LowAddress}.
 
 Afterwards, similarly to what occurs when logging "known" Native APIs, a \texttt{apicall\_t struct} (\textit{Listing 3.14}) representing the specific API being traced is allocated and initialized. The fields of such \texttt{struct} are all trivial and, as what done for Native API tracing, the API arguments are represented via a \texttt{drsys\_arg\_t} (\textit{Listing 3.6}) array with size \texttt{MAX\_ARGS\_CONFIG} (i.e. 18) as this is the maximum number of observed arguments for any "known" API. In particular, the \texttt{drsys\_arg\_t struct} could be reused in the context of APIs since, unlike \texttt{sysinfo\_arg\_t}, its fields could hold all API arguments' data, both from the \textit{drltrace} configuration file and the \textit{PyREBox} database, including the argument name. 
 \\
@@ -564,7 +564,7 @@ typedef struct _apicall_t {;
 } apicall_t;
 \end{lstlisting}
 
-The \texttt{apicall\_t struct} is initialized utilizing the API-related information, which was fetched beforehand during instrumentation and was passed to the analysis function via \texttt{libPointer}, as well as the values of the API arguments, which were provided to the analysis function through \texttt{IARG\_FUNCARG\_ENTRYPOINT\_VALUE} as already discussed in \textit{Section 3.4.1}.
+The \texttt{apicall\_t struct} is initialized utilizing the API-related data, which was fetched beforehand during instrumentation and was passed to the analysis function via \texttt{libPointer}, as well as the values of the API arguments, which were provided to the analysis function through \texttt{IARG\_FUNCARG\_ENTRYPOINT\_VALUE} as already discussed in \textit{Section 3.4.1}.
 
 Then, the logging of the API proceeds exactly the same as for Native APIs: the API call is recorded employing an identical log format in order to maintain uniformity and the input values of the arguments are logged through the use of a \texttt{print\_arg} function operating exactly in the same way as the one in \textit{Listing 3.7}.
 
@@ -621,14 +621,14 @@ Microsoft Windows employs two mechanisms aimed at dispatching asynchronous event
  
 In order to have a complete picture of the malware sample's activity, it is clearly relevant to also log the occurrences of such asynchronous events and to record as much information as possible related to them. Luckily, Pin provides an API which perfectly meets these needs, named \texttt{PIN\_AddContextChangeFunction}.
  
-This API allows to register a notification function to execute just before the pinned application changes context because of the reception of an asynchronous event, like for instance a callback or a Windows APC. In BlueTracer, the idea is to use such registered notification function to extract and log information relative to the context change. The notification function in question is of type \texttt{CONTEXT\_CHANGE\_CALLBACK} and the most important arguments it takes as input are:
+This API allows to register a notification function to execute just before the pinned application changes context due to the reception of an asynchronous event, like for instance a callback or a Windows APC. In BlueTracer, the idea is to use such registered notification function to extract and log information relative to the context change. The notification function in question is of type \texttt{CONTEXT\_CHANGE\_CALLBACK} and the most important arguments it takes as input are:
 \begin{itemize}
 \item A member of the \texttt{CONTEXT\_CHANGE\_REASON} enumeration indicating the reason for the context change. This is the parameter allowing BlueTracer to distinguish between callbacks and APCs. In fact, in the case of callbacks it is set to \texttt{CONTEXT\_CHANGE\_REASON\_CALLBACK}, while in the case of APCs it is set to \texttt{CONTEXT\_CHANGE\_REASON\_APC}. 
 \item The application's register state before the context change. It is \texttt{null} if the context change is caused by a callback.
 \item The application's register state after the context change.  
 \end{itemize}      
 
-Having outlined the tools made available by Pin to deal with the application's context change, let us now explain in detail how callbacks tracing and Windows APCs tracing is carried out in BlueTracer.
+Having outlined the tools made available by Pin to deal with the application's context changes, let us now explain in detail how callbacks tracing and Windows APCs tracing is carried out in BlueTracer.
 
 \subsection{Callbacks Tracing}
 
@@ -645,16 +645,60 @@ In case of a user mode callback, in Pin the registered \texttt{CONTEXT\_CALLBACK
 
 In light of what just stated, it is natural for BlueTracer's logging activity, taking place in the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function, to involve the record of a callback occurrence, together with the name of the callback that is about to be invoked. Unfortunately, tracing the callback's arguments would require further work since they are packed in a data structure, as previously explained.
 
-To further clarify how the tracing of callbacks takes place in BlueTracer, let us show how the stack looks like right before the execution of \texttt{KiUserCallbackDispatcher}, i.e. when the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function is called (\textit{Figure 3.6}). Note that the return address is \texttt{null}. 
+Right before the execution of \texttt{KiUserCallbackDispatcher}, i.e. when the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function is called, the stack looks as follows (\textit{Figure 3.6}).
+\\
+\begin{figure}[h]
+\centering
+\includegraphics[width=1\textwidth]{Figures/StackCallback.pdf}
+\caption{\textit{Stack before \texttt{KiUserCallbackDispatcher} execution}}
+\end{figure}
 
-It is worth mentioning that, in Win32, kernel mode to user mode callbacks are used exclusively by User32 for windowing related aspects. For this reason, in order for the kernelcallback table to not be null it has to be ensured at user32 is loaded. Moreover, it is also checked if callbacks belong to user32.dll.  
-  
-The final output of the log looks like this:
+Having this in mind, it is now possible to explain step-by-step how the tracing of callbacks takes place in BlueTracer:
 
+\begin{enumerate}
+\item The stack pointer value is retrieved. This is achieved through the use of the \texttt{PIN\_GetContextReg} API, that allows to get the value of a register in the context provided as input. Such context, in our specific case, is the application's register state after the context change, which, as previously mentioned, is passed as argument to the \texttt{CONTEXT\_CHANGE\_CALLBACK} notification function.
+\item The callback number is obtained by adding 4 to the stack pointer and fetching the pointed value, in accordance to \textit{Figure 3.6}.
+\item The \texttt{KernelCallbackTable} is retrieved from the PEB. 
+\item The function pointer stored in the \texttt{KernelCallbackTable} entry indicated by the callback number is acquired.
+\item It is checked if the address of the function falls within \texttt{User32.dll} memory address range. In fact, in \texttt{Win32} user mode callbacks are employed exclusively by \texttt{User32.dll} for windowing related aspects \cite{UCDispatcher}, meaning that the retrieved function address must belong to \texttt{User32.dll}'s memory address range. Such range is determined by retrieving an handle for \texttt{User32.dll} through \texttt{GetModuleHandle}, building an \texttt{IMG} object from it utilizing Pin's \texttt{IMG\_FindByAddress} and invoking the usual \texttt{IMG\_LowAddress} and \texttt{IMG\_HighAddress} functions. 
+\item The name of the callback is determined by creating a \texttt{RTN} object from the function address via \texttt{RTN\_FindByAddress} and consequently invoking \texttt{RTN\_Name} on such object.
+\item The callback occurrence and the callback name is recorded in the log.
+\end{enumerate}
 
+The result of the aforementioned callback tracing procedure is a log entry having the following format (\textit{Listing 3.16}).
+\\
+\lstset{
+    language=C++,
+    frame=single, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Log entry relative to a user mode callback},captionpos=b]
+Context change caused by callback -> USER32.dll!LoadMenuW
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
 
 
 \subsection{Windows Asynchronous Procedure Calls Tracing}
+
+
 
 \iffalse
 \section{Tool Configuration}
