@@ -1,12 +1,28 @@
 % !TEX root = LMThesisNicchi.tex
 
 \chapter{Architecture and Implementation}
-In this chapter we discuss the implementation of BlueTracer, providing a detailed account on how the tool is organized, on the design choices which were made during its development process, on how encountered challenges were dealt with and on the decisions which were taken to improve performance.
+In this chapter we discuss the implementation of BlueTracer, providing a detailed account on how the tool is organized, on the design choices which were made during its development process and on how encountered challenges were dealt with.
 
-\section{Overview}
+\section{General Overview}
+
+We will start the current chapter by giving a general overview of BlueTracer. Specifically we will describe the main characteristics of Intel Pin, the DBI framework on which BlueTracer is based on. Then we will introduce Blue Pill, the DBI-based software toolkit allowing BlueTracer to be robust against anti-evasive malware. Lastly, we will illustrate BlueTracer's structure, which will serve as a baseline for the rest of the chapter.  
 
 \subsection{Intel Pin}
-BlueTracer\mynote{This section requires significant extensions}, being a part of Blue Pill, is also implemented using Pin, a dynamic binary instrumentation framework by Intel, which is vastly utilized for program analysis, testing of software and in the security field. The version of Pin used for the development of the tool is 3.5, in order to benefit from the notable improvements, both in terms of execution speed and offered features, which were introduced going from the 2.14 release to the 3.x series. Pin comes with its own OS-agnostic and compiler-agnostic runtime, called PinCRT. PinCRT exposes three layers: a generic operating system interface providing basic OS services (e.g. process and thread control), together with C and C++03 (without RTTI) runtime layers, for writing instrumentation and analysis routines \cite{Pin}
+BlueTracer is implemented using Pin, a dynamic binary instrumentation framework by Intel, which is vastly utilized for program analysis, testing of software and in the security field. The version of Pin used for the development of the tool is 3.5, in order to benefit from the notable improvements, both in terms of execution speed and offered features, which were introduced going from the 2.14 release to the 3.x series. Pin comes with its own OS-agnostic and compiler-agnostic runtime, called PinCRT. PinCRT exposes three layers: a generic operating system interface providing basic OS services (e.g. process and thread control), together with C and C++03 (without RTTI) runtime layers \cite{Pin}.
+
+The most significant features provided by Pin are the following:
+
+\begin{itemize}
+\item \textbf{User-friendliness}. Pin's user model enables the insertion of analysis code in arbitrary locations of the binary through the use of its uncomplicated but rich C and C++ APIs.
+\item \textbf{Portability}. Pin's APIs are independent from the architecture but, at the same time, they allow the extraction of architecture-specific information.
+\item \textbf{Transparency}. The information obtained by Pin perfectly describes the program's original actions. This because an application instrumented by Pin preserves instruction and data addresses as well as memory and register values of the uninstrumented execution. 
+\item \textbf{Efficiency}. Pin employs a just-in-time (JIT) in order to add and optimize analysis code. It makes use of a set of optimization techniques, including code caching and inlining.
+\item \textbf{Robustness}. Pin uncovers code at run-time and is thus able to manage dynamically generated code, dynamically loaded libraries and the targets of indirect jumps which are statically unknown. 
+\end{itemize}
+
+An analysis tool built using Pin, commonly known as a \textit{pintool}, is made up essentially by two types of routines: analysis routines and instrumentation routines. Analysis routines embody the code to be inserted during the application's execution which is in charge of collecting application-related information. On the other hand, instrumentation routines determine where the analysis code has to be placed.  
+
+Moreover, in Pin there exist different granularities with respect to the instrumentation routines, namely image, routine, trace and instruction granularities. A granularity for a instrumentation routine defines when the instrumentation routine should be invoked. For instance, in the case of instruction granularity, the instrumentation routine is executed for each instruction. In a similar way, Pin also supports analysis-routine granularities, which define where the analysis routines should be placed \cite{6658603}.
 
 \subsection{Blue Pill}
 \subsection{Structure}
@@ -14,7 +30,7 @@ BlueTracer\mynote{This section requires significant extensions}, being a part of
 
 BlueTracer has been organized primarily taking into account the rich set of APIs offered by Pin, which have led to the decision to split the tool in three parts: the first aimed at \textbf{native APIs tracing}, the second for \textbf{APIs tracing} and the last focused on \textbf{callbacks and APCs tracing} (\textit{Figure 3.1}). In particular, the tracing of native APIs also employs a different source of API information (\textit{Dr. Memory}'s system call data) than the ones utilized for tracing APIs (\textit{drltrace}'s configuration file or the information extracted from \textit{PyREbox}'s database).
 
-This chapter will begin by describing how multi-threading was addressed in the tool, as this is central to all its components. Then, the implementation of each one of three aforementioned parts will be discussed in detail. 
+This chapter will proceed by describing how multi-threading was addressed in the tool, as this is central to all its components. Then, the implementation of each one of three aforementioned parts will be discussed in detail. 
 \iffalse
 Finally, all the configuration options of the tool will be explained.          
 \fi
