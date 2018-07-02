@@ -5,7 +5,7 @@ In this chapter we discuss the implementation of BlueTracer, providing a detaile
 
 \section{General Overview}
 
-We will start the current chapter by giving a general overview of BlueTracer. Specifically we will describe the main characteristics of Intel Pin, the DBI framework on which BlueTracer is based on. Then we will introduce Blue Pill, the DBI-based software toolkit allowing BlueTracer to be robust against anti-evasive malware. Lastly, we will illustrate BlueTracer's structure, which will serve as a baseline for the rest of the chapter.  
+We will start the current chapter by giving a general overview of BlueTracer. Specifically we will describe the main characteristics of Intel Pin, the DBI framework on which BlueTracer is based on. Then we will introduce BluePill, the DBI-based software toolkit allowing BlueTracer to be robust against anti-evasive malware. Lastly, we will illustrate BlueTracer's structure, which will serve as a baseline for the rest of the chapter.  
 
 \subsection{Intel Pin}
 BlueTracer is implemented using Pin, a dynamic binary instrumentation framework by Intel, which is vastly utilized for program analysis, testing of software and in the security field. The version of Pin used for the development of the tool is 3.5, in order to benefit from the notable improvements, both in terms of execution speed and offered features, which were introduced going from the 2.14 release to the 3.x series. Pin comes with its own OS-agnostic and compiler-agnostic runtime, called PinCRT. PinCRT exposes three layers: a generic operating system interface providing basic OS services (e.g. process and thread control), together with C and C++03 (without RTTI) runtime layers \cite{Pin}.
@@ -24,11 +24,27 @@ An analysis tool built using Pin, commonly known as a \textit{pintool}, is made 
 
 Moreover, in Pin there exist different granularities with respect to the instrumentation routines, namely image, routine, trace and instruction granularities. A granularity for a instrumentation routine defines when the instrumentation routine should be invoked. For instance, in the case of instruction granularity, the instrumentation routine is executed for each instruction. In a similar way, Pin also supports analysis-routine granularities, which define where the analysis routines should be placed \cite{6658603}.
 
-\subsection{Blue Pill}
+\subsection{BluePill}
+
+BlueTracer remains undetected from evasive malware thanks to its integration with BluePill, which essentially constitutes BlueTracer's foundations. The main concept behind BluePill is the idea of using DBI to deceive highly evasive malware instances into believing they are executing in the environment they are designed to attack. 
+
+BluePill \cite{BluePill} is a software toolkit built on top of the Intel Pin DBI framework which:
+
+\begin{itemize}
+\item Allows the simulation of a real production environment a specific malware sample was intended for.
+\item Conceals any virtualization artifacts and software setup which might set off evasion. 
+\end{itemize}
+
+In particular, BluePill implements over 100 Windows anti-evasion techniques as a set of low-level primitives aimed at monitoring, inspecting and faking the outcomes of malware operations investigating the execution environment. Experimental results have validated BluePill's effectiveness and have shown its ability to hinder a wide range of evasion mechanisms.    
+
+One of the BluePill's core components is the \textit{Target platform simulation layer}. It is in charge of managing how API calls, system calls and special instructions leak execution environment-specific information to the malware instance. In fact, details like operating system, hardware and the execution environment need to be tailored to meet the sample's expectations. BlueTracer operates at this level. In fact, BlueTracer complements BluePill by providing a detailed account of the malware instance activity, allowing the analysts to understand in detail what the malware's actions are. So, while BluePill's \textit{Target platform simulation layer} is aimed at deceiving the malware sample, BlueTracer tracks the information related to the malware activity before it is tricked, allowing to determine what the malicious sample was attempting to do. In this way it is possible to track in detail the activity of a malware sample, a feature BluePill lacks, while, at the same time, not worrying about the sample's anti-evasion activity, since this is addressed by BluePill.
+
+In light of what just stated, BlueTracer's integration with BluePill is straightforward, since it essentially complements the \textit{Target platform simulation layer}, as it can be observed from \textit{Figure 3.1}.
+
 \subsection{Structure}
    
 
-BlueTracer has been organized primarily taking into account the rich set of APIs offered by Pin, which have led to the decision to split the tool in three parts: the first aimed at \textbf{native APIs tracing}, the second for \textbf{APIs tracing} and the last focused on \textbf{callbacks and APCs tracing} (\textit{Figure 3.1}). In particular, the tracing of native APIs also employs a different source of API information (\textit{Dr. Memory}'s system call data) than the ones utilized for tracing APIs (\textit{drltrace}'s configuration file or the information extracted from \textit{PyREbox}'s database).
+BlueTracer has been organized primarily taking into account the rich set of APIs offered by Pin, which have led to the decision to split the tool in three parts: the first aimed at \textbf{native APIs tracing}, the second for \textbf{APIs tracing} and the last focused on \textbf{callbacks and APCs tracing} (\textit{Figure 3.2}). In particular, the tracing of native APIs also employs a different source of API information (\textit{Dr. Memory}'s system call data) than the ones utilized for tracing APIs (\textit{drltrace}'s configuration file or the information extracted from \textit{PyREbox}'s database).
 
 This chapter will proceed by describing how multi-threading was addressed in the tool, as this is central to all its components. Then, the implementation of each one of three aforementioned parts will be discussed in detail. 
 \iffalse
@@ -37,7 +53,7 @@ Finally, all the configuration options of the tool will be explained.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.85\textwidth]{Figures/BlueTracer.pdf}
+\includegraphics[width=1\textwidth]{Figures/BlueTracer.pdf}
 \caption{\textit{BlueTracer's high level structure}}
 \end{figure}
 
@@ -74,7 +90,7 @@ Since the first three fields of the above \texttt{struct} (lines 3-5) are employ
 
 \subsection{Log Files and Multithreading}
 
-In BlueTracer, the traced data is written to a binary file, one for every thread. The default naming convention used for the tracer's log files is \texttt{Traced.[OS Process ID].[Pin-specific Thread ID]}, similarly to the one Blue Pill employs in its own log files, with the user being able to change \texttt{Traced} with a name of its choice in the configuration file. 
+In BlueTracer, the traced data is written to a binary file, one for every thread. The default naming convention used for the tracer's log files is \texttt{Traced.[OS Process ID].[Pin-specific Thread ID]}, similarly to the one BluePill employs in its own log files, with the user being able to change \texttt{Traced} with a name of its choice in the configuration file. 
 
 When writing data to file, each thread invokes the \texttt{file\_write} function, whose pointer is located in the instance of the \texttt{bluepill\_tls} struct associated to the thread (line 11 of \textit{Listing 3.1}). However, such data, which follows the same format of strings used by \texttt{fprintf}, is not directly written to file. Instead, an intermediate 8 kB buffer is used (line 7 of \textit{Listing 3.1}): only when the buffer is full (or when the amount of data to be written does not fit the buffer) file writing actually occurs. The choice of using a buffer was made as an attempt to improve performance, as it allows the aggregation of small write operations into a block size that is more efficient for the disk subsystem.
 
@@ -102,7 +118,7 @@ Talk about log structure when talking about how arguments are printed
 Windows Native APIs are employed to call operating system services in kernel mode in a controlled way.  
 In fact, all core Windows components, which possess direct access to hardware and services in charge of handling the computer's resources (e.g. memory), operate in kernel mode. This means that, every time a user mode application desires to carry out certain actions, like for instance starting a thread or allocating virtual memory, they must rely on kernel mode  services. The Windows Native API corresponds to the system call interface of standard monolithic operating systems, such as the majority of UNIX-like systems, with the difference that in the latter case the system call interface is documented and can be utilized directly by applications. Instead, due to Windows' architecture, Windows Native APIs are concealed to the programmer by the higher level Windows (\texttt{Win32}) APIs \cite{NTAPI1}. User mode Windows Native APIs, which are identified by their \texttt{Nt} prefix and are exported by \texttt{ntdll}, have caught the attention of malware writers since they are seen as a way of bypassing the documented APIs with the objective of performing a series of actions without being discovered \cite{NTAPI2}. For this reason it is a good idea to also trace them, in addition to the ordinary Windows APIs.  
 
-Pin provides a set of APIs aimed at assisting the extraction of information relative to the system calls made by the pinned application, also including information relative to Windows Native APIs. In particular, in Blue Pill (and consequently in BlueTracer) \texttt{PIN\_AddSyscallEntryFunction} and  \texttt{PIN\_AddSyscallExitFunction} were used for this purpose. In fact, these allow to register notification functions which are called immediately before and after the execution of a system call \cite{Pin}. In BlueTracer, the function in charge of gathering Native API information before execution is \texttt{TraceSysCallEntry} while the one responsible for collecting Native API information after execution is \texttt{TraceSysCallExit}. They have been both been embedded in Blue Pill's notification functions and their overall structure is detailed in \textit{Figure 3.2}.
+Pin provides a set of APIs aimed at assisting the extraction of information relative to the system calls made by the pinned application, also including information relative to Windows Native APIs. In particular, in BluePill (and consequently in BlueTracer) \texttt{PIN\_AddSyscallEntryFunction} and  \texttt{PIN\_AddSyscallExitFunction} were used for this purpose. In fact, these allow to register notification functions which are called immediately before and after the execution of a system call \cite{Pin}. In BlueTracer, the function in charge of gathering Native API information before execution is \texttt{TraceSysCallEntry} while the one responsible for collecting Native API information after execution is \texttt{TraceSysCallExit}. They have been both been embedded in BluePill's notification functions and their overall structure is detailed in \textit{Figure 3.3}.
 \\
 \begin{figure}[h]
 \centering
@@ -110,12 +126,12 @@ Pin provides a set of APIs aimed at assisting the extraction of information rela
 \caption{\textit{Native APIs Tracing Workflow}}
 \end{figure}
 \\
-Following \textit{Figure 3.2}, let us now thoroughly analyze the main steps which take place when Native APIs are traced.
+Following \textit{Figure 3.3}, let us now thoroughly analyze the main steps which take place when Native APIs are traced.
 
 \subsection{Main Image Check}
-In order to filter the logged information relative to Native APIs, BlueTracer allows the analyst to decide, through the use of a boolean parameter (\texttt{MainImage}) in the configuration file, whether or not only Native APIs called invoked directly from the main executable of the pinned application should be traced. Therefore, as it can be seen in \textit{Figure 3.2}, the first thing which is done in \texttt{TraceSysCallEntry}, assuming that the \texttt{MainImage} configuration parameter has been set to \texttt{true}, is to determine if the Native API call is taking place directly from the main executable.
+In order to filter the logged information relative to Native APIs, BlueTracer allows the analyst to decide, through the use of a boolean parameter (\texttt{MainImage}) in the configuration file, whether or not only Native APIs called invoked directly from the main executable of the pinned application should be traced. Therefore, as it can be seen in \textit{Figure 3.3}, the first thing which is done in \texttt{TraceSysCallEntry}, assuming that the \texttt{MainImage} configuration parameter has been set to \texttt{true}, is to determine if the Native API call is taking place directly from the main executable.
 
-To this end, Pin's \texttt{IMG} APIs are employed, where in Pin an \texttt{IMG} represents all the data structures relative to binaries and shared libraries \cite{Pin}. Specifically, in Blue Pill, \texttt{IMG\_AddInstrumentFunction} is utilized to register a callback which is invoked each time an image is loaded. Inside such callback, which takes as one of the input parameters the \texttt{IMG} object representing the image being loaded, the following steps are taken:
+To this end, Pin's \texttt{IMG} APIs are employed, where in Pin an \texttt{IMG} represents all the data structures relative to binaries and shared libraries \cite{Pin}. Specifically, in BluePill, \texttt{IMG\_AddInstrumentFunction} is utilized to register a callback which is invoked each time an image is loaded. Inside such callback, which takes as one of the input parameters the \texttt{IMG} object representing the image being loaded, the following steps are taken:
 \begin{enumerate}
 \item \texttt{IMG\_IsMainExecutable} is employed to determine if the image being loaded is the main executable of the pinned application.
 \item If this is the case, \texttt{IMG\_HighAddress} and \texttt{IMG\_LowAddress} are invoked. These two APIs return the highest address and the lowest address respectively of any code or data loaded by the image corresponding the the \texttt{IMG} object they take as input. By employing these APIs is therefore possible to determine the address range relative to the main executable. 
@@ -123,7 +139,7 @@ To this end, Pin's \texttt{IMG} APIs are employed, where in Pin an \texttt{IMG} 
 
 Having obtained the main executable address range in this way, it is then employed in \texttt{TraceSysCallEntry} to learn if the Native API call is occuring directly from the main image. Internally, before entering kernel mode every Native API executes some common code, i.e. each Native API stores its ordinal in the \texttt{eax} register and invokes \texttt{KiFastSystemCall}, where the \texttt{sysenter} instruction is used to actually enter kernel mode. When \texttt{sysenter} is executed, the kernel obtains the ordinal number from \texttt{eax} and utilizes it to call the corresponding function, prior to going back to user mode \cite{MalwareTech}.
 
-In Pin, the Native API is intercepted right before \texttt{sysenter} is executed. This could be inferred by the fact that, in \texttt{TraceSysCallEntry}, the instruction pointer (obtainable via the \texttt{PIN\_GetContextReg} API) contains \texttt{sysenter}'s address. In light of this, in addition to the fact that each Native API calls \texttt{KiFastSystemCall} without setting a stack frame, the application's stack during the execution of \texttt{TraceSysCallEntry} is in the following state (\textit{Figure 3.3}).
+In Pin, the Native API is intercepted right before \texttt{sysenter} is executed. This could be inferred by the fact that, in \texttt{TraceSysCallEntry}, the instruction pointer (obtainable via the \texttt{PIN\_GetContextReg} API) contains \texttt{sysenter}'s address. In light of this, in addition to the fact that each Native API calls \texttt{KiFastSystemCall} without setting a stack frame, the application's stack during the execution of \texttt{TraceSysCallEntry} is in the following state (\textit{Figure 3.4}).
 \\
 \begin{figure}[h]
 \centering
@@ -135,14 +151,14 @@ Having outlined the general situation, it is finally possible to describe how th
 
 \begin{enumerate}
 \item The first check involves discovering whether or not \texttt{sysenter} is called directly from the main executable. As Pin intercepts Native APIs right before the execution of \texttt{sysenter}, this can be trivially done by checking if the instruction pointer value obtained in \texttt{TraceSysCallEntry} falls within the main executable memory address range.
-\item Secondly, it is required to examine if the Native API return address belongs to the main executable. As a result of what shown in \textit{Figure 3.3} such return address is obtained by adding 4 to the stack pointer and retrieving the pointed value, where the stack pointer can be obtained in Pin through the use of \texttt{PIN\_GetContextReg}. The resulting value is then, once more, compared with the main executable memory address range.
+\item Secondly, it is required to examine if the Native API return address belongs to the main executable. As a result of what shown in \textit{Figure 3.4} such return address is obtained by adding 4 to the stack pointer and retrieving the pointed value, where the stack pointer can be obtained in Pin through the use of \texttt{PIN\_GetContextReg}. The resulting value is then, once more, compared with the main executable memory address range.
 \end{enumerate}
 
 \subsection{Native API Name Resolution}
 
-Previously, it was stated how it is possible to register a callback function to be executed before Native APIs through the use of \texttt{PIN\_AddSyscallEntryFunction}. Such callback functions, named \texttt{SYSCALL\_ENTRY\_CALLBACK}s, receive a set of parameters, including \texttt{ctx}, the application's register state immediately before the system call execution, and \texttt{std}, the system call standard. In Blue Pill, these two parameters are used to invoke \texttt{PIN\_GetSyscallNumber} inside its \texttt{SYSCALL\_ENTRY\_CALLBACK}. Such API returns the number (ID) of the Native API to be executed in the provided context \cite{Pin}.
+Previously, it was stated how it is possible to register a callback function to be executed before Native APIs through the use of \texttt{PIN\_AddSyscallEntryFunction}. Such callback functions, named \texttt{SYSCALL\_ENTRY\_CALLBACK}s, receive a set of parameters, including \texttt{ctx}, the application's register state immediately before the system call execution, and \texttt{std}, the system call standard. In BluePill, these two parameters are used to invoke \texttt{PIN\_GetSyscallNumber} inside its \texttt{SYSCALL\_ENTRY\_CALLBACK}. Such API returns the number (ID) of the Native API to be executed in the provided context \cite{Pin}.
 
-Blue Pill employs a mechanism which allows it to obtain the Native API name from its number, since the hooking functions it employs are indexed by name and not by ordinal. This choice was made because the identifiers vary depending on the Windows version, even among different Service Pack versions. For the same reason, the information needed by BlueTracer to correctly log Native APIs is also indexed by Native API name and, consequently, BlueTracer also utilizes the aforementioned Native API name resolution mechanism.
+BluePill employs a mechanism which allows it to obtain the Native API name from its number, since the hooking functions it employs are indexed by name and not by ordinal. This choice was made because the identifiers vary depending on the Windows version, even among different Service Pack versions. For the same reason, the information needed by BlueTracer to correctly log Native APIs is also indexed by Native API name and, consequently, BlueTracer also utilizes the aforementioned Native API name resolution mechanism.
 
 The idea is to create an array, named \texttt{syscallIDs}, where Native API names are indexed by their IDs, by parsing \texttt{ntdll}'s export information. The export data of a PE is stored in the \texttt{IMAGE\_EXPORT\_DIRECTORY} structure located in the header. In our case, the most relevant fields of this structure are:
 
@@ -226,10 +242,10 @@ To make things clearer, an instance of \texttt{syscall\_info\_t} for the Native 
 	}
 \end{lstlisting}
 
-In \textit{3.2.2} it was explained how BlueTracer obtains a Native API name from its ID. After that, as shown in \textit{Figure 3.2}, there must be a way to, given a specific Native API name, retrieve the corresponding \texttt{syscall\_info\_t struct}. This is done by building an hash map during the tool's initialization which maps the Native API name to the appropriate \texttt{struct}. Such idea is also adopted for named constants enumerations since a hash map is also constructed with the objective of associating the name of a named constant enumeration to the corresponding \texttt{struct}.    
+In \textit{3.2.2} it was explained how BlueTracer obtains a Native API name from its ID. After that, as shown in \textit{Figure 3.3}, there must be a way to, given a specific Native API name, retrieve the corresponding \texttt{syscall\_info\_t struct}. This is done by building an hash map during the tool's initialization which maps the Native API name to the appropriate \texttt{struct}. Such idea is also adopted for named constants enumerations since a hash map is also constructed with the objective of associating the name of a named constant enumeration to the corresponding \texttt{struct}.    
 
 \subsection{Native API Logging}
-With reference to \textit{Figure 3.2}, let us consider the point in \texttt{TraceSysCallEntry} where the \texttt{syscall\_info\_t struct} relative to the Native API being traced was successfully retrieved. Before describing how the logging of "known" Native APIs is performed, it is worth mentioning that, in case a \texttt{struct} describing a certain Native API is not found, BlueTracer just logs the name of the Native API and the input value of a user-specified number of arguments (4 by default).
+With reference to \textit{Figure 3.3}, let us consider the point in \texttt{TraceSysCallEntry} where the \texttt{syscall\_info\_t struct} relative to the Native API being traced was successfully retrieved. Before describing how the logging of "known" Native APIs is performed, it is worth mentioning that, in case a \texttt{struct} describing a certain Native API is not found, BlueTracer just logs the name of the Native API and the input value of a user-specified number of arguments (4 by default).
 
 The first step towards logging "known" Native APIs is allocating and initializing a \texttt{syscall\_tracer struct} (\textit{Listing 3.5}) representing the specific Native API being traced. This \texttt{struct} is built starting from the data present in the previously retrieved  \texttt{syscall\_info\_t struct} and it is at the heart of the logging of the Native API.
 \\
@@ -343,7 +359,7 @@ Once the arguments' input values are logged, then the reference to the \texttt{s
 
 In \texttt{TraceSysCallExit}, after the value of \texttt{syscallEntry} has been fetched from the thread local storage, then it is determined whether the Native API has succeeded by checking if the output of \texttt{PIN\_GetSyscallErrno} is equal to zero, where \texttt{PIN\_GetSyscallErrno} is a Pin API returning the error code of the system call which has just returned with the provided context. Afterwards, \texttt{PIN\_GetSyscallReturn} is utilized to get the return value of the Native API and, with this information, the corresponding \texttt{drsys\_arg\_t} data structure is built. Successively, the Native API return value is logged, together with the output arguments, using once again \texttt{print\_arg} (\textit{Listing 3.7}). Finally, the \texttt{syscall\_tracer struct} representing the Native API being traced is deallocated.
 
-To conclude this section, let us show how a traced Native API looks like in the log file (\textit{Figure 3.4}). As it can be observed, the adopted log format is quite intuitive. In fact, the idea was to have a log which is both easy to read by the analyst but also easy to parse and post-process.      
+To conclude this section, let us show how a traced Native API looks like in the log file (\textit{Figure 3.5}). As it can be observed, the adopted log format is quite intuitive. In fact, the idea was to have a log which is both easy to read by the analyst but also easy to parse and post-process.      
 \\
 
 \lstset{
@@ -397,13 +413,13 @@ In Microsoft Windows, APIs are implemented as functions provided by a set of dyn
 \end{figure}
 
  
-When tracing APIs, most of the concepts seen in Native API tracing also apply, but there are also significant differences, both in the steps that were carried out and in the Pin APIs which were employed, as it can be observed from the diagram in \textit{Figure 3.4}.
+When tracing APIs, most of the concepts seen in Native API tracing also apply, but there are also significant differences, both in the steps that were carried out and in the Pin APIs which were employed, as it can be observed from the diagram in \textit{Figure 3.5}.
 
-Now let us illustrate the actions being performed during API tracing by analyzing in detail each one of the three main blocks of \textit{Figure 3.4}.
+Now let us illustrate the actions being performed during API tracing by analyzing in detail each one of the three main blocks of \textit{Figure 3.5}.
 
 \subsection{APIs Instrumentation}
 
-The first step taken towards APIs tracing is APIs instrumentation, i.e. placing analysis routines before and after the APIs' execution. To do this, a specific function was embedded in Blue Pill's image callback (the notion of image callback was previously introduced in Section 3.3.1). Such function, named \texttt{AddAnalysisRoutines}, performs the following actions for every DLL being loaded:
+The first step taken towards APIs tracing is APIs instrumentation, i.e. placing analysis routines before and after the APIs' execution. To do this, a specific function was embedded in BluePill's image callback (the notion of image callback was previously introduced in Section 3.3.1). Such function, named \texttt{AddAnalysisRoutines}, performs the following actions for every DLL being loaded:
 
 \begin{enumerate} 
 \item It inspects the symbol table, i.e. the DLL's exports. To this end, Pin symbol objects (\texttt{SYM}s) are employed, which provide information about function symbols in the applications \cite{Pin}.
@@ -515,7 +531,7 @@ To give a better idea on how API data is represented, an instance of \texttt{lib
 	}
 \end{lstlisting}
 
-Due to the high amount of APIs for which information was stored in the \texttt{PyREbox} database, it was decided to group API data by DLL. Specifically, for every DLL a corresponding \texttt{.cpp} file was created to store the API-related information under the form of \texttt{libcall\_arg\_info\_t} instances, one for each "known" API exported by that DLL. Furthermore, in order to make API data retrieval more efficient, it was chosen to employ a two-level hash map approach for this purpose. Given the DLL name (easily obtainable in the image callback via the use of \texttt{IMG\_Name}), the first level hash map is utilized to retrieve the DLL-specific second level hash map, which, in turn, maps the API name to the appropriate \texttt{struct} instance (\textit{Figure 3.5}). This is how API information retrieval is carried out in case \textit{PyREbox} database is used as API data source.
+Due to the high amount of APIs for which information was stored in the \texttt{PyREbox} database, it was decided to group API data by DLL. Specifically, for every DLL a corresponding \texttt{.cpp} file was created to store the API-related information under the form of \texttt{libcall\_arg\_info\_t} instances, one for each "known" API exported by that DLL. Furthermore, in order to make API data retrieval more efficient, it was chosen to employ a two-level hash map approach for this purpose. Given the DLL name (easily obtainable in the image callback via the use of \texttt{IMG\_Name}), the first level hash map is utilized to retrieve the DLL-specific second level hash map, which, in turn, maps the API name to the appropriate \texttt{struct} instance (\textit{Figure 3.6}). This is how API information retrieval is carried out in case \textit{PyREbox} database is used as API data source.
 \\
 \begin{figure}[h]
 \centering
@@ -563,7 +579,7 @@ For what concerns the addition of analysis code after the API's execution, the a
 
 \subsection{API Analysis before Execution}
 
-In this section we will describe how APIs are analyzed before execution, i.e. the main steps that are carried out in the \texttt{PrintInfoBefore} functions, an overview of which is given in \textit{Figure 3.4}.
+In this section we will describe how APIs are analyzed before execution, i.e. the main steps that are carried out in the \texttt{PrintInfoBefore} functions, an overview of which is given in \textit{Figure 3.5}.
 The workflow in this case is mostly the same as the one for NTAPIs' analysis, with one major difference, that is the introduction of a shadow stack used to store API entries in the thread local storage, which will be motivated later in the section.
 
 The first thing which is done is determining whether or not the API under analysis has been invoked directly from the main executable of the Pin application. The concepts involved here are essentially the ones applying to the main image check done for Native APIs, which was detailed in \textit{Section 3.3.1}. In short, it is checked if the API's return address, which is passed to the analysis function through the use of \texttt{IARG\_RETURN\_IP}, falls into the main executable memory address range, which was previously determined via \texttt{IMG\_HighAddress} and \texttt{IMG\_LowAddress}.
@@ -604,7 +620,7 @@ typedef struct _stackEntry {
 
 \subsection{API Analysis after Execution}
 
-Lastly, let us detail the most important operations performed towards tracing API-related information after the API execution. These are carried out in the \texttt{PrintInfoAfter} function and can be observed from \textit{Figure 3.4}.
+Lastly, let us detail the most important operations performed towards tracing API-related information after the API execution. These are carried out in the \texttt{PrintInfoAfter} function and can be observed from \textit{Figure 3.5}.
 
 At the beginning of \texttt{PrintInfoAfter}, the first thing which needs to be done in order to proceed with the logging is the retrieval from the shadow stack of the stack entry representing the API under analysis. A reference to the shadow stack can be easily acquired by gaining access to the thread local storage via \texttt{PIN\_GetThreadData}. However, it is not enough to pop the top of the shadow stack to obtain the wanted stack entry. This is due to a limitation of Pin in the instrumentation of routine objects.
 
@@ -664,7 +680,7 @@ In case of a user mode callback, in Pin the registered \texttt{CONTEXT\_CALLBACK
 
 In light of what just stated, it is natural for BlueTracer's logging activity, taking place in the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function, to involve the record of a callback occurrence, together with the name of the callback that is about to be invoked. Unfortunately, tracing the callback's arguments would require further work since they are packed in a data structure, as previously explained.
 
-Right before the execution of \texttt{KiUserCallbackDispatcher}, i.e. when the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function is called, the stack looks as follows (\textit{Figure 3.6}).
+Right before the execution of \texttt{KiUserCallbackDispatcher}, i.e. when the registered \texttt{CONTEXT\_CALLBACK\_NOTIFICATION} function is called, the stack looks as follows (\textit{Figure 3.7}).
 \\
 \begin{figure}[h]
 \centering
@@ -676,7 +692,7 @@ Having this in mind, it is now possible to explain step-by-step how the tracing 
 
 \begin{enumerate}
 \item The stack pointer value is retrieved. This is achieved through the use of the \texttt{PIN\_GetContextReg} API, that allows to get the value of a register in the context provided as input. Such context, in our specific case, is the application's register state after the context change, which, as previously mentioned, is passed as argument to the \texttt{CONTEXT\_CHANGE\_CALLBACK} notification function.
-\item The callback number is obtained by adding 4 to the stack pointer and fetching the pointed value, in accordance to \textit{Figure 3.6}.
+\item The callback number is obtained by adding 4 to the stack pointer and fetching the pointed value, in accordance to \textit{Figure 3.7}.
 \item The \texttt{KernelCallbackTable} is retrieved from the PEB. 
 \item The function pointer stored in the \texttt{KernelCallbackTable} entry indicated by the callback number is acquired.
 \item It is checked if the address of the function falls within \texttt{User32.dll} memory address range. In fact, in \texttt{Win32} user mode callbacks are employed exclusively by \texttt{User32.dll} for windowing related aspects \cite{UCDispatcher}, meaning that the retrieved function address must belong to \texttt{User32.dll}'s memory address range. Such range is determined by retrieving an handle for \texttt{User32.dll} through \texttt{GetModuleHandle}, building an \texttt{IMG} object from it utilizing Pin's \texttt{IMG\_FindByAddress} and invoking the usual \texttt{IMG\_LowAddress} and \texttt{IMG\_HighAddress} functions. 
