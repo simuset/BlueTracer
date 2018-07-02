@@ -7,3 +7,64 @@
 \section{Validation with Al-Khaser}
 
 \section{Run-Time Overhead Assessment}
+
+\vspace*{0.8cm}
+\begin{sidewaystable}
+\centering
+\begin{tabular}{cccccc}
+\hline
+\hline
+\cline{1-2}
+   \textbf{Application} & \textbf{Native (s)} & \textbf{Empty Image (s)} & \textbf{Empty Routine (s)} & \textbf{Main Image Only (s)} & \textbf{Complete (s)} \\
+\hline
+\texttt{Systeminfo}      & per gram    & 13.65      \\
+\texttt{System File Checker}          & each        & 0.01       \\
+\texttt{Check Disk}       & stuffed     & 92.50      \\
+\texttt{IPConfig}       & stuffed     & 33.33      \\
+\texttt{Netstat} & frozen      & 8.99       \\
+\texttt{DriverQuery}       & stuffed     & 92.50      \\
+\texttt{WinSat}       & stuffed     & 33.33      \\
+\texttt{PowerCFG} & frozen      & 8.99       \\
+\texttt{7zip}       & stuffed     & 92.50      \\
+\texttt{IZArc}      & stuffed     & 33.33      \\
+\texttt{WinRar} & frozen      & 8.99       \\
+\texttt{Cipher} & frozen      & 8.99       \\
+\texttt{OpenSSL}       & stuffed     & 92.50      \\
+\texttt{Crypt}      & stuffed     & 33.33      \\
+\texttt{FCIV} & frozen      & 8.99       \\
+\hline
+\end{tabular}
+\vspace{0.2cm}
+\caption{FirstTable}
+
+\end{sidewaystable}
+
+
+\begin{table}
+\centering
+\begin{tabular}{cccccc}
+\hline
+\hline
+\cline{1-2}
+   \textbf{Application} & \textbf{Complete (s)} & \textbf{Events (s)} & \textbf{Overhead per event (s)} \\
+\hline
+\texttt{Systeminfo}      & per gram    & 13.65      \\
+\texttt{System File Checker}          & each        & 0.01       \\
+\texttt{Check Disk}       & stuffed     & 92.50      \\
+\texttt{IPConfig}       & stuffed     & 33.33      \\
+\texttt{Netstat} & frozen      & 8.99       \\
+\texttt{DriverQuery}       & stuffed     & 92.50      \\
+\texttt{WinSat}       & stuffed     & 33.33      \\
+\texttt{PowerCFG} & frozen      & 8.99       \\
+\texttt{7zip}       & stuffed     & 92.50      \\
+\texttt{IZArc}      & stuffed     & 33.33      \\
+\texttt{WinRar} & frozen      & 8.99       \\
+\texttt{Cipher} & frozen      & 8.99       \\
+\texttt{OpenSSL}       & stuffed     & 92.50      \\
+\texttt{Crypt}      & stuffed     & 33.33      \\
+\texttt{FCIV} & frozen      & 8.99       \\
+\hline
+\end{tabular}
+\caption{SecondTable}
+\end{table}
+

@@ -1,0 +1,204 @@
+ANTI-DEBUGGER
+
+~~3160~~ 562 kernel32.dll!IsDebuggerPresent
+~~3160~~ 563 KERNELBASE.dll!IsDebuggerPresent
+563    executed KERNELBASE.dll!IsDebuggerPresent =>
+563 	retval: 0x0 (name=Return value, type=(long/int), size=0x4)
+
+~~3160~~ 1450 kernel32.dll!CheckRemoteDebuggerPresent
+1450 	arg 0: 0xffffffff (name=hProcess, type=DWORD, size=0x4)
+1450 	arg 1: 0x002bf710 => 0x0 (name=pbDebuggerPresent, type=(long/int)*, size=0x4)
+1450    executed kernel32.dll!CheckRemoteDebuggerPresent =>
+1450 	arg 1: 0x002bf710 => 0x0 (name=pbDebuggerPresent, type=(long/int)*, size=0x4)
+1450 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+
+~~3160~~ 3186 ntdll.dll!NtQueryInformationProcess
+3186 	arg 0: 0xffffffff (type=HANDLE, size=0x4)
+3186 	arg 1: 0x7 (type=int, size=0x4) <-- ProcessDebugPort
+3186 	arg 2: 0x002bf6cc (type=<struct>*, size=0x4)
+3186 	arg 3: 0x0 (type=unsigned int, size=0x4)
+3186 	arg 4: 0x003c0e98 (type=unsigned int*, size=0x4)
+3186    succeeded =>
+3186 	arg 2: 0x002bf6cc (type=<struct>*, size=0x4)
+3186 	arg 4: 0x003c0e98 => 0x3c0ea0 (type=unsigned int*, size=0x4)
+3186 	retval: 0x0 (type=NTSTATUS, size=0x4
+
+~~3160~~ 4017 ntdll.dll!NtSetInformationThread
+4017 	arg 0: 0xfffffffe (type=HANDLE, size=0x4)
+4017 	arg 1: 0x11 (type=int, size=0x4) <-- Hides thread from debugger
+4017 	arg 2: <null> (type=<struct>*, size=0x4)
+4017 	arg 3: 0x0 (type=unsigned int, size=0x4)
+4017    succeeded =>
+4017 	retval: 0x0 (type=NTSTATUS, size=0x4)
+--------------------------------------------------------------------------------------
+TIMING
+
+~~3160~~ 46332 ntdll.dll!NtDelayExecution
+46332 	arg 0: 0x0 (type=bool, size=0x1)
+46332 	arg 1: 0xffffffff4d2fa200(hex) (type=LARGE_INTEGER*, size=0x4)
+46332    succeeded =>
+46332 	retval: 0x0 (type=NTSTATUS, size=0x4) 
+
+~~3160~~ 50077 kernel32.dll!WaitForSingleObject
+50077 	arg 0: 0x204 (name=hHandle, type=DWORD, size=0x4)
+50077 	arg 1: 0x493e0 (name=dwMilliseconds, type=DWORD, size=0x4)
+50077    executed kernel32.dll!WaitForSingleObject =>
+50077 	retval: 0x102 (name=Return value, type=DWORD, size=0x4)
+
+~~3160~~ 49193 USER32.dll!SetTimer
+49193 	arg 0: 0x0 (name=hWnd, type=DWORD, size=0x4)
+49193 	arg 1: 0x0 (name=nIDEvent, type=DWORD, size=0x4)
+49193 	arg 2: 0x493e0 (name=uElapse, type=DWORD, size=0x4)
+49193 	arg 3: 0x01079690 (name=lpTimerFunc, type=typedef, size=0x0)
+49193    executed USER32.dll!SetTimer =>
+49193 	retval: 0x7f9b (name=Return value, type=DWORD, size=0x4)
+
+~~3160~~ 9225 kernel32.dll!Sleep
+9225 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+~~3160~~ 9226 KERNELBASE.dll!Sleep
+9226 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+9226    executed KERNELBASE.dll!Sleep =>
+9226 	retval: 0x00000000 (name=Return value, type=void, size=0x0)
+~~3160~~ 9227 ntdll.dll!NtYieldExecution
+9227    failed (error=0x40000024) =>
+9227 	retval: 0x40000024 (type=NTSTATUS, size=0x4)
+~~3160~~ 9228 kernel32.dll!Sleep
+9228 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+~~3160~~ 9229 KERNELBASE.dll!Sleep
+9229 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+9229    executed KERNELBASE.dll!Sleep =>
+9229 	retval: 0x00000000 (name=Return value, type=void, size=0x0)
+~~3160~~ 9230 ntdll.dll!NtYieldExecution
+9230    failed (error=0x40000024) =>
+9230 	retval: 0x40000024 (type=NTSTATUS, size=0x4)
+~~3160~~ 9231 kernel32.dll!Sleep
+9231 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+~~3160~~ 9232 KERNELBASE.dll!Sleep
+9232 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+9232    executed KERNELBASE.dll!Sleep =>
+9232 	retval: 0x00000000 (name=Return value, type=void, size=0x0)
+~~3160~~ 9233 ntdll.dll!NtYieldExecution
+9233    failed (error=0x40000024) =>
+9233 	retval: 0x40000024 (type=NTSTATUS, size=0x4)
+~~3160~~ 9234 kernel32.dll!Sleep
+9234 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+~~3160~~ 9235 KERNELBASE.dll!Sleep
+9235 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+9235    executed KERNELBASE.dll!Sleep =>
+9235 	retval: 0x00000000 (name=Return value, type=void, size=0x0)
+
+----------------------------------------------------------------------------------------
+
+USER INTERACTION
+
+~~3160~~ 17964 USER32.dll!GetCursorPos
+17964 	arg 0: 0x002bf684 (name=lpPoint, type=struct*|tagPOINT, size=0x40)
+17964    executed USER32.dll!GetCursorPos =>
+17964 	arg 0: 0x002bf684 (name=lpPoint, type=struct*|tagPOINT, size=0x40)
+17964 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+~~3160~~ 17965 kernel32.dll!Sleep
+17965 	arg 0: 0x1388 (name=dwMilliseconds, type=DWORD, size=0x4)
+~~3160~~ 17966 KERNELBASE.dll!Sleep
+17966 	arg 0: 0x1388 (name=dwMilliseconds, type=DWORD, size=0x4)
+17966    executed KERNELBASE.dll!Sleep =>
+17966 	retval: 0x00000000 (name=Return value, type=void, size=0x0)
+~~3160~~ 17967 USER32.dll!GetCursorPos
+17967 	arg 0: 0x002bf698 (name=lpPoint, type=struct*|tagPOINT, size=0x40)
+17967    executed USER32.dll!GetCursorPos =>
+17967 	arg 0: 0x002bf698 (name=lpPoint, type=struct*|tagPOINT, size=0x40)
+17967 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+
+----------------------------------------------------------------------------------------- 
+
+REGISTRY KEY VALUE ARTIFACTS
+
+~~3160~~ 38099 ADVAPI32.dll!RegOpenKeyExW
+38099 	arg 0: 0x80000002 (name=hKey, type=DWORD, size=0x4)
+38099 	arg 1: HARDWARE\DEVICEMAP\Scsi\Scsi Port 0\Scsi Bus 0\Target Id 0\Logical Unit Id 0 (name=lpSubKey, type=wchar_t*, size=0x2)
+38099 	arg 2: 0x0 (name=ulOptions, type=DWORD, size=0x4)
+38099 	arg 3: 0x20019 (name=samDesired, type=DWORD, size=0x4)
+38099 	arg 4: 0x002bf758 => 0x0 (name=phkResult, type=DWORD*, size=0x4)
+~~3160~~ 38100 kernel32.dll!RegOpenKeyExW
+38100 	arg 0: 0x80000002 (name=hKey, type=DWORD, size=0x4)
+38100 	arg 1: HARDWARE\DEVICEMAP\Scsi\Scsi Port 0\Scsi Bus 0\Target Id 0\Logical Unit Id 0 (name=lpSubKey, type=wchar_t*, size=0x2)
+38100 	arg 2: 0x0 (name=ulOptions, type=DWORD, size=0x4)
+38100 	arg 3: 0x20019 (name=samDesired, type=DWORD, size=0x4)
+38100 	arg 4: 0x002bf758 => 0x0 (name=phkResult, type=DWORD*, size=0x4)
+38100    executed kernel32.dll!RegOpenKeyExW =>
+38100 	arg 4: 0x002bf758 => 0x0 (name=phkResult, type=DWORD*, size=0x4)
+38100 	retval: 0x2 (name=Return value, type=(long/int), size=0x4)
+
+REGISTRY KEYS ARTIFACTS
+
+~~3160~~ 30134 ADVAPI32.dll!RegOpenKeyExW
+30134 	arg 0: 0x80000002 (name=hKey, type=DWORD, size=0x4)
+30134 	arg 1: HARDWARE\ACPI\DSDT\VBOX__ (name=lpSubKey, type=wchar_t*, size=0x2)
+30134 	arg 2: 0x0 (name=ulOptions, type=DWORD, size=0x4)
+30134 	arg 3: 0x20019 (name=samDesired, type=DWORD, size=0x4)
+30134 	arg 4: 0x002bf6e4 => 0x0 (name=phkResult, type=DWORD*, size=0x4)
+~~3160~~ 30135 kernel32.dll!RegOpenKeyExW
+30135 	arg 0: 0x80000002 (name=hKey, type=DWORD, size=0x4)
+30135 	arg 1: HARDWARE\ACPI\DSDT\VBOX__ (name=lpSubKey, type=wchar_t*, size=0x2)
+30135 	arg 2: 0x0 (name=ulOptions, type=DWORD, size=0x4)
+30135 	arg 3: 0x20019 (name=samDesired, type=DWORD, size=0x4)
+30135 	arg 4: 0x002bf6e4 => 0x0 (name=phkResult, type=DWORD*, size=0x4)
+30135    executed kernel32.dll!RegOpenKeyExW =>
+30135 	arg 4: 0x002bf6e4 => 0x0 (name=phkResult, type=DWORD*, size=0x4)
+30135 	retval: 0x2 (name=Return value, type=(long/int), size=0x4)
+
+FILE SYSTEM ARTIFACTS
+
+~~3160~~ 24975 kernel32.dll!GetWindowsDirectoryW
+24975 	arg 0:  (name=lpBuffer, type=wchar_t*, size=0x2)
+24975 	arg 1: 0x104 (name=uSize, type=DWORD, size=0x4)
+~~3160~~ 24976 KERNELBASE.dll!GetWindowsDirectoryW
+24976 	arg 0:  (name=lpBuffer, type=wchar_t*, size=0x2)
+24976 	arg 1: 0x104 (name=uSize, type=DWORD, size=0x4)
+~~3160~~ 24977 KERNELBASE.dll!GetSystemWindowsDirectoryW
+24977 	arg 0:  (name=lpBuffer, type=wchar_t*, size=0x2)
+24977 	arg 1: 0x104 (name=uSize, type=DWORD, size=0x4)
+24977    executed KERNELBASE.dll!GetSystemWindowsDirectoryW =>
+24977 	arg 0: C:\Windows (name=lpBuffer, type=wchar_t*, size=0x2)
+24977 	retval: 0xa (name=Return value, type=DWORD, size=0x4)
+~~3160~~ 24978 SHLWAPI.dll!PathCombineW
+24978 	arg 0:  (name=pszDest, type=wchar_t*, size=0x2)
+24978 	arg 1: C:\Windows (name=pszDir, type=wchar_t*, size=0x2)
+24978 	arg 2: system32\drivers\VBoxMouse.sys (name=pszFile, type=wchar_t*, size=0x2)
+24978    executed SHLWAPI.dll!PathCombineW =>
+24978 	retval: C:\Windows\system32\drivers\VBoxMouse.sys (name=Return value, type=wchar_t*, size=0x2)
+~~3160~~ 24979 kernel32.dll!GetFileAttributesW
+24979 	arg 0: C:\Windows\system32\drivers\VBoxMouse.sys (name=lpFileName, type=wchar_t*, size=0x2)
+~~3160~~ 24980 KERNELBASE.dll!GetFileAttributesW
+24980 	arg 0: C:\Windows\system32\drivers\VBoxMouse.sys (name=lpFileName, type=wchar_t*, size=0x2)
+24980    executed KERNELBASE.dll!GetFileAttributesW =>
+24980 	retval: 0xffffffff (name=Return value, type=DWORD, size=0x4)
+
+VIRTUAL DEVICES
+
+~~3160~~ 33612 kernel32.dll!CreateFileW
+33612 	arg 0: \\.\VBoxGuest (name=lpFileName, type=wchar_t*, size=0x2)
+33612 	arg 1: 0x80000000 (name=dwDesiredAccess, type=DWORD, size=0x4)
+33612 	arg 2: 0x1 (name=dwShareMode, type=DWORD, size=0x4)
+33612 	arg 3: 0x00000000 (name=lpSecurityAttributes, type=struct*|_SECURITY_ATTRIBUTES, size=0x60)
+33612 	arg 4: 0x3 (name=dwCreationDisposition, type=DWORD, size=0x4)
+33612 	arg 5: 0x80 (name=dwFlagsAndAttributes, type=DWORD, size=0x4)
+33612 	arg 6: 0x0 (name=hTemplateFile, type=DWORD, size=0x4)
+33612    executed kernel32.dll!CreateFileW =>
+33612 	retval: 0xffffffff (name=Return value, type=DWORD, size=0x4)
+
+WINDOW CLASS
+
+~~3160~~ 35246 USER32.dll!FindWindowW
+35246 	arg 0: VBoxTrayToolWndClass (name=lpClassName, type=wchar_t*, size=0x2)
+35246 	arg 1: <null> (name=lpWindowName, type=wchar_t*, size=0x2)
+35246    executed USER32.dll!FindWindowW =>
+35246 	retval: 0x0 (name=Return value, type=DWORD, size=0x4
+
+LOADED DLLS
+
+~~3160~~ 12708 kernel32.dll!GetModuleHandleW
+12708 	arg 0: dbghelp.dll (name=lpModuleName, type=wchar_t*, size=0x2)
+~~3160~~ 12709 KERNELBASE.dll!GetModuleHandleW
+12709 	arg 0: dbghelp.dll (name=lpModuleName, type=wchar_t*, size=0x2)
+12709    executed KERNELBASE.dll!GetModuleHandleW =>
+12709 	retval: 0x0 (name=Return value, type=DWORD, size=0x4)
