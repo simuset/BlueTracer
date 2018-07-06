@@ -5,7 +5,7 @@ In this chapter we discuss the implementation of BlueTracer, providing a detaile
 
 \section{General Overview}
 
-We will start the current chapter by giving a general overview of BlueTracer. Specifically we will describe the main characteristics of Intel Pin, the DBI framework on which BlueTracer is based on. Then we will introduce BluePill, the DBI-based software toolkit allowing BlueTracer to be robust against anti-evasive malware. Lastly, we will illustrate BlueTracer's structure, which will serve as a baseline for the rest of the chapter.  
+We will start the current chapter by giving a general overview of BlueTracer. Specifically we will describe the main characteristics of Intel Pin, the DBI framework on which BlueTracer is based on. Then we will introduce BluePill, the DBI-based software toolkit allowing BlueTracer to be robust against evasive malware. Lastly, we will illustrate BlueTracer's structure, which will serve as a baseline for the rest of the chapter.  
 
 \subsection{Intel Pin}
 BlueTracer is implemented using Pin, a dynamic binary instrumentation framework by Intel, which is vastly utilized for program analysis, testing of software and in the security field. The version of Pin used for the development of the tool is 3.5, in order to benefit from the notable improvements, both in terms of execution speed and offered features, which were introduced going from the 2.14 release to the 3.x series. Pin comes with its own OS-agnostic and compiler-agnostic runtime, called PinCRT. PinCRT exposes three layers: a generic operating system interface providing basic OS services (e.g. process and thread control), together with C and C++03 (without RTTI) runtime layers \cite{Pin}.
@@ -51,7 +51,7 @@ In light of what just stated, BlueTracer's integration with BluePill is straight
 \subsection{Structure}
    
 
-BlueTracer has been organized primarily taking into account the rich set of APIs offered by Pin, which have led to the decision to split the tool in three parts: the first aimed at \textbf{native APIs tracing}, the second for \textbf{APIs tracing} and the last focused on \textbf{callbacks and APCs tracing} (\textit{Figure 3.2}). In particular, the tracing of native APIs also employs a different source of API information (\textit{Dr. Memory}'s system call data) than the ones utilized for tracing APIs (\textit{drltrace}'s configuration file or the information extracted from \textit{PyREbox}'s database).
+BlueTracer has been organized primarily taking into account the rich set of APIs offered by Pin, which have led to the decision to split the tool in three parts: the first aimed at \textbf{Native APIs tracing}, the second for \textbf{APIs tracing} and the last focused on \textbf{callbacks and APCs tracing} (\textit{Figure 3.2}). In particular, the tracing of native APIs also employs a different source of API information (\textit{Dr. Memory}'s system call data) than the ones utilized for tracing APIs (\textit{drltrace}'s configuration file or the information extracted from \textit{PyREbox}'s database).
 
 This chapter will proceed by describing how multi-threading was addressed in the tool, as this is central to all its components. Then, the implementation of each one of three aforementioned parts will be discussed in detail. 
 \iffalse
@@ -799,3 +799,7 @@ Context change caused by APC -> ifsutil.dll!?HardRead@IO_DP_DRIVE@@QAEEVBIG_INT@
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
 }
+
+\section{Conclusions}
+
+In this chapter we have provided a detailed description of how BlueTracer was organized and implemented. We have first introduced its building blocks, i.e., the Intel Pin DBI framework and the BluePill  anti-evasion software toolkit. We have then showed the tool's architecture, outlining its three core components: the Native API tracer, the API tracer and, the user-mode callbacks and APCs tracer. Next, we have explained how the issues related to multithreading were handled, and, finally, we have thoroughly analyzed each one of three aforementioned elements. 

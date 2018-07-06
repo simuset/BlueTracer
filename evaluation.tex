@@ -11,44 +11,55 @@
 \vspace*{0.8cm}
 \begin{sidewaystable}
 \centering
-\begin{tabular}{cccccc}
+%\begin{tabular}{cccccc}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\begin{tabularx}{\linewidth}{*{6}{Y}}
+
 \hline
 \hline
 \cline{1-2}
-   \textbf{Application} & \textbf{Native (s)} & \textbf{Empty Image (s)} & \textbf{Empty Routine (s)} & \textbf{Main Image Only (s)} & \textbf{Complete (s)} \\
+   \textbf{Application} & \specialcell{ \textbf{Native} \\ \textbf{(s)}} & \specialcell{ \textbf{Empty Image} \\ \textbf{(s)}} & \specialcell{ \textbf{Empty Routine} \\ \textbf{(s)}} & \specialcell{ \textbf{Main Image} \\ \textbf{(s)}} & \specialcell{ \textbf{Complete} \\ \textbf{(s)}} \\
 \hline
-\texttt{Systeminfo}      & per gram    & 13.65      \\
-\texttt{System File Checker}          & each        & 0.01       \\
-\texttt{Check Disk}       & stuffed     & 92.50      \\
-\texttt{IPConfig}       & stuffed     & 33.33      \\
-\texttt{Netstat} & frozen      & 8.99       \\
-\texttt{DriverQuery}       & stuffed     & 92.50      \\
-\texttt{WinSat}       & stuffed     & 33.33      \\
-\texttt{PowerCFG} & frozen      & 8.99       \\
-\texttt{7zip}       & stuffed     & 92.50      \\
-\texttt{IZArc}      & stuffed     & 33.33      \\
-\texttt{WinRar} & frozen      & 8.99       \\
-\texttt{Cipher} & frozen      & 8.99       \\
-\texttt{OpenSSL}       & stuffed     & 92.50      \\
-\texttt{Crypt}      & stuffed     & 33.33      \\
-\texttt{FCIV} & frozen      & 8.99       \\
+\texttt{Systeminfo}      & 5.894    & 9.686  & 12.869 & 15.694 & 26.398     \\
+\texttt{SFC}          & 218.251 & 222.065 & 226.125 & 230.869 & 245.476       \\
+\texttt{Check Disk}       & 101.570     & 171.94 & 181.429 & 454.649 & 600+      \\
+\texttt{IPConfig}       & 0.105     & 4.257 & 8.421 & 9.599 & 13.181      \\
+\texttt{Netstat} & 0.085 & 2.563 & 4.630 & 6.902 & 21.129       \\
+\texttt{DriverQuery} & 1.168 & 6.663 & 9.786 & 34.074 & 68.668      \\
+\texttt{WinSat}       & 163.175     & 212.496 & 221.012 & 273.641 & 600+      \\
+\texttt{PowerCFG} & 61.333      & 73.325 & 80.018 & 132.466 & 273.882       \\
+\texttt{7zip}       & 175.526     & 212.000 & 225.091 & 227.985 & 233.792      \\
+\texttt{IZArc}      & 30.920     & 52.878 & 56.631 & 61.066 & 65.770      \\
+\texttt{WinRar} & 155.674 & 192.638 & 198.804 & 208.606 & 215.455      \\
+\texttt{Cipher} & 0.028 & 1.817 & 3.787 & 4.435 & 5.064       \\
+\texttt{OpenSSL} & 24.769 & 33.183 & 34.308 & 47.006 & 1524.763      \\
+\texttt{Crypt} & 65.392 & 140.048 & 142.979 & 572.353 & 600+      \\
+\texttt{FCIV} & 10.807 & 25.113 & 28.144 & 56.329 & 87.948       \\
+\texttt{TurboSFV} & 34.412 & 57.705 & 62.639 & 66.439 & 74.657
+\\
 \hline
-\end{tabular}
+\end{tabularx}
 \vspace{0.2cm}
-\caption{FirstTable}
+\caption{Execution times of instrumented benign applications}
 
 \end{sidewaystable}
 
-
+\iffalse
 \begin{table}
 \centering
-\begin{tabular}{cccccc}
+%\begin{tabular}{cccccc}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\begin{tabularx}{\linewidth}{*{4}{Y}}
 \hline
 \hline
 \cline{1-2}
-   \textbf{Application} & \textbf{Complete (s)} & \textbf{Events (s)} & \textbf{Overhead per event (s)} \\
+   \textbf{Application} & \specialcell{ \textbf{Complete} \\ \textbf{(s)}} & \textbf{Events} & \specialcell{ \textbf{Overhead / Event} \\ \textbf{(s)}} \\
 \hline
-\texttt{Systeminfo}      & per gram    & 13.65      \\
+\texttt{Systeminfo}      & 26.398    & 387 476      \\
 \texttt{System File Checker}          & each        & 0.01       \\
 \texttt{Check Disk}       & stuffed     & 92.50      \\
 \texttt{IPConfig}       & stuffed     & 33.33      \\
@@ -64,7 +75,42 @@
 \texttt{Crypt}      & stuffed     & 33.33      \\
 \texttt{FCIV} & frozen      & 8.99       \\
 \hline
-\end{tabular}
-\caption{SecondTable}
+\end{tabularx}
+\caption{Run-time overhead for benign applications}
 \end{table}
+\fi
 
+\vspace*{0.8cm}
+\begin{sidewaystable}
+\centering
+%\begin{tabular}{cccccc}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\begin{tabularx}{\linewidth}{*{6}{Y}}
+
+\hline
+\hline
+\cline{1-2}
+   \textbf{Application} & \specialcell{ \textbf{Native} \\ \textbf{(s)}} & \specialcell{ \textbf{Complete} \\ \textbf{(s)}} & \textbf{Events} & \specialcell{ \textbf{Overhead per Event} \\  \textbf{($10^-5$ s)} }  \\
+\hline
+\texttt{Systeminfo}      & 5.894    & 26.398  & 387 476 & $5.291$    \\
+\texttt{SFC}          & 218.251 & 245.476 & 333 781 & $8.156$ \\
+\texttt{IPConfig}       & 0.105 & 13.181 & 94 313 & $13.864$      \\
+\texttt{Netstat} & 0.085 & 21.129 & 542 649 & $3.878$       \\
+\texttt{DriverQuery} & 1.168 & 68.668 & 1 735 859 & $3.860$            \\
+\texttt{PowerCFG} & 61.333 & 273.882 & 4 497 247 & $4.726$       \\
+\texttt{7zip}       & 175.526 & 233.792 & 146 578 & $39.751$      \\
+\texttt{IZArc}      & 30.920 & 65.770 & 109 142 & $31.931$      \\
+\texttt{WinRar} & 155.674 & 215.455 & 84 329 & $70.890$      \\
+\texttt{Cipher} & 0.028 & 4.435 & 24 141 & $18.255$           \\
+\texttt{OpenSSL} & 24.769 & 1524.763 & 57 410 809 & $2.613$                \\
+\texttt{FCIV} & 10.807 & 87.948 & 725 133 &  $10.638$               \\
+\texttt{TurboSFV} & 34.412 & 74.657 & 183 455 & $21.937$ 
+\\
+\hline
+\end{tabularx}
+\vspace{0.2cm}
+\caption{Run-time overhead for benign applications}
+
+\end{sidewaystable}
