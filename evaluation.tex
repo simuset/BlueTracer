@@ -25,68 +25,68 @@ All the tests were conducted on a VirtualBox (version 5.2.6)  Virtual Machine wi
 
 \section{Run-Time Overhead Assessment}
 
-In order to evaluate the overhead at run-time introduced by BlueTracer we tested it with a number of benign applications exercising a large number of functions. In order to experiment with a wide range of different functionalities, we picked a set of well-known Windows applications performing a variety of jobs. We grouped these applications based on the task they carry out, as shown below:
+In order to evaluate the run-time overhead introduced by BlueTracer we tested it with a number of benign applications exercising a large number of functions. In order to experiment with a wide range of different functionalities, we picked a set of well-known Windows applications performing a variety of jobs. We grouped these applications based on the task they carry out, as shown below:
 
 \begin{itemize}
 \item \textbf{Collection of system information}
 	   \begin{itemize}
-	   \item \texttt{Systeminfo.} Outputs a summary of OS-environment parameters. 
-	   \item \texttt{System File Checker (SFC).} Scans for corruptions in system files.
-	   \item \texttt{Check Disk}. Checks the disks' integrity.
-	   \item \texttt{IPConfig}. Displays TCP/IP network configuration values.
-	   \item \texttt{Netstat}. Allows to display active TCP connections as well as TCP and UDP ports on which the computer is listening.
-	   \item \texttt{Driver Query}. Shows a list of installed drivers and their properties.
-	   \item \texttt{Windows Assessment Tools (WinSAT).} Measures a number of performance characteristics and reports them.
-	   \item \texttt{Powercfg.} Enables to search for common energy-efficiency problems. 
+	   \item \texttt{Systeminfo.} It outputs a summary of OS-environment parameters. 
+	   \item \texttt{System File Checker (SFC).} It scans for corruptions in system files.
+	   \item \texttt{Check Disk}. It checks the disks' integrity.
+	   \item \texttt{IPConfig}. It displays TCP/IP network configuration values.
+	   \item \texttt{Netstat}. It can show active TCP connections as well as TCP and UDP ports on which the computer is listening.
+	   \item \texttt{Driver Query}. It presents the list of installed drivers and their properties.
+	   \item \texttt{Windows Assessment Tools (WinSAT).} It  measures a number of performance characteristics and reports them.
+	   \item \texttt{Powercfg.} It enables to search for common energy-efficiency problems. 
 	   \end{itemize}
 \item \textbf{Compression programs}
 		\begin{itemize}
-		\item \texttt{7zip.} Default output extension is \texttt{.7z}.
-		\item \texttt{IZArc.} Default output extension is \texttt{.zip}.
-		\item \texttt{WinRar.} Default output extension is \texttt{.rar}.
+		\item \texttt{7zip.}. Its default output extension is \texttt{.7z}.
+		\item \texttt{IZArc.} Its default output extension is \texttt{.zip}.
+		\item \texttt{WinRar.} Its default output extension is \texttt{.rar}.
 		\end{itemize}
 \item \textbf{Encryption Utilities}
 		\begin{itemize}
-		\item \texttt{Cipher.} Uses Encrypting File System (ESF), based on DESX. 
-		\item \texttt{OpenSSL.} Was configured to employ 256-bit CBC AES.
-		\item \texttt{Crypt.} Adopts RC2 block encryption.
+		\item \texttt{Cipher.} It uses Encrypting File System (ESF), based on DESX. 
+		\item \texttt{OpenSSL.} It was configured to employ 256-bit CBC AES.
+		\item \texttt{Crypt.} It adopts RC2 block encryption.
 		\end{itemize}
 \item \textbf{Hashing Utilities}
 		\begin{itemize}
-		\item \texttt{File Checksum Integrity Verifier (FCIV).} Was set to use both MD5 and SHA1.
-		\item \texttt{TurboSFV.} Was configured to adopt SHA3-224. 
+		\item \texttt{File Checksum Integrity Verifier (FCIV).} It was set to use both MD5 and SHA1.
+		\item \texttt{TurboSFV.} It was configured to adopt SHA3-224. 
 		\end{itemize}
 \end{itemize}
 
 We first recorded the native execution time for each of the aforementioned applications. Then, we ran them under BlueTracer, logging the respective execution times. Specifically, the following BlueTracer modes of operation were employed:
 
 \begin{itemize}
-\item \textbf{Empty Image:} All image notification functions are empty, that is, they just increase a global counter value. This means that no analysis routines are inserted. 
-\item \textbf{Empty Routine:} All analysis routines are empty, i.e., all they do is, once again, increase a global counter value.
-\item \textbf{Main Image:} Only Native APIs and APIs being directly invoked from the main executable of the pinned application are traced. This is BlueTracer's default mode of operation. 
-\item \textbf{Complete:} Every event is traced, including also Native APIs and APIs not being directly invoked from the main executable.
+\item \textbf{Empty Image.} All image notification functions are empty, that is, they just increase a global counter value. This means that no analysis routines are inserted at run-time. 
+\item \textbf{Empty Routine.} All analysis routines are empty, i.e., all they do is, once again, increase a global counter value.
+\item \textbf{Main Image.} Only Native APIs and APIs being directly invoked from the main executable of the pinned application are traced. This is BlueTracer's default mode of operation. 
+\item \textbf{Complete.} Every event is traced, also including Native APIs and APIs being invoked outside the main executable.
 \end{itemize}
 
-We executed every benign application in the previous page adopting each of the above operation modes, which can be set using BlueTracer's configuration file. Essentially, \textbf{Empty Image} and \textbf{Empty Routine} were utilized to determine the run-time overhead introduced just by the Pin's framework, when no analysis is actually performed. On the contrary, \textbf{Main Image} was adopted to show BlueTracer's overhead during a typical use of the tool, as \textbf{Main Image} is BlueTracer's default mode. Lastly, \textbf{Complete} was employed to determine how BlueTracer's behaves under heavy stress conditions.
+We tested every benign application in the previous page adopting each of the above operation modes, which can be set using BlueTracer's configuration file. Essentially, \textbf{Empty Image} and \textbf{Empty Routine} were utilized to determine the run-time overhead introduced just by the Pin's framework, when no analysis is actually performed. On the contrary, \textbf{Main Image} was adopted to show BlueTracer's overhead during a typical use of the tool, as \textbf{Main Image} is BlueTracer's default mode. Lastly, \textbf{Complete} was employed to determine how BlueTracer's behaves under heavy stress conditions.
 
-We tested each application three times and then recorded the average execution time. For the compression programs, the file being compressed is the Puppy Linux ISO (\texttt{xenialpup-7.5-uefi.iso}), of size 332 MBs. On the other hand, for the encryption and hashing utilities, we used the Ubuntu 18.04 ISO (\texttt{ubuntu-18.04-desktop-amd64}), the size of which is 1.8 GBs. Add threshhold.       
+We tested each application three times and then recorded the average execution time. For the compression programs, the file being compressed was the Puppy Linux ISO (\texttt{xenialpup-7.5-uefi.iso}), of size 332 MBs. On the other hand, for the encryption and hashing utilities, we used the Ubuntu 18.04 ISO (\texttt{ubuntu-18.04-desktop-amd64}), the size of which is 1.8 GBs. During the tests, we also decided to stop the execution of the pinned application if, after it had been running for more than 10 minutes, the log file was greater than 5 GBs. This had to be done due to the hard drive limitations of the testing platform.      
 
-The recorded execution times can be observed from table, which show how, as more analysis is carried out, the run-time increases.
+The recorded execution times can be observed from \textit{Table 4.1}. As it can be seen, as more demanding modes of operation are employed, the run-time increases, although the increment is not uniform, but is actually quite variable across the different applications.
 
-Also in order to quantify the run-time overhead we used this and that.
+In light of this, to actually quantify the run-time overhead we decided to adopt the following metric:
 
-\iffalse
-Empty Image and Empty Routine to assess Pin's overhead
-Main Image to assess analysis overhead in a typical scenario
-Complete to stress
-\fi
+\begin{align*}
+\text{Overhead per Event} = \frac{T_{instrumented} - T_{native}}{Events}
+\end{align*}
 
-\iffalse
--Applications -> Mention Crypt and Compression files used
--Mention three times and then average
--Native vs Main and so on
--Mention that execution interrupted beforehand if, after 10 minutes, log size exceed a treshhold, e.g. 5 gb.
-\fi
+where:
+\begin{itemize}
+\item $T_{instrumented}$ is the application's execution time when executed under BlueTracer with the \textbf{Complete} mode of operation enabled. We chose the \textbf{Complete} mode of operation to quantify the overhead per event in the worst-case situation.
+\item $T_{native}$ is the application's native execution time.
+\item $Events$ is the total number of Native API and API calls performed by the analyzed application.
+\end{itemize}
+
+\textit{Table 4.2} lists the overhead per event value of each benign application for which the execution time in the \textbf{Complete} mode of operation could be obtained. In this case we can see that the typical overhead is approximately up to 22$\times10^{-5}$ seconds, with the compression programs being an exception, as they have a greater overhead per event value than the rest.
 
 \vspace*{0.8cm}
 \begin{sidewaystable}
@@ -99,7 +99,6 @@ Complete to stress
 
 \hline
 \hline
-\cline{1-2}
    \textbf{Application} & \specialcell{ \textbf{Native} \\ \textbf{(s)}} & \specialcell{ \textbf{Empty Image} \\ \textbf{(s)}} & \specialcell{ \textbf{Empty Routine} \\ \textbf{(s)}} & \specialcell{ \textbf{Main Image} \\ \textbf{(s)}} & \specialcell{ \textbf{Complete} \\ \textbf{(s)}} \\
 \hline
 \texttt{Systeminfo}      & 5.894    & 9.686  & 12.869 & 15.694 & 26.398     \\
@@ -195,8 +194,16 @@ Complete to stress
 
 \end{sidewaystable}
 
+\vspace{-2cm}
 \section{Al-Khaser}
+Al-Khaser is ... . For this reason we use it as validation as well as a running example.
+Running BlueTracer with Al-Khaser in its default mode -> ok , not detected. So detection aspect is ok. Now let us instead examine some of the Native API, APIs traced by BlueTracer to assess its tracing capabilities.
+Al-Khaser categorizes checks blabla. Let us look at some examples from the main categories.
+
+
 
 \iffalse
 \section{JoeBox}
 \fi
+
+\section{Conclusions}
