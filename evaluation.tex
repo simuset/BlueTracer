@@ -196,10 +196,107 @@ where:
 
 \vspace{-2cm}
 \section{Al-Khaser}
-Al-Khaser is ... . For this reason we use it as validation as well as a running example.
-Running BlueTracer with Al-Khaser in its default mode -> ok , not detected. So detection aspect is ok. Now let us instead examine some of the Native API, APIs traced by BlueTracer to assess its tracing capabilities.
-Al-Khaser categorizes checks blabla. Let us look at some examples from the main categories.
+Al-Khaser \cite{AlK} is a popular open-source application which performs a large number of common checks employed by malware families to determine if they are being executed in an analysis environment. It is typically utilized to assess how stealthy and well hidden a malware analysis system is. For this reason, we chose Al-Khaser as our main validation tool.
 
+The checks implemented by Al-Khaser are divided into categories, with the most significant ones being the following:
+\begin{itemize}
+\item \textbf{Anti-Debugging}, aimed at detecting the presence of a debugger.
+\item \textbf{Anti-Sandbox Timing-based}, the purpose of which is to let sandboxes time out in order to defy analysis. 
+\item \textbf{Human Interaction Detection}, which seek to discover the presence of a sandbox by looking for the lack of human interaction with the system.
+\item \textbf{Anti-Virtualization}, which have the objective of exposing the use of virtualization and full-system emulation. 
+\item \textbf{Anti-Analysis}, aimed at uncovering the employment of common analysis tools (e.g OllyDbg, IDA Pro, etc. ).
+\end{itemize}  
+
+When Al-Khaser's executable is run, all the checks are performed and the outcome of each one of them can be easily observed from the command line: \texttt{GOOD} is printed if the analysis product succeeded at remaining hidden, and \texttt{BAD} otherwise. 
+
+To validate BlueTracer, Al-Khaser was run under it in the default \textbf{Main Image} mode. The result was that BlueTracer managed to remain undetected with respect to all the checks performed by Al-Khaser. From this outcome we obtained a first confirmation of BlueTracer's ability to hide its presence. 
+
+Furthermore, to also validate BlueTracer's tracing power, we analyzed the logs obtained when running Al-Khaser, with the objective of finding evidence of the performed evasion checks.
+Even in this case, BlueTracer performed well, as the majority of the checks could easily be deduced from the log file. 
+
+Let us now show how some of these checks appeared on the log, in order to give a better idea of what BlueTracer is capable of. To be as clear as possible, we will use the same checks categorization as Al-Khaser's.
+
+\subsection{Anti-Debugging}
+
+Anti-debugging checks are essentially aimed at determining if a program is running under a debugger. As already mentioned in section 2.1.5, there exist Windows APIs whose objective is exactly to discover if the calling process is being debugged.
+A well-known API of this kind is \texttt{IsDebuggerPresent}, which returns a nonzero value if the calling process is running in the context of a debugger and zero otherwise. Such API is employed in one of Al-Khaser's anti-debugging checks and is appropriately recorded by BlueTracer (\textit{Listing 4.1}). As it can be seen below, the return value is zero, as no debugger is detected.
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Log entry relative to \texttt{IsDebuggerPresent}},captionpos=b]
+~~3160~~ 562 kernel32.dll!IsDebuggerPresent
+~~3160~~ 563 KERNELBASE.dll!IsDebuggerPresent
+563    executed KERNELBASE.dll!IsDebuggerPresent =>
+563 	retval: 0x0 (name=Return value, type=(long/int), size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+
+Another popular Windows API for debug detection is \texttt{CheckRemoteDebuggerPresent}, which determines if the specified process is being debugged by a "remote" debugger, i.e., a debugger residing in parallel and different process. Its second argument is a pointer to a boolean, which is set to true if the provided process is being debugged, or false otherwise. Al-Khaser also adopts this API, and, again, BlueTracer correctly logged its invocation (\textit{Listing 4.2}). In addition, it is worth noting that the output value for the second argument (\texttt{arg 1}) is 
+false (\texttt{0x0}), thus showing once more that a debugger was not discovered.   
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Log entry relative to \texttt{CheckRemoteDebuggerPresent}},captionpos=b]
+~~3160~~ 1450 kernel32.dll!CheckRemoteDebuggerPresent
+1450 	arg 0: 0xffffffff (name=hProcess, type=DWORD, size=0x4)
+1450 	arg 1: 0x002bf710 => 0x0 (name=pbDebuggerPresent, type=(long/int)*, size=0x4)
+1450    executed kernel32.dll!CheckRemoteDebuggerPresent =>
+1450 	arg 1: 0x002bf710 => 0x0 (name=pbDebuggerPresent, type=(long/int)*, size=0x4)
+1450 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+
+Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. When invoked 
+  
+
+\subsection{Anti-Sandbox Timing-based}
+\subsection{Human Interaction Detection}
+\subsection{Anti-Virtualization}
+\subsection{Anti-Analysis}
 
 
 \iffalse

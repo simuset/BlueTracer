@@ -202,3 +202,36 @@ LOADED DLLS
 12709 	arg 0: dbghelp.dll (name=lpModuleName, type=wchar_t*, size=0x2)
 12709    executed KERNELBASE.dll!GetModuleHandleW =>
 12709 	retval: 0x0 (name=Return value, type=DWORD, size=0x4)
+
+
+
+
+------Analysis
+
+~~3160~~ 53940 kernel32.dll!CreateToolhelp32Snapshot
+53940 	arg 0: 0x2 (name=dwFlags, type=DWORD, size=0x4)
+53940 	arg 1: 0x0 (name=th32ProcessID, type=DWORD, size=0x4)
+53940    executed kernel32.dll!CreateToolhelp32Snapshot =>
+53940 	retval: 0x1fc (name=Return value, type=DWORD, size=0x4)
+~~3160~~ 53941 kernel32.dll!Process32FirstW
+53941 	arg 0: 0x1fc (name=hSnapshot, type=DWORD, size=0x4)
+53941 	arg 1: 0x002b7408 (name=lppe, type=struct*|tagPROCESSENTRY32W, size=0x1160)
+53941    executed kernel32.dll!Process32FirstW =>
+53941 	arg 1: 0x002b7408 (name=lppe, type=struct*|tagPROCESSENTRY32W, size=0x1160)
+53941 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+~~3160~~ 53942 SHLWAPI.dll!StrCmpIW
+53942 	arg 0: [System Process] (name=psz1, type=wchar_t*, size=0x2)
+53942 	arg 1: procmon.exe (name=psz2, type=wchar_t*, size=0x2)
+53942    executed SHLWAPI.dll!StrCmpIW =>
+53942 	retval: 0xffffffff (name=Return value, type=(long/int), size=0x4)
+~~3160~~ 53943 kernel32.dll!Process32NextW
+53943 	arg 0: 0x1fc (name=hSnapshot, type=DWORD, size=0x4)
+53943 	arg 1: 0x002b7408 (name=lppe, type=struct*|tagPROCESSENTRY32W, size=0x1160)
+53943    executed kernel32.dll!Process32NextW =>
+53943 	arg 1: 0x002b7408 (name=lppe, type=struct*|tagPROCESSENTRY32W, size=0x1160)
+53943 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+~~3160~~ 53944 SHLWAPI.dll!StrCmpIW
+53944 	arg 0: System (name=psz1, type=wchar_t*, size=0x2)
+53944 	arg 1: procmon.exe (name=psz2, type=wchar_t*, size=0x2)
+53944    executed SHLWAPI.dll!StrCmpIW =>
+53944 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
