@@ -4,23 +4,89 @@
 
 In this chapter we will illustrate the results obtained during the experimental evaluation of BlueTracer.
 
-We \iffalse first \fi tested the tool on \textit{Al-Khaser}, a popular open-source project employed to assess how stealthy a malware analysis system is with respect to a large portion of public evasion techniques used by real malware families.
+We first tested the tool on a set of benign applications performing different tasks, in order to assess its run-time overhead.
+
+Then, we validated BlueTracer using \textit{Al-Khaser} \cite{AlK}, a popular open-source project employed to assess how stealthy a malware analysis system is with respect to a large portion of public evasion techniques used by real malware families.
 
 \iffalse
-Then, we  
-
+Finally, we employed BlueTracer to analyze a group of highly evasive real malware samples collected by Joe Security, the proclaimed technology leader for the analysis of evasive malware.
 \fi
-
-Finally, we tested BlueTracer on a set of benign applications, belonging to different categories, in order to assess its run-time overhead.
 
 \iffalse
-When adding JoeBox add new platform
+If JoeBox added differentiate machines
 \fi
-All the tests were conducted on a virtual machine blablabla with host operating system 
-
-\section{Al-Khaser}
+All the tests were conducted on a VirtualBox (version 5.2.6)  Virtual Machine with 1 CPU core and 3 GB of RAM running Windows 7 32-bit. The specifications of the host machine are:
+\begin{itemize}
+\item \textbf{Operating System:} Linux Mint 17.3 
+\item \textbf{Processor:} Intel Core i7-3537U CPU @ 2.00 GHz $\times$ 2
+\item \textbf{RAM:} 8 GBs  
+\end{itemize}
+ 
 
 \section{Run-Time Overhead Assessment}
+
+In order to evaluate the overhead at run-time introduced by BlueTracer we tested it with a number of benign applications exercising a large number of functions. In order to experiment with a wide range of different functionalities, we picked a set of well-known Windows applications performing a variety of jobs. We grouped these applications based on the task they carry out, as shown below:
+
+\begin{itemize}
+\item \textbf{Collection of system information}
+	   \begin{itemize}
+	   \item \texttt{Systeminfo.} Outputs a summary of OS-environment parameters. 
+	   \item \texttt{System File Checker (SFC).} Scans for corruptions in system files.
+	   \item \texttt{Check Disk}. Checks the disks' integrity.
+	   \item \texttt{IPConfig}. Displays TCP/IP network configuration values.
+	   \item \texttt{Netstat}. Allows to display active TCP connections as well as TCP and UDP ports on which the computer is listening.
+	   \item \texttt{Driver Query}. Shows a list of installed drivers and their properties.
+	   \item \texttt{Windows Assessment Tools (WinSAT).} Measures a number of performance characteristics and reports them.
+	   \item \texttt{Powercfg.} Enables to search for common energy-efficiency problems. 
+	   \end{itemize}
+\item \textbf{Compression programs}
+		\begin{itemize}
+		\item \texttt{7zip.} Default output extension is \texttt{.7z}.
+		\item \texttt{IZArc.} Default output extension is \texttt{.zip}.
+		\item \texttt{WinRar.} Default output extension is \texttt{.rar}.
+		\end{itemize}
+\item \textbf{Encryption Utilities}
+		\begin{itemize}
+		\item \texttt{Cipher.} Uses Encrypting File System (ESF), based on DESX. 
+		\item \texttt{OpenSSL.} Was configured to employ 256-bit CBC AES.
+		\item \texttt{Crypt.} Adopts RC2 block encryption.
+		\end{itemize}
+\item \textbf{Hashing Utilities}
+		\begin{itemize}
+		\item \texttt{File Checksum Integrity Verifier (FCIV).} Was set to use both MD5 and SHA1.
+		\item \texttt{TurboSFV.} Was configured to adopt SHA3-224. 
+		\end{itemize}
+\end{itemize}
+
+We first recorded the native execution time for each of the aforementioned applications. Then, we ran them under BlueTracer, logging the respective execution times. Specifically, the following BlueTracer modes of operation were employed:
+
+\begin{itemize}
+\item \textbf{Empty Image:} All image notification functions are empty, that is, they just increase a global counter value. This means that no analysis routines are inserted. 
+\item \textbf{Empty Routine:} All analysis routines are empty, i.e., all they do is, once again, increase a global counter value.
+\item \textbf{Main Image:} Only Native APIs and APIs being directly invoked from the main executable of the pinned application are traced. This is BlueTracer's default mode of operation. 
+\item \textbf{Complete:} Every event is traced, including also Native APIs and APIs not being directly invoked from the main executable.
+\end{itemize}
+
+We executed every benign application in the previous page adopting each of the above operation modes, which can be set using BlueTracer's configuration file. Essentially, \textbf{Empty Image} and \textbf{Empty Routine} were utilized to determine the run-time overhead introduced just by the Pin's framework, when no analysis is actually performed. On the contrary, \textbf{Main Image} was adopted to show BlueTracer's overhead during a typical use of the tool, as \textbf{Main Image} is BlueTracer's default mode. Lastly, \textbf{Complete} was employed to determine how BlueTracer's behaves under heavy stress conditions.
+
+We tested each application three times and then recorded the average execution time. For the compression programs, the file being compressed is the Puppy Linux ISO (\texttt{xenialpup-7.5-uefi.iso}), of size 332 MBs. On the other hand, for the encryption and hashing utilities, we used the Ubuntu 18.04 ISO (\texttt{ubuntu-18.04-desktop-amd64}), the size of which is 1.8 GBs. Add threshhold.       
+
+The recorded execution times can be observed from table, which show how, as more analysis is carried out, the run-time increases.
+
+Also in order to quantify the run-time overhead we used this and that.
+
+\iffalse
+Empty Image and Empty Routine to assess Pin's overhead
+Main Image to assess analysis overhead in a typical scenario
+Complete to stress
+\fi
+
+\iffalse
+-Applications -> Mention Crypt and Compression files used
+-Mention three times and then average
+-Native vs Main and so on
+-Mention that execution interrupted beforehand if, after 10 minutes, log size exceed a treshhold, e.g. 5 gb.
+\fi
 
 \vspace*{0.8cm}
 \begin{sidewaystable}
@@ -128,3 +194,9 @@ All the tests were conducted on a virtual machine blablabla with host operating 
 \caption{Run-time overhead for benign applications}
 
 \end{sidewaystable}
+
+\section{Al-Khaser}
+
+\iffalse
+\section{JoeBox}
+\fi
