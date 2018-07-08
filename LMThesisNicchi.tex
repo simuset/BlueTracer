@@ -59,10 +59,35 @@
 \vspace*{-2cm}% Insert needed vertical retraction
 
 
-\begin{abstract}     
-\mynote{Short version of Intro chapter}
-\lipsum[23]
+\begin{abstract}
 
+\iffalse     
+With thousands of new malware samples surfacing every day, dy-
+namic analysis techniques play a fundamental role in the automatic
+characterization and detection of malicious behaviors that under-
+mine the security of computing systems. And yet, often new threats
+emerge that defeat automatic analysis, requiring them to be manu-
+ally dissected by expert analysts. A significant fraction of strains
+adopt however evasion techniques that hide their malicious behav-
+ior if they are under the magnifying glass of an analyst, hindering
+the analysis. We propose a methodology for hardening automatic
+dynamic analysis techniques to make them more robust against
+evasive malware. We build on binary instrumentation and we show
+that more than 100 different anti-evasion techniques can be imple-
+mented in terms of a minimal core of primitives to withstand com-
+mon evasive behaviors. We discuss an embodiment of our approach
+in the Pin dynamic binary instrumentation framework showing
+how to construct a customizable stealthy sandbox that supports
+remote debugging and dynamic taint analysis. We evaluate our
+tool on a set of highly evasive malware samples and show how
+taint analysis can help analysts to identify new evasive techniques;
+countermeasures can then be incorporated into the analysis system
+as part of a human-assisted feedback loop mechanism.
+\fi
+
+As a multitude of new malware instances arise every day, dynamic analysis techniques have assumed a key role in the detection and inspection of malicious software. One of the most adopted dynamic analysis strategies is function call monitoring, since the abstractions embodied by API calls and system calls can be used to comprehend the visible behaviour of the malware sample under analysis, regardless of any obfuscations made on its code. Function call monitoring is typically implemented by means of API hooking, i.e., the interception of function calls made available by dynamically linked libraries (DLL). However, all dynamic analyses techniques - including API hooking - have to face the adversarial behaviour of \textit{evasive malware} strains, which check if they are being executed in a hostile environment and conceal their malicious behaviour accordingly. Furthermore, the majority of API hooking techniques proposed to date in literature are easily detectable by malware and are not equipped with any cloaking method to hide their presence from evasive malware.
+
+We propose a robust library and system call tracer for Windows applications, specialized in evasive malware. To implement our tool, we used the Intel Pin dynamic instrumentation framework, which allows to transparently inject analysis code in a running binary program. In addition, our tool was integrated with BluePill, a stealthy execution framework developed at Sapienza University and Royal Holloway university, enabling it to counteract a wide range of evasive techniques. Our tracer is capable of tracing input parameters, output buffers and return values of a plethora of system calls (including Windows Native APIs) and library calls, as well as the occurrence of user-mode callbacks and Windows Asynchronous Procedure Call. We first evaluated our tool on a set of benign applications performing a variety of tasks and exercising a large number of functions. Then, we validated it through the use of a popular security product aimed at assessing a how stealthy a malware analysis system is with respect to a large portion of public evasion techniques employed by real malware families.  
 
 \end{abstract}
 \endgroup
