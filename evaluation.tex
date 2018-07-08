@@ -290,11 +290,218 @@ false (\texttt{0x0}), thus showing once more that a debugger was not discovered.
     basewidth = {.48em}
 }
 
-Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. When invoked 
-  
+Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. Its second parameter is utilized to specify the type of process information to be retrieved. When set to \texttt{ProcessDebugPort} (value \texttt{0x7}), the Native API provides information on whether or not the supplied process is being debugged. Specifically, if a debugger is present, the \texttt{ProcessInformation} output parameter is set to a non-zero port number, while, if the process is not under a debugger, this parameter is set to zero. Al-Khaser performs this check and, once more, BlueTracer recorded it (\textit{Listing 4.3}). In particular, we can see from \texttt{arg 1}'s value that \texttt{ProcessDebugPort} is adopted. Unfortunately, this time, we cannot tell from the log that a debugger has not been detected because the output paramater containing this information (\texttt{arg 2}) is a pointer to a \texttt{struct}, which changes based on the type of process information requested. BlueTracer does not yet address these complex cases and we are planning to address them in future versions of the tool.  
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Log entry relative to \texttt{NtQueryInformationProcess}},captionpos=b]
+~~3160~~ 3186 ntdll.dll!NtQueryInformationProcess
+3186 	arg 0: 0xffffffff (type=HANDLE, size=0x4)
+3186 	arg 1: 0x7 (type=int, size=0x4)
+3186 	arg 2: 0x002bf6cc (type=<struct>*, size=0x4)
+3186 	arg 3: 0x0 (type=unsigned int, size=0x4)
+3186 	arg 4: 0x003c0e98 (type=unsigned int*, size=0x4)
+3186    succeeded =>
+3186 	arg 2: 0x002bf6cc (type=<struct>*, size=0x4)
+3186 	arg 4: 0x003c0e98 => 0x3c0ea0 (type=unsigned int*, size=0x4)
+3186 	retval: 0x0 (type=NTSTATUS, size=0x4
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}  
 
 \subsection{Anti-Sandbox Timing-based}
+
+Anti-sandbox timing-based checks have the objective of hindering dynamic analysis by making sandboxes time out and, in some cases, they also measure the time elapsed between sleep operations to detect time fast-forwarding strategies. Luckily, BluePill \cite{BluePill} addresses these checks by adopting a sophisticated strategy based on manipulating the timer behaviour of a process. This means that BlueTracer can record timing-based checks without worrying about being detected.
+
+The \texttt{NtDelayExecution} Native API is lowest level user mode mechanism which can be employed to suspend execution. It takes as input two paramaters: a boolean that makes the Native API alertable when set to \texttt{true} and a \texttt{LARGE\_INTEGER} defining the delay interval. If the value for the second parameter is negative, it specifies the \textit{relative} amount to sleep in units of 100 nanoseconds; otherwise, it indicates an \textit{absolute time}, i.e. the date and time when to stop sleeping. Al-Khaser makes use of this Native API and BlueTracer was able to correctly trace it (\textit{Listing 4.4}). In particular, from the log entry, we can see that a negative delay was specified, meaning that a \textit{relative} time to sleep was provided.  
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Log entry relative to \texttt{NtDelayExecution}},captionpos=b]
+~~3160~~ 46332 ntdll.dll!NtDelayExecution
+46332 	arg 0: 0x0 (type=bool, size=0x1)
+46332 	arg 1: 0xffffffff4d2fa200(hex) (type=LARGE_INTEGER*, size=0x4)
+46332    succeeded =>
+46332 	retval: 0x0 (type=NTSTATUS, size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}   
+
+\texttt{WaitForSingleObject} is also often used to wait until a time-out interval elapses. In input, it receives an handle to an object and a time-out interval in milliseconds. Then, it waits until the provided object is in the signaled state or the time-out runs out. Al-Khaser also adopts this API in its set of timing-based checks. Once more, BlueTracer was capable of recording its occurrence (\textit{Listing 4.5}). It is relevant to point out that the return value is \texttt{0x102}, which indicates that the API has returned because the time-out interval has elapsed, just as expected.
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Log entry relative to \texttt{WaitForSingleObject}},captionpos=b]
+~~3160~~ 50077 kernel32.dll!WaitForSingleObject
+50077 	arg 0: 0x204 (name=hHandle, type=DWORD, size=0x4)
+50077 	arg 1: 0x493e0 (name=dwMilliseconds, type=DWORD, size=0x4)
+50077    executed kernel32.dll!WaitForSingleObject =>
+50077 	retval: 0x102 (name=Return value, type=DWORD, size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+} 
+
+The most well-known API for suspending execution is surely \texttt{sleep}, that simply takes as input the number of milliseconds for which execution is to be delayed. Due to its popularity, Al-Khaser had to adopt it and, again, BlueTracer's logs showed evidence of its usage (\textit{Listing 4.6}). Specifically, from the log file, it can be deduced that \texttt{sleep} was used in a loop, as it is invoked many times subsequently.
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Portion of \texttt{Sleep} loop },captionpos=b]
+~~3160~~ 9225 kernel32.dll!Sleep
+9225 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+~~3160~~ 9226 KERNELBASE.dll!Sleep
+9226 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+9226    executed KERNELBASE.dll!Sleep =>
+9226 	retval: 0x00000000 (name=Return value, type=void, size=0x0)
+~~3160~~ 9227 ntdll.dll!NtYieldExecution
+9227    failed (error=0x40000024) =>
+9227 	retval: 0x40000024 (type=NTSTATUS, size=0x4)
+~~3160~~ 9228 kernel32.dll!Sleep
+9228 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+~~3160~~ 9229 KERNELBASE.dll!Sleep
+9229 	arg 0: 0xf (name=dwMilliseconds, type=DWORD, size=0x4)
+9229    executed KERNELBASE.dll!Sleep =>
+9229 	retval: 0x00000000 (name=Return value, type=void, size=0x0)
+~~3160~~ 9230 ntdll.dll!NtYieldExecution
+9230    failed (error=0x40000024) =>
+9230 	retval: 0x40000024 (type=NTSTATUS, size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}   
+
 \subsection{Human Interaction Detection}
+
+The idea behind human interaction detection checks is to uncover the presence of a sandbox based on the lack of human interaction with the system; in fact, in real environments users typically perform some detectable activities when carrying out their tasks. A classical example of such activities is moving the mouse cursor.  
+
+The mouse cursor position can be obtained through the use of the \texttt{GetCursorPos} API, which has a single output parameter containing a pointer to a \texttt{POINT struct}. Such data structure stores the retrieved position of the mouse cursor, in screen coordinates. Al-Khaser employs the \texttt{GetCursorPos} API to check if there is some kind of mouse movement in the sandbox. Even in this case, BlueTracer proved to work well as it traced the API's invocation (\textit{Listing 4.7}). It is interesting to notice that, from the log, it can be also deduced how the actual check is carried out by Al-Khaser. In fact, \texttt{GetCursorPos} is called, followed by a \texttt{Sleep} and another \texttt{GetCursorPos} invocation. In light of this, it is likely that an initial cursor position was first retrieved, which was later compared with the cursor position obtained after the sleep operation, with the aim of determining if the mouse cursor had moved in the mean time.
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={\texttt{GetCursorPos} evidence in the log },captionpos=b]
+~~3160~~ 17964 USER32.dll!GetCursorPos
+17964 	arg 0: 0x002bf684 (name=lpPoint, type=struct*|tagPOINT, size=0x40)
+17964    executed USER32.dll!GetCursorPos =>
+17964 	arg 0: 0x002bf684 (name=lpPoint, type=struct*|tagPOINT, size=0x40)
+17964 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+~~3160~~ 17965 kernel32.dll!Sleep
+17965 	arg 0: 0x1388 (name=dwMilliseconds, type=DWORD, size=0x4)
+~~3160~~ 17966 KERNELBASE.dll!Sleep
+17966 	arg 0: 0x1388 (name=dwMilliseconds, type=DWORD, size=0x4)
+17966    executed KERNELBASE.dll!Sleep =>
+17966 	retval: 0x00000000 (name=Return value, type=void, size=0x0)
+~~3160~~ 17967 USER32.dll!GetCursorPos
+17967 	arg 0: 0x002bf698 (name=lpPoint, type=struct*|tagPOINT, size=0x40)
+17967    executed USER32.dll!GetCursorPos =>
+17967 	arg 0: 0x002bf698 (name=lpPoint, type=struct*|tagPOINT, size=0x40)
+17967 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}   
+
 \subsection{Anti-Virtualization}
 \subsection{Anti-Analysis}
 

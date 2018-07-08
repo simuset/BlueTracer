@@ -14,7 +14,7 @@ ANTI-DEBUGGER
 
 ~~3160~~ 3186 ntdll.dll!NtQueryInformationProcess
 3186 	arg 0: 0xffffffff (type=HANDLE, size=0x4)
-3186 	arg 1: 0x7 (type=int, size=0x4) <-- ProcessDebugPort
+3186 	arg 1: 0x7 (type=int, size=0x4)
 3186 	arg 2: 0x002bf6cc (type=<struct>*, size=0x4)
 3186 	arg 3: 0x0 (type=unsigned int, size=0x4)
 3186 	arg 4: 0x003c0e98 (type=unsigned int*, size=0x4)
@@ -25,7 +25,7 @@ ANTI-DEBUGGER
 
 ~~3160~~ 4017 ntdll.dll!NtSetInformationThread
 4017 	arg 0: 0xfffffffe (type=HANDLE, size=0x4)
-4017 	arg 1: 0x11 (type=int, size=0x4) <-- Hides thread from debugger
+4017 	arg 1: 0x11 (type=int, size=0x4)
 4017 	arg 2: <null> (type=<struct>*, size=0x4)
 4017 	arg 3: 0x0 (type=unsigned int, size=0x4)
 4017    succeeded =>
