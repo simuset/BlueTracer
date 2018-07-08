@@ -194,6 +194,12 @@ WINDOW CLASS
 35246    executed USER32.dll!FindWindowW =>
 35246 	retval: 0x0 (name=Return value, type=DWORD, size=0x4
 
+~~3160~~ 35247 USER32.dll!FindWindowW
+35247 	arg 0: <null> (name=lpClassName, type=wchar_t*, size=0x2)
+35247 	arg 1: VBoxTrayToolWnd (name=lpWindowName, type=wchar_t*, size=0x2)
+35247    executed USER32.dll!FindWindowW =>
+35247 	retval: 0x0 (name=Return value, type=DWORD, size=0x4)
+
 LOADED DLLS
 
 ~~3160~~ 12708 kernel32.dll!GetModuleHandleW

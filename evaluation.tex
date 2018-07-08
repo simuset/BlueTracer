@@ -86,7 +86,7 @@ where:
 \item $Events$ is the total number of Native API and API calls performed by the analyzed application.
 \end{itemize}
 
-\textit{Table 4.2} lists the overhead per event value of each benign application for which the execution time in the \textbf{Complete} mode of operation could be obtained. In this case we can see that the typical overhead is approximately up to 22$\times10^{-5}$ seconds, with the compression programs being an exception, as they have a greater overhead per event value than the rest.
+\textit{Table 4.2} lists the overhead per event value of each benign application for which the execution time in the \textbf{Complete} mode of operation could be obtained. In this case we can see that the typical overhead is approximately in the 4$\times10^{-5}$ - 22$\times10^{-5}$ seconds range, with the compression programs being an exception, as they have a greater overhead per event value than the rest.
 
 \vspace*{0.8cm}
 \begin{sidewaystable}
@@ -290,7 +290,7 @@ false (\texttt{0x0}), thus showing once more that a debugger was not discovered.
     basewidth = {.48em}
 }
 
-Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. Its second parameter is utilized to specify the type of process information to be retrieved. When set to \texttt{ProcessDebugPort} (value \texttt{0x7}), the Native API provides information on whether or not the supplied process is being debugged. Specifically, if a debugger is present, the \texttt{ProcessInformation} output parameter is set to a non-zero port number, while, if the process is not under a debugger, this parameter is set to zero. Al-Khaser performs this check and, once more, BlueTracer recorded it (\textit{Listing 4.3}). In particular, we can see from \texttt{arg 1}'s value that \texttt{ProcessDebugPort} is adopted. Unfortunately, this time, we cannot tell from the log that a debugger has not been detected because the output paramater containing this information (\texttt{arg 2}) is a pointer to a \texttt{struct}, which changes based on the type of process information requested. BlueTracer does not yet address these complex cases and we are planning to address them in future versions of the tool.  
+Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. Its second parameter is utilized to specify the type of process information to be retrieved. When set to \texttt{ProcessDebugPort} (value \texttt{0x7}), the Native API provides information on whether or not the supplied process is being debugged. Specifically, if a debugger is present, the \texttt{ProcessInformation} output parameter is set to a non-zero port number, while, if the process is not under a debugger, this parameter is set to zero \cite{Sikorski:2012:PMA:2181153}. Al-Khaser performs this check and, once more, BlueTracer recorded it (\textit{Listing 4.3}). In particular, it can be deduced from \texttt{arg 1}'s value that \texttt{ProcessDebugPort} is adopted. Unfortunately, this time, we cannot tell from the log that a debugger has not been detected because the output paramater containing this information (\texttt{arg 2}) is a pointer to a \texttt{struct}, which changes based on the type of process information requested. BlueTracer does not yet address these complex cases and we are planning to address them in future versions of the tool.  
 
 \vspace{0.5cm}
 \lstset{
@@ -334,7 +334,7 @@ Debugger detection is not only achieved through the use of Windows APIs. In fact
 
 Anti-sandbox timing-based checks have the objective of hindering dynamic analysis by making sandboxes time out and, in some cases, they also measure the time elapsed between sleep operations to detect time fast-forwarding strategies. Luckily, BluePill \cite{BluePill} addresses these checks by adopting a sophisticated strategy based on manipulating the timer behaviour of a process. This means that BlueTracer can record timing-based checks without worrying about being detected.
 
-The \texttt{NtDelayExecution} Native API is lowest level user mode mechanism which can be employed to suspend execution. It takes as input two paramaters: a boolean that makes the Native API alertable when set to \texttt{true} and a \texttt{LARGE\_INTEGER} defining the delay interval. If the value for the second parameter is negative, it specifies the \textit{relative} amount to sleep in units of 100 nanoseconds; otherwise, it indicates an \textit{absolute time}, i.e. the date and time when to stop sleeping. Al-Khaser makes use of this Native API and BlueTracer was able to correctly trace it (\textit{Listing 4.4}). In particular, from the log entry, we can see that a negative delay was specified, meaning that a \textit{relative} time to sleep was provided.  
+The \texttt{NtDelayExecution} Native API is lowest level user mode mechanism which can be employed to suspend execution. It takes as input two paramaters: a boolean that makes the Native API alertable when set to \texttt{true} and a \texttt{LARGE\_INTEGER} defining the delay interval. If the value for the second parameter is negative, it specifies the \textit{relative} amount to sleep in units of 100 nanoseconds; otherwise, it indicates an \textit{absolute time}, i.e. the date and time when to stop sleeping. Al-Khaser makes use of this Native API and BlueTracer was able to correctly trace it (\textit{Listing 4.4}). In particular, from the log entry, it can be seen that a negative delay was specified, meaning that a \textit{relative} time to sleep was provided.  
 
 \vspace{0.5cm}
 \lstset{
@@ -503,11 +503,201 @@ The mouse cursor position can be obtained through the use of the \texttt{GetCurs
 }   
 
 \subsection{Anti-Virtualization}
+Anti-virtualization checks look for a number of artifacts in the guest operating system introduced by hypervisors which are specific to virtual machines.
+
+A common way to detect virtualization is by checking Windows registry artifacts. The Windows registry is a hierarchical tree-like database containing critical data for both the Windows operating system and its applications. Each node of the tree is a \textit{key} and every key embodies \textit{subkeys} and \textit{values} \cite{Regs}. The existence of some specific registry keys is enough to reveal the presence of virtualization. For instance, the key \texttt{HKEY\_LOCAL\_MACHINE\textbackslash}\texttt{{HARDWARE}\textbackslash{ACPI}\textbackslash{DSDT}}\texttt{\textbackslash{VBOX}\textbackslash\_\_}
+gives away the presence of VirtualBox. Al-Khaser looks for these kinds of Windows registry artifacts and BlueTracer is able to record such events (\textit{Listing 4.8}). From the listing below, it can be observed that the aforementioned registry key is searched through the use of the \texttt{RegOpenKeyExW} API, which normally opens the specified registry key. However, in this case, a file not found error value (\texttt{0x2}) is returned since the registry key is not found, thus also confirming BlueTracer's ability to remain hidden.
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={Log entry relative to \texttt{RegOpenKeyExW} },captionpos=b]
+~~3160~~ 30134 ADVAPI32.dll!RegOpenKeyExW
+30134 	arg 0: 0x80000002 (name=hKey, type=DWORD, size=0x4)
+30134 	arg 1: HARDWARE\ACPI\DSDT\VBOX__ (name=lpSubKey, type=wchar_t*, size=0x2)
+30134 	arg 2: 0x0 (name=ulOptions, type=DWORD, size=0x4)
+30134 	arg 3: 0x20019 (name=samDesired, type=DWORD, size=0x4)
+30134 	arg 4: 0x002bf6e4 => 0x0 (name=phkResult, type=DWORD*, size=0x4)
+~~3160~~ 30135 kernel32.dll!RegOpenKeyExW
+30135 	arg 0: 0x80000002 (name=hKey, type=DWORD, size=0x4)
+30135 	arg 1: HARDWARE\ACPI\DSDT\VBOX__ (name=lpSubKey, type=wchar_t*, size=0x2)
+30135 	arg 2: 0x0 (name=ulOptions, type=DWORD, size=0x4)
+30135 	arg 3: 0x20019 (name=samDesired, type=DWORD, size=0x4)
+30135 	arg 4: 0x002bf6e4 => 0x0 (name=phkResult, type=DWORD*, size=0x4)
+30135    executed kernel32.dll!RegOpenKeyExW =>
+30135 	arg 4: 0x002bf6e4 => 0x0 (name=phkResult, type=DWORD*, size=0x4)
+30135 	retval: 0x2 (name=Return value, type=(long/int), size=0x4))
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}   
+
+In addition to Windows registry artifacts, there are also many file system artifacts which can be checked in order to uncover the presence of a virtualized environment. Typically, specific files are searched. Al-Khaser, for instance, looks for a number of files, one of which is the \texttt{VboxMouse.sys} driver of Virtualbox. Once more, BlueTracer was able to trace these file-searching events, including the ones relative to \texttt{VboxMouse.sys} (\textit{Listing 4.9}). The \texttt{GetFileAttributesW} API, as the name suggests, is typically employed to obtain file attributes for the specified file. From \textit{Listing 4.9} it can be seen that the API returns -1, since the requested file was not found. Therefore, even in this situation, BlueTracer was also undetected.
+
+\vspace{1cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={ Log portion relative to the search for \texttt{VboxMouse.sys} search},captionpos=b]
+~~3160~~ 24979 kernel32.dll!GetFileAttributesW
+24979 	arg 0: C:\Windows\system32\drivers\VBoxMouse.sys
+ (name=lpFileName, type=wchar_t*, size=0x2)
+~~3160~~ 24980 KERNELBASE.dll!GetFileAttributesW
+24980 	arg 0: C:\Windows\system32\drivers\VBoxMouse.sys
+ (name=lpFileName, type=wchar_t*, size=0x2)
+24980    executed KERNELBASE.dll!GetFileAttributesW =>
+24980 	retval: 0xffffffff (name=Return value, type=DWORD, size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}     
+
+\iffalse
+-Registry Artifacts
+-File system artifacts -> Virtual Devices here?
+-Window
+-DLLs
+\fi
+
+A virtualized environment can be also discovered by looking for specific windows. The \texttt{FindWindow} API returns an handle of a window belonging to a specific class or having the specified name. This API can be exploited to check for the presence of a window associated to a virtualization program. A typical example of this trick, which is implemented by Al-Khaser, is searching for a window named "VBoxTrayToolWnd", as the presence of such window indicates that VirtualBox is being utilized. BlueTracer also detected this check (\textit{Listing 4.10}). As it can be seen, the return value is \texttt{null}, meaning that the window was not found and that BlueTracer did not reveal its presence.
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={ Log entry relative to \texttt{FindWindowW}},captionpos=b]
+~~3160~~ 35247 USER32.dll!FindWindowW
+35247 	arg 0: <null> (name=lpClassName, type=wchar_t*, size=0x2)
+35247 	arg 1: VBoxTrayToolWnd (name=lpWindowName, type=wchar_t*, size=0x2)
+35247    executed USER32.dll!FindWindowW =>
+35247 	retval: 0x0 (name=Return value, type=DWORD, size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}    
+
 \subsection{Anti-Analysis}
 
+\iffalse
+Check for processes of common anti-analysis tools
+\fi
+
+Lastly, anti-analysis checks are aimed at detecting the existence processes belonging to popular analysis tools. One of such tools is Process Monitor (\texttt{procmon.exe}), which is an advanced Windows monitoring tool that shows real-time file system, registry and process/thread activity \cite{procmon}. Al-Khaser looks for the processes of many analysis tools, including the process associated to Process Monitor. Again, BlueTracer was also able to successfully log anti-analysis events, even the ones directed at uncovering the presence of Process Monitor (\textit{Listing 4.11}). From the listing below, it can be seen that the course of action adopted by Al-Khaser is quite straightforward. It first takes a snapshot of all the processes in the system with \texttt{CreateToolhelp32Snapshot}. Then, for each process in the snapshot, it retrieves the corresponding name, through the use of \texttt{Process32FirstW} at the beginning and \texttt{Process32NextW} afterwards, and compares it with \texttt{procmon.exe} via \texttt{StrCmpIW}. 
+
+\vspace{0.5cm}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}
+\begin{lstlisting}[caption={\texttt{procmon.exe} search},captionpos=b]
+~~3160~~ 53940 kernel32.dll!CreateToolhelp32Snapshot
+53940 	arg 0: 0x2 (name=dwFlags, type=DWORD, size=0x4)
+53940 	arg 1: 0x0 (name=th32ProcessID, type=DWORD, size=0x4)
+53940    executed kernel32.dll!CreateToolhelp32Snapshot =>
+53940 	retval: 0x1fc (name=Return value, type=DWORD, size=0x4)
+~~3160~~ 53941 kernel32.dll!Process32FirstW
+53941 	arg 0: 0x1fc (name=hSnapshot, type=DWORD, size=0x4)
+53941 	arg 1: 0x002b7408 (name=lppe, type=struct*|tagPROCESSENTRY32W, size=0x1160)
+53941    executed kernel32.dll!Process32FirstW =>
+53941 	arg 1: 0x002b7408 (name=lppe, type=struct*|tagPROCESSENTRY32W, size=0x1160)
+53941 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+~~3160~~ 53942 SHLWAPI.dll!StrCmpIW
+53942 	arg 0: [System Process] (name=psz1, type=wchar_t*, size=0x2)
+53942 	arg 1: procmon.exe (name=psz2, type=wchar_t*, size=0x2)
+53942    executed SHLWAPI.dll!StrCmpIW =>
+53942 	retval: 0xffffffff (name=Return value, type=(long/int), size=0x4)
+~~3160~~ 53943 kernel32.dll!Process32NextW
+53943 	arg 0: 0x1fc (name=hSnapshot, type=DWORD, size=0x4)
+53943 	arg 1: 0x002b7408 (name=lppe, type=struct*|tagPROCESSENTRY32W, size=0x1160)
+53943    executed kernel32.dll!Process32NextW =>
+53943 	arg 1: 0x002b7408 (name=lppe, type=struct*|tagPROCESSENTRY32W, size=0x1160)
+53943 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+~~3160~~ 53944 SHLWAPI.dll!StrCmpIW
+53944 	arg 0: System (name=psz1, type=wchar_t*, size=0x2)
+53944 	arg 1: procmon.exe (name=psz2, type=wchar_t*, size=0x2)
+53944    executed SHLWAPI.dll!StrCmpIW =>
+53944 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+}   
 
 \iffalse
 \section{JoeBox}
 \fi
 
 \section{Conclusions}
+In this chapter we have outlined the results of BlueTracer's experimental evaluation. In order to assess BlueTracer's run-time overhead, we have tested it on a number of applications performing various tasks, employing a four different modes of operation. We have also introduced the overhead per event metric as a way of quantifying the run-time overhead introduced by BlueTracer. The results showed that the typical overhead per event is in the 4$\times10^{-5}$ - 22$\times10^{-5}$ seconds range.
+Then we validated BlueTracer with Al-Khaser, an open-source application employed to assess how stealthy an analysis system is with respect to many evasion techniques used in the wild. BlueTracer was able to remain hidden to all the checks performed by Al-Khaser, thus proving to be effective at staying undetected. Furthermore, BlueTracer's tracking abilities also turned out to be efficacious, since evidence of a large portion of Al-Khaser's techniques could found in BlueTracer's log.
