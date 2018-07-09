@@ -19,7 +19,7 @@ All the tests were conducted on a VirtualBox (version 5.2.6)  Virtual Machine wi
 \begin{itemize}
 \item \textbf{Operating System:} Linux Mint 17.3 
 \item \textbf{Processor:} Intel Core i7-3537U CPU @ 2.00 GHz $\times$ 2
-\item \textbf{RAM:} 8 GBs  
+\item \textbf{RAM:} 8 GB  
 \end{itemize}
  
 
@@ -65,12 +65,12 @@ We first recorded the native execution time for each of the aforementioned appli
 \item \textbf{Empty Image.} All image notification functions are empty, that is, they just increase a global counter value. This means that no analysis routines are inserted at run-time. 
 \item \textbf{Empty Routine.} All analysis routines are empty, i.e., all they do is, once again, increase a global counter value.
 \item \textbf{Main Image.} Only Native APIs and APIs being directly invoked from the main executable of the pinned application are traced. This is BlueTracer's default mode of operation. 
-\item \textbf{Complete.} Every event is traced, also including Native APIs and APIs being invoked outside the main executable.
+\item \textbf{Complete.} Every event is traced, also including Native APIs and APIs being invoked outside the main executable (e.g., within libraries).
 \end{itemize}
 
 We tested every benign application in the previous page adopting each of the above operation modes, which can be set using BlueTracer's configuration file. Essentially, \textbf{Empty Image} and \textbf{Empty Routine} were utilized to determine the run-time overhead introduced just by the Pin's framework, when no analysis is actually performed. On the contrary, \textbf{Main Image} was adopted to show BlueTracer's overhead during a typical use of the tool, as \textbf{Main Image} is BlueTracer's default mode. Lastly, \textbf{Complete} was employed to determine how BlueTracer's behaves under heavy stress conditions.
 
-We tested each application three times and then recorded the average execution time. For the compression programs, the file being compressed was the Puppy Linux ISO (\texttt{xenialpup-7.5-uefi.iso}), of size 332 MBs. On the other hand, for the encryption and hashing utilities, we used the Ubuntu 18.04 ISO (\texttt{ubuntu-18.04-desktop-amd64}), the size of which is 1.8 GBs. During the tests, we also decided to stop the execution of the pinned application if, after it had been running for more than 10 minutes, the log file was greater than 5 GBs. This had to be done due to the hard drive limitations of the testing platform.      
+We tested each application three times and then recorded the average execution time. For the compression programs, the file being compressed was the Puppy Linux ISO (\texttt{xenialpup-7.5-uefi.iso}), of size 332 MBs. On the other hand, for the encryption and hashing utilities, we used the Ubuntu 18.04 ISO (\texttt{ubuntu-18.04-desktop-amd64}), the size of which is 1.8 GB. During the tests, we also decided to stop the execution of the pinned application if, after it had been running for more than 10 minutes, the log file was greater than 5 GB. This had to be done due to the hard drive limitations of the testing platform.      
 
 The recorded execution times can be observed from \textit{Table 4.1}. As it can be seen, as more demanding modes of operation are employed, the run-time increases, although the increment is not uniform, but is actually quite variable across the different applications.
 
@@ -216,9 +216,9 @@ Even in this case, BlueTracer performed well, as the majority of the checks coul
 
 Let us now show how some of these checks appeared on the log, in order to give a better idea of what BlueTracer is capable of. To be as clear as possible, we will use the same checks categorization as Al-Khaser's.
 
-\subsection{Anti-Debugging}
+\subsubsection*{Anti-Debugging}
 
-Anti-debugging checks are essentially aimed at determining if a program is running under a debugger. As already mentioned in section 2.1.5, there exist Windows APIs whose objective is exactly to discover if the calling process is being debugged.
+Anti-debugging checks are essentially aimed at determining if a program is running under a debugger. As already mentioned in Section~\ref{Debugger}, there exist Windows APIs whose objective is exactly to discover if the calling process is being debugged.
 A well-known API of this kind is \texttt{IsDebuggerPresent}, which returns a nonzero value if the calling process is running in the context of a debugger and zero otherwise. Such API is employed in one of Al-Khaser's anti-debugging checks and is appropriately recorded by BlueTracer (\textit{Listing 4.1}). As it can be seen below, the return value is zero, as no debugger is detected.
 
 \vspace{0.5cm}
@@ -290,7 +290,7 @@ false (\texttt{0x0}), thus showing once more that a debugger was not discovered.
     basewidth = {.48em}
 }
 
-Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. Its second parameter is utilized to specify the type of process information to be retrieved. When set to \texttt{ProcessDebugPort} (value \texttt{0x7}), the Native API provides information on whether or not the supplied process is being debugged. Specifically, if a debugger is present, the \texttt{ProcessInformation} output parameter is set to a non-zero port number, while, if the process is not under a debugger, this parameter is set to zero \cite{Sikorski:2012:PMA:2181153}. Al-Khaser performs this check and, once more, BlueTracer recorded it (\textit{Listing 4.3}). In particular, it can be deduced from \texttt{arg 1}'s value that \texttt{ProcessDebugPort} is adopted. Unfortunately, this time, we cannot tell from the log that a debugger has not been detected because the output paramater containing this information (\texttt{arg 2}) is a pointer to a \texttt{struct}, which changes based on the type of process information requested. BlueTracer does not yet address these complex cases and we are planning to address them in future versions of the tool.  
+Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. Its second parameter is utilized to specify the type of process information to be retrieved. When set to \texttt{ProcessDebugPort} (value \texttt{0x7}), the Native API provides information on whether the supplied process is being debugged. Specifically, if a debugger is present, the \texttt{ProcessInformation} output parameter is set to a non-zero port number, while, if the process is not under a debugger, this parameter is set to zero \cite{Sikorski:2012:PMA:2181153}. Al-Khaser performs this check and, once more, BlueTracer recorded it (\textit{Listing 4.3}). In particular, it can be deduced from \texttt{arg 1}'s value that \texttt{ProcessDebugPort} is adopted. Unfortunately, this time, we cannot tell from the log that a debugger has not been detected because the output paramater containing this information (\texttt{arg 2}) is a pointer to a \texttt{struct}, which changes based on the type of process information requested. BlueTracer does not yet address these complex cases and we are planning to address them in future versions of the tool.  
 
 \vspace{0.5cm}
 \lstset{
@@ -330,11 +330,11 @@ Debugger detection is not only achieved through the use of Windows APIs. In fact
     basewidth = {.48em}
 }  
 
-\subsection{Anti-Sandbox Timing-based}
+\subsubsection*{Anti-Sandbox Timing-based}
 
 Anti-sandbox timing-based checks have the objective of hindering dynamic analysis by making sandboxes time out and, in some cases, they also measure the time elapsed between sleep operations to detect time fast-forwarding strategies. Luckily, BluePill \cite{BluePill} addresses these checks by adopting a sophisticated strategy based on manipulating the timer behaviour of a process. This means that BlueTracer can record timing-based checks without worrying about being detected.
 
-The \texttt{NtDelayExecution} Native API is lowest level user mode mechanism which can be employed to suspend execution. It takes as input two paramaters: a boolean that makes the Native API alertable when set to \texttt{true} and a \texttt{LARGE\_INTEGER} defining the delay interval. If the value for the second parameter is negative, it specifies the \textit{relative} amount to sleep in units of 100 nanoseconds; otherwise, it indicates an \textit{absolute time}, i.e. the date and time when to stop sleeping. Al-Khaser makes use of this Native API and BlueTracer was able to correctly trace it (\textit{Listing 4.4}). In particular, from the log entry, it can be seen that a negative delay was specified, meaning that a \textit{relative} time to sleep was provided.  
+The \texttt{NtDelayExecution} Native API is lowest level user mode mechanism which can be employed to suspend execution. It takes as input two paramaters: a boolean that makes the Native API alertable when set to \texttt{true} and a \texttt{LARGE\_INTEGER} defining the delay interval. If the value for the second parameter is negative, it specifies the \textit{relative} amount to sleep in units of 100 nanoseconds; otherwise, it indicates an \textit{absolute time}, i.e., the date and time when to stop sleeping. Al-Khaser makes use of this Native API and BlueTracer was able to correctly trace it (\textit{Listing 4.4}). In particular, from the log entry, it can be seen that a negative delay was specified, meaning that a \textit{relative} time to sleep was provided.  
 
 \vspace{0.5cm}
 \lstset{
@@ -452,7 +452,7 @@ The most well-known API for suspending execution is surely \texttt{sleep}, that 
     basewidth = {.48em}
 }   
 
-\subsection{Human Interaction Detection}
+\subsubsection*{Human Interaction Detection}
 
 The idea behind human interaction detection checks is to uncover the presence of a sandbox based on the lack of human interaction with the system; in fact, in real environments users typically perform some detectable activities when carrying out their tasks. A classical example of such activities is moving the mouse cursor.  
 
@@ -502,7 +502,7 @@ The mouse cursor position can be obtained through the use of the \texttt{GetCurs
     basewidth = {.48em}
 }   
 
-\subsection{Anti-Virtualization}
+\subsubsection*{Anti-Virtualization}
 Anti-virtualization checks look for a number of artifacts in the guest operating system introduced by hypervisors which are specific to virtual machines.
 
 A common way to detect virtualization is by checking Windows registry artifacts. The Windows registry is a hierarchical tree-like database containing critical data for both the Windows operating system and its applications. Each node of the tree is a \textit{key} and every key embodies \textit{subkeys} and \textit{values} \cite{Regs}. The existence of some specific registry keys is enough to reveal the presence of virtualization. For instance, the key \texttt{HKEY\_LOCAL\_MACHINE\textbackslash}\texttt{{HARDWARE}\textbackslash{ACPI}\textbackslash{DSDT}}\texttt{\textbackslash{VBOX}\textbackslash\_\_}
@@ -631,7 +631,7 @@ A virtualized environment can be also discovered by looking for specific windows
     basewidth = {.48em}
 }    
 
-\subsection{Anti-Analysis}
+\subsubsection{Anti-Analysis}
 
 \iffalse
 Check for processes of common anti-analysis tools
