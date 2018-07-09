@@ -52,6 +52,7 @@ Having in mind the goal of experimenting with a wide range of different function
 		\item \texttt{OpenSSL.} It was configured to employ 256-bit CBC AES.
 		\item \texttt{Crypt.} It adopts RC2 block encryption.
 		\end{itemize}
+\vspace{2cm}
 \item \textbf{Hashing Utilities}
 		\begin{itemize}
 		\item \texttt{File Checksum Integrity Verifier (FCIV).} It was set to use both MD5 and SHA1.
@@ -75,7 +76,7 @@ We tested each application three times and then recorded the average execution t
 The recorded execution times can be observed in \textit{Table 4.1}. As the reader can see, as more demanding modes of operation are employed, the running time increases, although the increment is not uniform, but is actually quite variable across the different applications.
 
 In light of this, to actually quantify the run-time overhead we decided to adopt the following metric:
-
+\vspace{-0.1cm}
 \begin{align*}
 \text{Overhead per Event} = \frac{T_{instrumented} - T_{native}}{Events}
 \end{align*}
@@ -89,7 +90,7 @@ where:
 
 \textit{Table 4.2} lists the overhead per event value of each benign application for which the execution time in the \textbf{Complete} mode of operation could be obtained. In this case we can see that the typical overhead is approximately in the range of 40 - 220 microseconds per operation, with the compression programs being an exception, as they have a greater overhead per event value than the rest.
 
-\vspace*{0.8cm}
+%\vspace*{0.8cm}
 \begin{sidewaystable}
 \centering
 %\begin{tabular}{cccccc}
@@ -253,8 +254,7 @@ A well-known API of this kind is \texttt{IsDebuggerPresent}, which returns a non
     basewidth = {.48em}
 }
 
-Another popular Windows API for debug detection is \texttt{CheckRemoteDebuggerPresent}, which determines if the specified process is being debugged by a "remote" debugger, i.e., a debugger residing in parallel and different process. Its second argument is a pointer to a boolean, which is set to true if the provided process is being debugged, or false otherwise. Al-Khaser also adopts this API, and, again, BlueTracer correctly logged its invocation (\textit{Listing 4.2}). In addition, it is worth noting that the output value for the second argument (\texttt{arg 1}) is 
-false (\texttt{0x0}), thus showing once more that a debugger was not discovered.   
+Another popular Windows API for debug detection is \texttt{CheckRemoteDebuggerPresent}, which determines if the specified process is being debugged by a "remote" debugger, i.e., a debugger residing in parallel and different process.
 
 \vspace{0.5cm}
 \lstset{
@@ -289,6 +289,9 @@ false (\texttt{0x0}), thus showing once more that a debugger was not discovered.
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
 }
+
+Its second argument is a pointer to a boolean, which is set to true if the provided process is being debugged, or false otherwise. Al-Khaser also adopts this API, and, again, BlueTracer correctly logged its invocation (\textit{Listing 4.2}). In addition, it is worth noting that the output value for the second argument (\texttt{arg 1}) is 
+false (\texttt{0x0}), thus showing once more that a debugger was not discovered.   
 
 Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. Its second parameter is utilized to specify the type of process information to be retrieved. When set to \texttt{ProcessDebugPort} (value \texttt{0x7}), the Native API provides information on whether the supplied process is being debugged. Specifically, if a debugger is present, the \texttt{ProcessInformation} output parameter is set to a non-zero port number, while, if the process is not under a debugger, this parameter is set to zero \cite{Sikorski:2012:PMA:2181153}. Al-Khaser performs this check and, once more, BlueTracer recorded it (\textit{Listing 4.3}). In particular, it can be deduced from \texttt{arg 1}'s value that \texttt{ProcessDebugPort} is adopted. Unfortunately, this time, we cannot tell from the log that a debugger has not been detected because the output paramater containing this information (\texttt{arg 2}) is a pointer to a \texttt{struct}, which changes based on the type of process information requested. BlueTracer does not yet address these complex cases and we are planning to address them in future versions of the tool.  
 
@@ -371,7 +374,7 @@ The \texttt{NtDelayExecution} Native API is the lowest level user mode mechanism
 
 \texttt{WaitForSingleObject} is also often used to wait until a time-out interval elapses. In input, it receives an handle to an object and a time-out interval in milliseconds. Then, it waits until the provided object is in the signaled state or the time-out runs out. Al-Khaser also adopts this API in its set of timing-based checks. Once more, BlueTracer was capable of recording its occurrence (\textit{Listing 4.5}). It is relevant to point out that the return value is \texttt{0x102}, which indicates that the API has returned because the time-out interval has elapsed, just as expected.
 
-\vspace{0.5cm}
+\vspace{1cm}
 \lstset{
     language=C++,
     frame=tb, % draw a frame at the top and bottom of the code block
@@ -550,10 +553,10 @@ gives away the presence of VirtualBox. Al-Khaser looks for these kinds of Window
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
 }   
-
+\vspace{1cm}
 In addition to Windows registry artifacts, there are also many file system artifacts which can be checked in order to uncover the presence of a virtualized environment. Typically, specific files are searched. Al-Khaser, for instance, looks for a number of files, one of which is the \texttt{VboxMouse.sys} driver of Virtualbox. Once more, BlueTracer was able to trace these file-searching events, including the ones relative to \texttt{VboxMouse.sys} (\textit{Listing 4.9}). The \texttt{GetFileAttributesW} API, as the name suggests, is typically employed to obtain file attributes for the specified file. From \textit{Listing 4.9} it can be seen that the API returns -1, since the requested file was not found. Therefore, even in this situation, BlueTracer was also undetected.
 
-\vspace{1cm}
+\vspace{0.5cm}
 \lstset{
     language=C++,
     frame=tb, % draw a frame at the top and bottom of the code block
@@ -596,7 +599,7 @@ In addition to Windows registry artifacts, there are also many file system artif
 -DLLs
 \fi
 
-A virtualized environment can be also discovered by looking for specific windows. The \texttt{FindWindow} API returns an handle of a window belonging to a specific class or having the specified name. This API can be exploited to check for the presence of a window associated to a virtualization program. A typical example of this trick, which is implemented by Al-Khaser, is searching for a window named "VBoxTrayToolWnd", as the presence of such window indicates that VirtualBox is being utilized. BlueTracer also detected this check (\textit{Listing 4.10}). As the reader can see, the return value is \texttt{null}, meaning that the window was not found and that BlueTracer did not reveal its presence.
+A virtualized environment can be also discovered by looking for specific windows. The \texttt{FindWindow} API returns an handle of a window belonging to a specific class or having the specified name. 
 
 \vspace{0.5cm}
 \lstset{
@@ -629,7 +632,10 @@ A virtualized environment can be also discovered by looking for specific windows
     stringstyle=\color{red}, % string color
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
-}    
+} 
+
+
+This API can be exploited to check for the presence of a window associated to a virtualization program. A typical example of this trick, which is implemented by Al-Khaser, is searching for a window named "VBoxTrayToolWnd", as the presence of such window indicates that VirtualBox is being utilized. BlueTracer also detected this check (\textit{Listing 4.10}). As the reader can see, the return value is \texttt{null}, meaning that the window was not found and that BlueTracer did not reveal its presence.   
 
 \subsubsection{Anti-Analysis}
 
@@ -638,7 +644,6 @@ Check for processes of common anti-analysis tools
 \fi
 
 Lastly, anti-analysis checks are aimed at detecting the existence of processes belonging to popular analysis tools. One of such tools is Process Monitor (\texttt{procmon.exe}), which is an advanced Windows monitoring tool that shows real-time file system, registry and process/thread activity \cite{procmon}. Al-Khaser looks for the processes of many analysis tools, including Process Monitor. Again, BlueTracer was also able to successfully log anti-analysis events, even the ones directed at uncovering the presence of Process Monitor (\textit{Listing 4.11}). From the listing below, it can be seen that the course of action adopted by Al-Khaser is quite straightforward. It first takes a snapshot of all the processes in the system with \texttt{CreateToolhelp32Snapshot}. Then, for each process in the snapshot, it retrieves the corresponding name, through the use of \texttt{Process32FirstW} at the beginning and \texttt{Process32NextW} afterwards, and compares it with \texttt{procmon.exe} via \texttt{StrCmpIW}. 
-
 \vspace{0.5cm}
 \lstset{
     language=C++,

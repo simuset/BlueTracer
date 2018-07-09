@@ -61,6 +61,7 @@ In the rest of the chapter we will proceed by describing how multi-threading was
 Finally, all the configuration options of the tool will be explained.          
 \fi
 
+\vspace{0.5cm}
 \begin{figure}[h]
 \centering
 \includegraphics[width=1\textwidth]{Figures/BlueTracer.pdf}
@@ -111,6 +112,7 @@ In order to bypass this limitation of the Pin's framework, the following strateg
 \begin{enumerate}
 \item When initializing the thread local data in \texttt{OnThreadStart}, \texttt{file\_write} is set to point to a function named \texttt{file\_open}.
 \item The first time a thread attempts to write data to file, \texttt{file\_open} is invoked.
+\vspace{2cm}
 \item \texttt{file\_open} carries out the following actions:
 \begin{enumerate}
 \item Opens the tracer's log file (this is safe since the file is not opened in a callback)
@@ -158,7 +160,8 @@ In Pin, the Native API is intercepted right before \texttt{sysenter} is executed
 \includegraphics[width=0.7\textwidth]{Figures/StackMainImage.pdf}
 \caption{\textit{Stack before} \texttt{sysenter} \textit{execution}}
 \label{sysenter}
-\end{figure}     
+\end{figure}  
+   
 Having outlined the general situation, it is finally possible to describe how the main image check is carried out:
 
 \begin{enumerate}
@@ -180,6 +183,8 @@ The idea is to create an array, named \texttt{syscallIDs}, where Native API name
 \item The \texttt{AddressOfNameOrdinals} array, which is an array of 16-bit ordinals existing in parallel with \texttt{AddressOfNames}, i.e., they possess the same number of elements and there is a direct relation between equivalent indices \cite{Sikorski:2012:PMA:2181153}.  
 \end{itemize}
 
+%\vspace{0.6cm}
+\newpage
 With this in mind, \texttt{syscallIDs} is built by carrying out the following actions for every element \texttt{iName} in \texttt{AddressOfNames}:
 
 \begin{enumerate}
@@ -188,7 +193,7 @@ With this in mind, \texttt{syscallIDs} is built by carrying out the following ac
 \item The pointed function is expected to begin \texttt{mov eax, syscall\_number}. As a result of this, the first byte should be \texttt{B8h} and the syscall number can be obtained by considering the next four bytes.  
 \end{enumerate}
 
-By following the above procedure, every element in \texttt{AddressOfNames} can be therefore mapped to the corresponding identifier. 
+By following the above procedure, every element in \texttt{AddressOfNames} can be therefore mapped to the corresponding identifier.
 
 \subsection{Information Representation and Retrieval}
 
@@ -196,7 +201,7 @@ When tracing Native APIs, it is wanted to record as much data as possible as wel
 In BlueTracer, this information was adapted from the Native API data provided by Dr.Memory \cite{DrMemory}, a memory monitoring tool based on the DynamoRIO DBI framework.
 
 For each Native API, the information related to it is contained in a \texttt{struct} of type \texttt{syscall\_info\_t} (\textit{Listing 3.2}). Most fields of such \texttt{struct} are self-explanatory. In particular, \texttt{num} is a \texttt{struct} storing two values indicating the system call number; these are filled in dynamically by Dr.Memory but are not needed by BlueTracer. Furthermore, the \texttt{flags} field is utilized to notify whether all the details of the Native API are known, as most Native APIs are undocumented. Undoubtedly though, a major role is played by the \texttt{arg} array, which is made up by \texttt{sysinfo\_arg\_t} \texttt{struct}s (\textit{Listing 3.3}) containing the data of the Native API arguments. This array is initialized with size \texttt{MAX\_ARGS\_IN\_ENTRY} (i.e., 18), since a Native API can have at most 18 arguments. 
-\\
+\vspace{0.5cm}
 \begin{lstlisting}[caption={\texttt{struct} containing Native API-related information},captionpos=b]
 	typedef struct _syscall_info_t {
 
@@ -283,24 +288,20 @@ Even for \texttt{syscall\_tracer}, each field is self-explanatory. The only one 
 \end{itemize}
 \begin{lstlisting}[caption={\texttt{struct} representing an argument of the Native API being traced},captionpos=b]
 typedef struct _drsys_arg_t {
-
 	// Whether operating pre-call (if true) or post-system call (if false)
 	bool pre;
-
 	int ordinal;			    // Parameter Ordinal				
 	int size;			        // Size	
 	uint flags;			        // SYSARG_ flags
 	int type;			        // Type
 	const char *type_name;		// Symbolic Name of the arg Type
-
 	// String describing the symbolic name of a named constant's enum
 	const char *enum_name;
-
 	// Argument value
-	ADDRINT value;
-	
+	ADDRINT value;	
 } drsys_arg_t
 \end{lstlisting}
+\newpage
 
 As previously mentioned in Section~\ref{LogFilesMultithreading}, each thread possesses its own log file, whose pointer resides in the thread local storage, and writes on it by means of the \texttt{file\_write} function, also located in the thread local storage (\textit{Listing 3.1}). The first Native API component being logged is its name and this is done with the following format:
 \\ 
@@ -315,16 +316,10 @@ Argument logging is done via the \texttt{print\_arg} function (\textit{Listing 3
 \end{itemize}
 
 \begin{itemize}
-\item Then, if the argument's type is primitive (e.g., \texttt{int}, \texttt{bool}, etc.),  \texttt{print\_simple\_value} is invoked to record its value. In particular, the second parameter of this function is a boolean which is set to \texttt{true} if it is wanted to print the argument's value with leading zeros (e.g., if the argument is of pointer type and the address it stores is being logged ) and \texttt{false} otherwise. The way \texttt{print\_simple\_value} operates is quite straightforward:
-\begin{enumerate}
-\item At the beginning the argument's value is simply logged, with leading zeroes or not depending on the previously mentioned parameter
-\item Then, if the argument is a pointer, it is determined if the value it points to needs to be logged. This occurs if the argument is being processed before the Native API execution (i.e., \texttt{pre} is \texttt{true}) and is an input parameter (i.e., \texttt{SYSARG\_READ} is contained in \texttt{flags}) or if the argument is being processed after the Native API execution (i.e., \texttt{pre} is \texttt{false}) and is an output parameter (i.e., \texttt{SYSARG\_WRITE} is contained in \texttt{flags}). The pointed value is obtained through the use of \texttt{PIN\_SafeCopy}, which copies the specified number of bytes from a source memory region to a destination memory region, guaranteeing safe return to the caller even if such regions are inaccessible.  
-\end{enumerate}
+\item Then, if the argument's type is primitive (e.g., \texttt{int}, \texttt{bool}, etc.),  \texttt{print\_simple\_value} is invoked to record its value. In particular, the second parameter of this function is a boolean which is set to \texttt{true} if it is wanted to print the argument's value with leading zeros (e.g., if the argument is of pointer type and the address it stores is being logged ) and \texttt{false} otherwise.
 
-\end{itemize}
-
-\vspace{1em}
-\begin{lstlisting}[caption={\texttt{print\_arg} function},captionpos=b]
+\newpage
+\begin{lstlisting}[xleftmargin=\dimexpr-\leftmargini,caption={\texttt{print\_arg} function},captionpos=b]
 static void print_arg(drsys_arg_t* curr_arg, bluepill_tls* tdata, uint syscall_counter) {
 
 	...
@@ -361,6 +356,17 @@ static void print_arg(drsys_arg_t* curr_arg, bluepill_tls* tdata, uint syscall_c
 	...
 }
 \end{lstlisting}
+
+The way \texttt{print\_simple\_value} operates is quite straightforward:
+\begin{enumerate}
+\item At the beginning the argument's value is simply logged, with leading zeroes or not depending on the previously mentioned parameter
+
+\item Then, if the argument is a pointer, it is determined if the value it points to needs to be logged. This occurs if the argument is being processed before the Native API execution (i.e., \texttt{pre} is \texttt{true}) and is an input parameter (i.e., \texttt{SYSARG\_READ} is contained in \texttt{flags}) or if the argument is being processed after the Native API execution (i.e., \texttt{pre} is \texttt{false}) and is an output parameter (i.e., \texttt{SYSARG\_WRITE} is contained in \texttt{flags}). The pointed value is obtained through the use of \texttt{PIN\_SafeCopy}, which copies the specified number of bytes from a source memory region to a destination memory region, guaranteeing safe return to the caller even if such regions are inaccessible.  
+\end{enumerate}
+
+\end{itemize}
+
+
 
 \begin{itemize}
 \item Finally, if the argument's type is not a primitive one, it is checked if it is \texttt{null} and if it is a complex output parameter being traced before the Native API execution, situation in which only the address stored in the pointer is logged. If none of these two scenarios are true, then the tracer finds itself in the situation where it is required to log the value of a complex type. This is performed through the invocation of \texttt{print\_known\_compound}. As of right now, such function differentiates between four complex types, namely \texttt{UNICODE\_STRING}, \texttt{OBJECT\_ATTRIBUTES}, \texttt{IO\_STATUS\_BLOCK} and \texttt{LARGE\_INTEGER}, and logs the argument's value accordingly. If the argument's type is a complex type that is not supported, the symbolic value \texttt{<NYI>} (not yet implemented) is recorded.    
@@ -419,11 +425,12 @@ To conclude this section, let us show how a traced Native API looks like in the 
 In Microsoft Windows, APIs are implemented as functions provided by a set of dynamically linked libraries. These, also known as DLLs, constitute Microsoft's way of implementing the concept of shared libraries in the Windows operating system. Therefore, the functions they make available can be employed by different applications \cite{DLL}. Windows APIs offer a plethora of functionalities which belong to many different categories, ranging from base services (e.g., file management) to user interface functions and network operations \cite{WinAPI}. In light of this, a Windows API has rich semantic information associated to it and tracing the sequence of APIs a malware calls provides analysts with a high-level view of the sample's behavior. This is why BlueTracer's API tracer component is undoubtedly the most important one. 
 \begin{figure}[h]
 \centering
-\vspace{0.5cm}
-\includegraphics[scale=0.662]{Figures/APITracing.pdf}
+\vspace{1cm}
+\includegraphics[scale=0.7]{Figures/APITracing.pdf}
 \caption{\textit{APIs Tracing Workflow}}
 \label{API Tracing}
 \end{figure}
+\newpage
 When tracing APIs, most of the concepts seen in Native API tracing also apply, but there are also significant differences, both in the steps that were carried out and in the Pin APIs which were employed, as it can be observed from the diagram in \textit{Figure~\ref{API Tracing}}.
 
 Now let us illustrate the actions being performed during API tracing by analyzing in detail each one of the three main blocks of \textit{Figure~\ref{API Tracing}}.
@@ -449,7 +456,7 @@ Having given a general outline on how \texttt{AddAnalysisRoutine} works, let us 
 Similarly to what occurs for Native API tracing, in order to log as much information as possible and to correctly record the arguments values, it is necessary to have a source of API information, providing some kind of assistance during the tracing activity. When dealing with APIs, BlueTracer allows the user to choose between two possible sources of API information: \textit{drltrace}'s configuration file or the data extracted from \textit{PyREbox}'s database. By default, the latter is employed as it embodies a greater amount of information, including variable names and named constants' enumerations.
 
 \textit{drltrace} (already mentioned in Section~\ref{DBI}) comes with its own external configuration file, in which each line contains information relative to an API, as it can be observed from the sample configuration file entry on \textit{Listing 3.9}.      
-\vspace{1cm}
+\vspace{0.5cm}
 \lstset{
     language=C++,
     frame=single, % draw a frame at the top and bottom of the code block
@@ -484,8 +491,7 @@ Before API instrumentation takes place, BlueTracer parses the aforementioned con
 
 The other source of API information employed by BlueTracer is \textit{PyREbox}'s database. \textit{PyREbox} is a Python scriptable reverse engineering sandbox based on QEMU and VMI techniques, whose goal is to provide support for reverse engineering through its dynamic analysis capabilities \cite{Pyrebox}. \textit{PyREbox} is equipped with its own API tracer, which relies on the information contained in a sqlite database to correctly log the APIs' parameters. Such database was, in turn, generated by utilizing as its core the data from the \textit{Deviare}\footnote{Deviare is an open-source hooking engine for instrumenting arbitrary \texttt{Win32} functions \cite{Deviare}} project and then employing a crawler for parsing the Microsoft online documentation with the goal of marking which parameters are input parameters and which are output parameters. The resulting database is incredibly richer in API information than \textit{drltrace}'s configuration file. In fact, the number of APIs for which data is stored is much higher, argument names are also included, as well as the contents of named constants' enumerations, information which \textit{drltrace}'s configuration file does not provide at all.
 
-In order to extract information relative to the APIs from PyREbox's database, a Python script was employed, which, for every API, instantiates a \texttt{libcall\_info\_t struct} (\textit{Listing 3.10}) in a \texttt{.cpp} file.
-\\
+\vspace{0.7cm}
 \begin{lstlisting}[caption={\texttt{struct} containing API-related information from PyREbox's database},captionpos=b]
 typedef struct _libcall_info_t {
 	const char* func_name;     			// API name
@@ -493,6 +499,9 @@ typedef struct _libcall_info_t {
 	libcall_arg_info_t lib_args[19];	// Array of arguments
 } libcall_info_t
 \end{lstlisting}
+
+\newpage
+In order to extract information relative to the APIs from PyREbox's database, a Python script was employed, which, for every API, instantiates a \texttt{libcall\_info\_t struct} (\textit{Listing 3.10}) in a \texttt{.cpp} file.
 
 The most important field of such \texttt{struct} is surely the arguments' array, which is made up of \texttt{libcall\_arg\_info\_t} data structures (\textit{Listing 3.11}) containing the information relative each argument of an API, including an entry specific for the return value data. The array size was set to 19, since it was observed from the database data that the API with the most parameters had 18 arguments. This time, we decided not to reuse NTAPI's \texttt{sysinfo\_arg\_t struct} (\textit{Listing 3.2}) to store the API's arguments information due to its lack of the field storing the argument name. 
 \\
@@ -647,7 +656,9 @@ As a result of this, the correct stack entry has to be fetched by iterating thro
 
 Once the appropriate shadow stack entry has been retrieved, the API return value, which is passed to the analysis function via \texttt{IARG\_FUNCARG\_EXITPOINT\_VALUE}, is set in the \texttt{apicall\_t struct} so that it can be logged, together with the output arguments, once again utilizing the ideas behind \texttt{print\_arg} (\textit{Listing 3.7}). 
 
-The last operation carried out by \texttt{PrintInfoAfter}, after the API under analysis has been traced, is the re-alignment of the shadow stack, i.e., the deallocation of all the stack entries belonging to APIs which have terminated their execution. In fact, due to the previously mentioned issue involving Pin's instrumentation of routines, it is necessary to manually remove from the shadow stack all the entries relative to the APIs for which the corresponding \texttt{IPOINT\_AFTER} analysis function is not executed. Such shadow stack re-alignment procedure works as follows:
+The last operation carried out by \texttt{PrintInfoAfter}, after the API under analysis has been traced, is the re-alignment of the shadow stack, i.e., the deallocation of all the stack entries belonging to APIs which have terminated their execution. In fact, due to the previously mentioned issue involving Pin's instrumentation of routines, it is necessary to manually remove from the shadow stack all the entries relative to the APIs for which the corresponding \texttt{IPOINT\_AFTER} analysis function is not executed.
+\newpage
+Such shadow stack re-alignment procedure works as follows:
 
 \begin{enumerate}
 \item The previously fetched shadow stack entry is removed.
@@ -668,7 +679,9 @@ Microsoft Windows employs two mechanisms aimed at dispatching asynchronous event
  
 In order to have a complete picture of the malware sample's activity, it is clearly relevant to also log the occurrences of such asynchronous events and to record as much information as possible related to them. Luckily, Pin provides an API which perfectly meets these needs, named \texttt{PIN\_AddContextChangeFunction}.
  
-This API allows to register a notification function to execute just before the pinned application changes context due to the reception of an asynchronous event, like for instance a callback or a Windows APC. In BlueTracer, the idea is to use such registered notification function to extract and log information relative to the context change. The notification function in question is of type \texttt{CONTEXT\_CHANGE\_CALLBACK} and the most important arguments it takes as input are:
+This API allows to register a notification function to execute just before the pinned application changes context due to the reception of an asynchronous event, like for instance a callback or a Windows APC. In BlueTracer, the idea is to use such registered notification function to extract and log information relative to the context change. 
+\newpage
+The notification function in question is of type \texttt{CONTEXT\_CHANGE\_CALLBACK} and the most important arguments it takes as input are:
 \begin{itemize}
 \item A member of the \texttt{CONTEXT\_CHANGE\_REASON} enumeration indicating the reason for the context change. This is the parameter allowing BlueTracer to distinguish between callbacks and APCs. In fact, in the case of callbacks it is set to \texttt{CONTEXT\_CHANGE\_REASON\_CALLBACK}, while in the case of APCs it is set to \texttt{CONTEXT\_CHANGE\_REASON\_APC}. 
 \item The application's register state before the context change. It is \texttt{null} if the context change is caused by a callback.
@@ -754,7 +767,7 @@ A user mode APC invocation involves APCDispatcher. where the argument is the add
 \fi
 
 Windows Asynchronous Procedure Calls (APCs) are employed to alter a thread's ordinary execution path and reroute it to execute some other code. An important concept related to APCs is that, every time an APC is scheduled, it is intended for a specific thread.
-
+\newpage
 APCs are utilized in many situations. Some examples are:
 
 \begin{itemize}
