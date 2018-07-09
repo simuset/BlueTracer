@@ -54,7 +54,7 @@ Export Address Table (EAT) patching is similar to IAT patching, with the differe
 
 EAT patching produces similar results to the ones obtained through IAT patching, but, unlike IAT patching, the created hooks are global, i.e. they affect every program which utilizes the altered DLL \cite{Berdajs:2010:EAU:1815744.1815746}.
 
-However, in a similar manner to what occurs for IAT patching, it can be easily detected to by simply examining the entries of the EAT and checking whether or not each RVA, when added to the DLL base address, falls within the DLL memory range \cite{Stuttard:2014:ADC:2616217}.
+However, in a similar manner to what occurs for IAT patching, it can be easily detected by simply examining the entries of the EAT and checking whether or not each RVA, when added to the DLL base address, falls within the DLL memory range \cite{Stuttard:2014:ADC:2616217}.
 
 \subsection{Proxy DLL}
 
@@ -104,10 +104,10 @@ In addition, the \texttt{INT 3} instruction in an API entry point immediately gi
 
 Hooking based on Virtual Machine Introspection (VMI) relies on the idea of executing the target program in an emulated environment, typically with QEMU being used as virtual machine monitor (VMM). Function calls are monitored by comparing the virtual processor's instruction pointer with the RVAs of DLLs' exported functions when added to the DLL base address. Function arguments are also monitored and this is done by providing them to callback routines, which perform the appropriate tracking operations.
 
-In theory, a PC emulator allows to have functionalities similar to the ones of a debugger, i.e. the code being monitored can be stopped at any arbitrary point during its execution, allowing its registers and virtual memory to be inspected, with the added advantage of not being subject to the aforementioned issues related to breakpoints.
+In theory, a PC emulator allows to have functionalities similar to the ones of a debugger, i.e., the code being monitored can be stopped at any arbitrary point during its execution, allowing its registers and virtual memory to be inspected, with the added advantage of not being subject to the aforementioned issues related to breakpoints.
 Moreover, VMI-based hooking is harder to detect with respect to the previously illustrated hooking techniques, since emulation is utilized to execute an unknown binary with a complete operating system in software, without the sample being never ran directly on the processor \cite{Bayer2005TTAnalyzeA}.
 
-The significant drawback of VMI-based hooking is that it incurs in the \textit{semantic gap} problem, i.e. the issue of deducing high-level information from the raw system information by making sense of the CPU state and memory contents \cite{Egele:2008:SAD:2089125.2089126}. VMI-based hooking tools
+The significant drawback of VMI-based hooking is that it incurs in the \textit{semantic gap} problem, i.e., the issue of deducing high-level information from the raw system information by making sense of the CPU state and memory contents \cite{Egele:2008:SAD:2089125.2089126}. VMI-based hooking tools
 might need an in-depth knowledge of kernel data structures or other details at low-level, which could constitute a complication when dealing with proprietary operating systems. For this reason, as of right now, VMI is not as effective in practice as a traditional debugger when investigating a sample.
 
 
@@ -133,7 +133,7 @@ DBI, conversely from static binary instrumentation does not need any preprocessi
 
 In DBI-based hooking, the idea is to use DBI with the objective of learning information at run-time relative to which APIs are called by the sample being analyzed and, possibly, with which arguments and return values. 
 
-There indeed exist DBI-based API tracing tools that rely on the previously illustrated idea, namely \textit{drstrace} and \textit{drltrace}, which are both built on top of the DynamoRIO \cite{DynamoRIO} DBI framework. In particular, \textit{drstrace} is a system call tracer for Windows, while \textit{drltrace} is an API calls tracer for both Windows and Linux applications. They both produce a textual log, in which the invoked APIs are recorded, together with their arguments' values and return values.
+There indeed exist DBI-based API tracing tools that rely on the previously illustrated idea, namely \textit{drstrace} and \textit{drltrace}, which are both built on top of the DynamoRIO \cite{DynamoRIO} DBI framework. In particular, \textit{drstrace} is a system call tracer for Windows, while \textit{drltrace} is an API calls tracer for both Windows and Linux applications. They both produce a textual log, in which the invoked APIs are recorded, together with their argument values and return values.
 
 In order to evaluate the effectiveness of such tools in the context of evasive malware analysis, a series of experiments involving them was carried out. In particular, both tools were employed to analyze 1000 random samples from the Arancino\footnote{Arancino is a dynamic protection framework aimed at providing protection from anti-instrumentation attacks \cite{polino_arancino_2017}} dataset of malware samples (about 20\% of the total). Each malware sample was ran for 5 minutes in a VirtualBox environment with Windows 7 \texttt{x86} SP1 as the guest operating system. The analysis of the resulting logs showed that both tools possess critical shortcomings when analysing evasive malware. In particular: 
 

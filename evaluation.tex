@@ -41,7 +41,7 @@ In order to evaluate the run-time overhead introduced by BlueTracer we tested it
 	   \end{itemize}
 \item \textbf{Compression programs}
 		\begin{itemize}
-		\item \texttt{7zip.}. Its default output extension is \texttt{.7z}.
+		\item \texttt{7zip.} Its default output extension is \texttt{.7z}.
 		\item \texttt{IZArc.} Its default output extension is \texttt{.zip}.
 		\item \texttt{WinRar.} Its default output extension is \texttt{.rar}.
 		\end{itemize}
@@ -637,7 +637,7 @@ A virtualized environment can be also discovered by looking for specific windows
 Check for processes of common anti-analysis tools
 \fi
 
-Lastly, anti-analysis checks are aimed at detecting the existence processes belonging to popular analysis tools. One of such tools is Process Monitor (\texttt{procmon.exe}), which is an advanced Windows monitoring tool that shows real-time file system, registry and process/thread activity \cite{procmon}. Al-Khaser looks for the processes of many analysis tools, including the process associated to Process Monitor. Again, BlueTracer was also able to successfully log anti-analysis events, even the ones directed at uncovering the presence of Process Monitor (\textit{Listing 4.11}). From the listing below, it can be seen that the course of action adopted by Al-Khaser is quite straightforward. It first takes a snapshot of all the processes in the system with \texttt{CreateToolhelp32Snapshot}. Then, for each process in the snapshot, it retrieves the corresponding name, through the use of \texttt{Process32FirstW} at the beginning and \texttt{Process32NextW} afterwards, and compares it with \texttt{procmon.exe} via \texttt{StrCmpIW}. 
+Lastly, anti-analysis checks are aimed at detecting the existence of processes belonging to popular analysis tools. One of such tools is Process Monitor (\texttt{procmon.exe}), which is an advanced Windows monitoring tool that shows real-time file system, registry and process/thread activity \cite{procmon}. Al-Khaser looks for the processes of many analysis tools, including the process associated to Process Monitor. Again, BlueTracer was also able to successfully log anti-analysis events, even the ones directed at uncovering the presence of Process Monitor (\textit{Listing 4.11}). From the listing below, it can be seen that the course of action adopted by Al-Khaser is quite straightforward. It first takes a snapshot of all the processes in the system with \texttt{CreateToolhelp32Snapshot}. Then, for each process in the snapshot, it retrieves the corresponding name, through the use of \texttt{Process32FirstW} at the beginning and \texttt{Process32NextW} afterwards, and compares it with \texttt{procmon.exe} via \texttt{StrCmpIW}. 
 
 \vspace{0.5cm}
 \lstset{
