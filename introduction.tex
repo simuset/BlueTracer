@@ -1,6 +1,6 @@
 % !TEX root = LMThesisNicchi.tex
 
-\chapter{Introduction}
+\chapter{Introduction} \label{Intro}
 
 \iffalse
 Malwares are a threat
@@ -32,7 +32,7 @@ BlueTracer is based on the Intel Pin~\cite{Luk05} dynamic binary instrumentation
 
 BlueTracer can trace input parameters, output buffers and return values of an extremely wide range of system calls (including Windows Native APIs that are invoked directly via special CPU instructions in more advanced malware) and library calls. Moreover, it also supports the tracing of user-mode callbacks and Windows Asynchronous Procedure Calls. 
 
-The heterogeneity of Windows libraries used in malware and the lack of well-structured documentation for their prototypes and input/output parameters posed a significant implementation challenge, which BlueTracer addresses by leveling out and integrating reliable external sources (two industry projects: Dr. Memory and CISCO PyREBox) that account for more than 17,000 existing function prototypes. An important engineering effort was also required to make best use of Intel Pin’s capabilities with respect to run-time CPU and memory costs, as well as to address some inherent limitations that emerged on the field.
+The heterogeneity of Windows libraries used in malware and the lack of well-structured documentation for their prototypes and input/output parameters posed a significant implementation challenge, which BlueTracer addresses by leveling out and integrating reliable external sources (two industry projects: Dr. Memory \cite{DrMemory} and CISCO PyREBox \cite{Pyrebox}) that account for more than 17,000 existing function prototypes. An important engineering effort was also required to make best use of Intel Pin’s capabilities with respect to run-time CPU and memory costs, as well as to address some inherent limitations that emerged on the field.
 
 We first validated BlueTracer on benign applications exercising a large number of functions, and then on a popular security product used for assessing how stealthy a malware analysis system is against a large body of public evasion techniques used in the wild. The obtained results suggested that BlueTracer can be very effective in tracing a malware sample's activities while remaining undetected. 
 \iffalse
@@ -41,7 +41,7 @@ I then analyzed a set of highly evasive samples collected by Joe Security, the p
 
 \paragraph{Structure of the Thesis.}
 The remaining part of this thesis is structured as follows.
-Chapter 1 describes the major \textit{API hooking} techniques present in literature, outlining their stengths and weaknesses, especially from a detection point of view. It also introduces the concept of Dynamic Binary Instrumentation (DBI), which constitutes BlueTracer's core.
-Chapter 3 focuses on the implementation of the tool, on its structure and the design choices which were made during its development.
-Chapter 4 illustrates the experimental results and assesses the tool's effectiveness.
+Chapter \ref{background} describes the major \textit{API hooking} techniques present in literature, outlining their stengths and weaknesses, especially from a detection point of view. It also introduces the concept of Dynamic Binary Instrumentation (DBI), which constitutes BlueTracer's core.
+Chapter \ref{implementation} focuses on the implementation of the tool, on its structure and the design choices which were made during its development.
+Chapter \ref{conclusion} illustrates the experimental results and assesses the tool's effectiveness.
 Finally, we present concluding remarks in Chapter 5, together with possible future developments.

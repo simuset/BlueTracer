@@ -1,6 +1,6 @@
 % !TEX root = LMThesisNicchi.tex
 
-\chapter{Experimental Evaluation}
+\chapter{Experimental Evaluation} \label{results}
 
 In this chapter we will illustrate the results obtained during the experimental evaluation of BlueTracer.
 
@@ -25,7 +25,8 @@ All the tests were conducted on a VirtualBox (version 5.2.6)  Virtual Machine wi
 
 \section{Run-Time Overhead Assessment}
 
-In order to evaluate the run-time overhead introduced by BlueTracer we tested it with a number of benign applications exercising a large number of functions. In order to experiment with a wide range of different functionalities, we picked a set of well-known Windows applications performing a variety of jobs. We grouped these applications based on the task they carry out, as shown below:
+In order to evaluate the run-time overhead introduced by BlueTracer we tested it with a number of benign applications exercising a large number of functions. We had to perform this kind of test on deterministic batch programs to obtain accurate results rather than on real malware samples. This because malware instances have unpredictable behaviour, thus rendering the execution times obtained when running them meaningless.
+Having in mind the goal of experimenting with a wide range of different functionalities, we picked a set of well-known Windows applications performing a variety of jobs. We grouped these applications based on the task they carry out, as shown below:
 
 \begin{itemize}
 \item \textbf{Collection of system information}
@@ -101,22 +102,22 @@ where:
 \hline
    \textbf{Application} & \specialcell{ \textbf{Native} \\ \textbf{(s)}} & \specialcell{ \textbf{Empty Image} \\ \textbf{(s)}} & \specialcell{ \textbf{Empty Routine} \\ \textbf{(s)}} & \specialcell{ \textbf{Main Image} \\ \textbf{(s)}} & \specialcell{ \textbf{Complete} \\ \textbf{(s)}} \\
 \hline
-\texttt{Systeminfo}      & 5.894    & 9.686  & 12.869 & 15.694 & 26.398     \\
-\texttt{SFC}          & 218.251 & 222.065 & 226.125 & 230.869 & 245.476       \\
-\texttt{Check Disk}       & 101.570     & 171.94 & 181.429 & 454.649 & 600+      \\
-\texttt{IPConfig}       & 0.105     & 4.257 & 8.421 & 9.599 & 13.181      \\
-\texttt{Netstat} & 0.085 & 2.563 & 4.630 & 6.902 & 21.129       \\
-\texttt{DriverQuery} & 1.168 & 6.663 & 9.786 & 34.074 & 68.668      \\
-\texttt{WinSat}       & 163.175     & 212.496 & 221.012 & 273.641 & 600+      \\
-\texttt{PowerCFG} & 61.333      & 73.325 & 80.018 & 132.466 & 273.882       \\
-\texttt{7zip}       & 175.526     & 212.000 & 225.091 & 227.985 & 233.792      \\
-\texttt{IZArc}      & 30.920     & 52.878 & 56.631 & 61.066 & 65.770      \\
-\texttt{WinRar} & 155.674 & 192.638 & 198.804 & 208.606 & 215.455      \\
-\texttt{Cipher} & 0.028 & 1.817 & 3.787 & 4.435 & 5.064       \\
-\texttt{OpenSSL} & 24.769 & 33.183 & 34.308 & 47.006 & 1524.763      \\
-\texttt{Crypt} & 65.392 & 140.048 & 142.979 & 572.353 & 600+      \\
-\texttt{FCIV} & 10.807 & 25.113 & 28.144 & 56.329 & 87.948       \\
-\texttt{TurboSFV} & 34.412 & 57.705 & 62.639 & 66.439 & 74.657
+\texttt{Systeminfo}      & 5.894    & 9.686 (1.64x)  & 12.869 (2.18x) & 15.694 (2.66x) & 26.398 (4.48x)     \\
+\texttt{SFC}          & 218.251 & 222.065 (1.02x) & 226.125 (1.04x) & 230.869 (1.06x) & 245.476 (1.12x)       \\
+\texttt{Check Disk}       & 101.570     & 171.94 (1.69x) & 181.429 (1.79x) & 454.649 (4.48x) & 600+       \\
+\texttt{IPConfig}       & 0.105     & 4.257 (40.54x) & 8.421 (80.20x) & 9.599 (91.42x) & 13.181 (125.53x)      \\
+\texttt{Netstat} & 0.085 & 2.563 (30.15x) & 4.630 (54.47x) & 6.902 (81.20x) & 21.129 (248.58x)       \\
+\texttt{DriverQuery} & 1.168 & 6.663 (5.70x) & 9.786 (8.38x) & 34.074 (29.17x) & 68.668 (58.79x)     \\
+\texttt{WinSat}       & 163.175     & 212.496 (1.30x) & 221.012 (1.35x) & 273.641 (1.68x) & 600+      \\
+\texttt{PowerCFG} & 61.333      & 73.325 (1.20x) & 80.018 (1.30x) & 132.466 (2.16x) & 273.882 (4.47x)       \\
+\texttt{7zip}       & 175.526     & 212.000 (1.21x) & 225.091 (1.28x) & 227.985 (1.30x) & 233.792 (1.33x)      \\
+\texttt{IZArc}      & 30.920     & 52.878 (1.71x) & 56.631 (1.83x) & 61.066 (1.97x) & 65.770 (2.13x)      \\
+\texttt{WinRar} & 155.674 & 192.638 (1.24x) & 198.804 (1.28x) & 208.606 (1.34x) & 215.455 (1.38x)      \\
+\texttt{Cipher} & 0.028 & 1.817 (64.89x) & 3.787 (135.25x) & 4.435 (158.39x) & 5.064 (180.86x)       \\
+\texttt{OpenSSL} & 24.769 & 33.183 (1.34x) & 34.308 (1.39x) & 47.006 (1.90x) & 1524.763 (61.56x)      \\
+\texttt{Crypt} & 65.392 & 140.048 (2.14x) & 142.979 (2.19x) & 572.353 (8.75x) & 600+      \\
+\texttt{FCIV} & 10.807 & 25.113 (2.32x) & 28.144 (2.60x) & 56.329 (5.21x) & 87.948 (8.14x)       \\
+\texttt{TurboSFV} & 34.412 & 57.705 (1.68x) & 62.639 (1.82x) & 66.439 (1.93x) & 74.657 (2.17x)
 \\
 \hline
 \end{tabularx}
@@ -170,7 +171,6 @@ where:
 
 \hline
 \hline
-\cline{1-2}
    \textbf{Application} & \specialcell{ \textbf{Native} \\ \textbf{(s)}} & \specialcell{ \textbf{Complete} \\ \textbf{(s)}} & \textbf{Events} & \specialcell{ \textbf{Overhead per Event} \\  \textbf{($10^-5$ s)} }  \\
 \hline
 \texttt{Systeminfo}      & 5.894    & 26.398  & 387 476 & $5.291$    \\
