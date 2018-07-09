@@ -71,8 +71,7 @@ In \textit{inline hooking} the API to be hooked has its initial instructions (at
 \begin{figure}[h]
 \centering
 \includegraphics[scale=0.8]{Figures/Inline.pdf}
-\caption{\textit{(a) Ordinary API call execution flow \\
-				  (b) API call with inline hooking}}
+\caption{\textit{(a) Ordinary API call execution flow; (b) API call with inline hooking}}
 \end{figure}
 
 \textit{Inline Hooking}, which was made famous by its employment  in the Microsoft \textit{Detours} Windows API hooking library, is one of the most used API hooking techniques since it offers a number of advantages:
@@ -96,7 +95,7 @@ Hooking through the use of a debugger is realized by instructing the debugger to
 Contrarily to inline hooking, a debugger can be used to hook functions whose entry points include instructions containing relative addresses \cite{Berdajs:2010:EAU:1815744.1815746}.
 
 On the other hand, a debugger is much easier to detect. In fact, there exist specific Windows APIs whose purpose is to find out whether or not the current process is being debugged. For example, \texttt{IsDebuggerPresent} allows to determine if the calling process is running under a debugger, while \texttt{CheckRemoteDebuggerPresent} checks for the presence of a debugger in a separate process. 
-In addition, the \texttt{INT 3} instruction in an API entry point immediately gives away the debugger's presence \cite{HookingDetection}.
+In addition, the \texttt{INT 3} instruction in an API entry point immediately gives away the debugger's presence~\cite{HookingDetection}.
 
 
 
@@ -144,6 +143,6 @@ In order to evaluate the effectiveness of such tools in the context of evasive m
 
 This highlights how the current DBI-based methods are lacking when having to deal with the dynamic analysis of evasive malware and that there is much room for improvement in this area.
 
-\section{Conclusion}
+\section{Conclusions}
 
 In this chapter we showed how the state of the art API hooking techniques suffer from a number of remarkable shortcomings, especially when dealing with evasive malware. In fact, binary rewriting-based hooking techniques are all easily detectable, while VMI, although harder to uncover, is affected by the \textit{semantic gap problem}. Finally, existing DBI-based API tracing tools are not accompanied by adequate cloaking mechanisms and are limited in the amount of logged information. The aforementioned issues indicate that there is a need for a robust API tracer, specialized in the analysis of evasive malware and with extensive logging capabilities. This is the rationale at the heart of BlueTracer. 
