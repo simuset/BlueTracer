@@ -141,7 +141,7 @@ Pin provides a set of APIs aimed at assisting the extraction of information rela
 Following \textit{Figure~\ref{NTAPI Tracing}}, let us now thoroughly analyze the main steps which take place when Native APIs are traced.
 
 \subsection{Main Image Check} \label{MainImage}
-In order to filter the logged information relative to Native APIs, BlueTracer allows the analyst to decide, through the use of a boolean parameter (\texttt{MainImage}) in the configuration file, whether only Native APIs invoked directly from the main executable of the pinned application should be traced. Therefore, as it can be seen in \textit{Figure~\ref{NTAPI Tracing}}, the first thing we do in \texttt{TraceSysCallEntry}, assuming that the \texttt{MainImage} configuration parameter has been set to \texttt{true}, is to determine if the Native API call is taking place directly from the main executable.
+In order to filter the logged information relative to Native APIs, BlueTracer allows the analyst to decide, through the use of a boolean parameter (\texttt{MainImage}) in the configuration file, whether only Native APIs invoked directly from the main executable of the pinned application should be traced. Therefore, as the reader can see in \textit{Figure~\ref{NTAPI Tracing}}, the first thing we do in \texttt{TraceSysCallEntry}, assuming that the \texttt{MainImage} configuration parameter has been set to \texttt{true}, is to determine if the Native API call is taking place directly from the main executable.
 
 To this end, Pin's \texttt{IMG} APIs are employed, where in Pin an \texttt{IMG} represents all the data structures relative to binaries and shared libraries \cite{Pin}. Specifically, in BluePill, \texttt{IMG\_AddInstrumentFunction} is utilized to register a callback which is invoked each time an image is loaded. Inside such callback, which takes as one of the input parameters the \texttt{IMG} object representing the image being loaded, the following steps are taken:
 \begin{enumerate}
@@ -763,7 +763,7 @@ APCs are utilized in many situations. Some examples are:
 \item Some APIs, like \texttt{ReadFileEx} and \texttt{WriteFileEx}, utilize APCs when performing asynchronous I{\textbackslash}O operations.   
 \end{itemize} 
 
-APCs are of different types, one of which is user mode APCs. These usually call user mode code and are normally dispatched when the thread willingly enters into an alertable state. This means that, typically, user mode APCs do not asynchronously force themselves into the targeted thread, but they can be seen more like a set of work items in a queue, which the thread processes when he decides to do so \cite{APC1}.
+APCs are of different types, one of which is user mode APCs. These usually call user mode code and are normally dispatched when the thread willingly enters into an alertable wait state. This means that, typically, user mode APCs do not asynchronously force themselves into the targeted thread, but they can be seen more like a set of work items in a queue, which the thread processes when he decides to do so \cite{APC1}.
 
 Just like \texttt{KiUserCallbackDispatcher} for user mode callbacks, APCs are channelled by means of a single dispatcher function inside \texttt{ntdll}, named \texttt{KiUserApcDispatcher}. Such function receives as input a set of paramaters, including the address of the APC routine to be invoked and the references to two data structures in which the APC's arguments are stored \cite{APC2}.  
  
