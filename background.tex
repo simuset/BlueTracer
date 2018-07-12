@@ -46,7 +46,7 @@ The idea is to overwrite the original pointer to an imported API function so tha
 
 Despite being extremely simple to implement, IAT patching suffers from a couple of disadvantages, which significantly limit its use in practice:
 \begin{itemize}
-    \item It is incredibly easy to detect by simply examining the entries of the IAT and checking whether or not each address falls inside the memory range of the DLL that should contain the function \cite{HookingDetection}.
+    \item It is incredibly easy to detect by simply examining the entries of the IAT and checking whether each address falls inside the memory range of the DLL that should contain the function \cite{HookingDetection}.
     \item It is ineffective when function pointers are acquired dynamically, e.g., via \texttt{LoadLibrary} and \texttt{GetProcAddress} \cite{Buescher:2011:BIS:2186328.2186347}.
 \end{itemize}
 
@@ -56,7 +56,7 @@ Export Address Table (EAT) patching is similar to IAT patching, with the differe
 
 EAT patching produces similar results to the ones obtained through IAT patching, but, unlike IAT patching, the created hooks are global, i.e., they affect every program which utilizes the altered DLL \cite{Berdajs:2010:EAU:1815744.1815746}.
 
-However, in a similar manner to what occurs for IAT patching, it can be easily detected by simply examining the entries of the EAT and checking whether or not each RVA, when added to the DLL base address, falls within the DLL memory range \cite{Stuttard:2014:ADC:2616217}.
+However, in a similar manner to what occurs for IAT patching, it can be easily detected by simply examining the entries of the EAT and checking whether each RVA, when added to the DLL base address, falls within the DLL memory range \cite{Stuttard:2014:ADC:2616217}.
 
 \subsection{Proxy DLL}
 
@@ -78,7 +78,10 @@ In \textit{inline hooking} the API to be hooked has its initial instructions (at
 \label{Inlined}
 \end{figure}
 
-\textit{Inline Hooking}, which was made famous by its employment  in the Microsoft \textit{Detours} Windows API hooking library, is one of the most used API hooking techniques since it offers a number of advantages:
+\textit{Inline Hooking}, which was made famous by its employment  in the Microsoft \textit{Detours} Windows API hooking library, is one of the most used API hooking techniques
+\\
+\\
+since it offers a number of advantages:
 \begin{itemize}
 \item It is fast and efficient.
 \item It can be utilized to hook any code, not just operating systems APIs, but also programmer defined functions \cite{Rootkit}. 
@@ -98,7 +101,7 @@ Hooking through the use of a debugger is realized by instructing the debugger to
 
 Contrarily to inline hooking, a debugger can be used to hook functions whose entry points include instructions containing relative addresses \cite{Berdajs:2010:EAU:1815744.1815746}.
 
-On the other hand, a debugger is much easier to detect. In fact, there exist specific Windows APIs whose purpose is to find out whether or not the current process is being debugged. For example, \texttt{IsDebuggerPresent} allows to determine if the calling process is running under a debugger, while \texttt{CheckRemoteDebuggerPresent} checks for the presence of a debugger in a separate process. 
+On the other hand, a debugger is much easier to detect. In fact, there exist specific Windows APIs whose purpose is to find out whether the current process is being debugged. For example, \texttt{IsDebuggerPresent} allows to determine if the calling process is running under a debugger, while \texttt{CheckRemoteDebuggerPresent} checks for the presence of a debugger in a separate process. 
 In addition, the \texttt{INT 3} instruction in an API entry point immediately gives away the debugger's presence \cite{HookingDetection}.
 
 

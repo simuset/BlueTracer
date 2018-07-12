@@ -4,22 +4,23 @@
 
 In this chapter we will illustrate the results obtained during the experimental evaluation of BlueTracer.
 
-We first tested the tool on a set of benign applications performing different tasks, in order to assess its run-time overhead.
-
-Then, we validated BlueTracer using \textit{Al-Khaser} \cite{AlK}, a popular open-source project employed to assess how stealthy a malware analysis system is with respect to a large portion of public evasion techniques used by real malware families.
-
-\iffalse
-Finally, we employed BlueTracer to analyze a group of highly evasive real malware samples collected by Joe Security, the proclaimed technology leader for the analysis of evasive malware.
-\fi
+We first tested the tool on a set of benign applications performing different tasks, in order to assess its run-time overhead. Then, we validated BlueTracer using \textit{Al-Khaser} \cite{AlK}, a popular open-source project employed to assess how stealthy a malware analysis system is with respect to a large portion of public evasion techniques used by real malware families. Finally, we employed BlueTracer to analyze a group of highly-evasive real malware samples collected by Joe Security \cite{JoeBox}, the proclaimed technology leader for the analysis of evasive malware.
 
 \iffalse
 If JoeBox added differentiate machines
 \fi
-All the tests were conducted on a VirtualBox (version 5.2.6)  Virtual Machine with 1 CPU core and 3 GB of RAM running Windows 7 32-bit. The specifications of the host machine are:
+The tests on benign applications and on \textit{Al-Khaser} were conducted on a VirtualBox (version 5.2.6)  Virtual Machine with 1 CPU core and 3 GB of RAM running Windows 7 32-bit, where the specifications of the host machine are:
 \begin{itemize}
 \item \textbf{Operating System:} Linux Mint 17.3 
 \item \textbf{Processor:} Intel Core i7-3537U CPU @ 2.00 GHz $\times$ 2
 \item \textbf{RAM:} 8 GB  
+\end{itemize}
+
+Instead, the tests on real malware instances were performed on a VirtualBox (version 5.2.0)  Virtual Machine with 4 CPU cores and 3 GB of RAM running Windows 7 32-bit, where the specifications of the host machine are:
+\begin{itemize}
+\item \textbf{Operating System:} Debian Wheezy 7 
+\item \textbf{Processor:} Intel Xeon E5-4610 v2 CPU @ 2.3 GHz
+\item \textbf{RAM:} 128 GB  
 \end{itemize}
  
 
@@ -52,7 +53,6 @@ Having in mind the goal of experimenting with a wide range of different function
 		\item \texttt{OpenSSL.} It was configured to employ 256-bit CBC AES.
 		\item \texttt{Crypt.} It adopts RC2 block encryption.
 		\end{itemize}
-\vspace{2cm}
 \item \textbf{Hashing Utilities}
 		\begin{itemize}
 		\item \texttt{File Checksum Integrity Verifier (FCIV).} It was set to use both MD5 and SHA1.
@@ -195,8 +195,8 @@ where:
 
 \end{sidewaystable}
 
-\vspace{-2cm}
-\section{Al-Khaser}
+\vspace{-1cm}
+\section{Al-Khaser} \label{Alk}
 Al-Khaser \cite{AlK} is a popular open-source application which performs a large number of common checks employed by malware families to determine if they are being executed in an analysis environment. It is typically utilized to assess how stealthy and well hidden a malware analysis system is. For this reason, we chose Al-Khaser as our main validation tool.
 
 The checks implemented by Al-Khaser are divided into categories, with the most significant ones being the following:
@@ -255,6 +255,8 @@ A well-known API of this kind is \texttt{IsDebuggerPresent}, which returns a non
 }
 
 Another popular Windows API for debug detection is \texttt{CheckRemoteDebuggerPresent}, which determines if the specified process is being debugged by a "remote" debugger, i.e., a debugger residing in parallel and different process.
+Its second argument is a pointer to a boolean, which is set to true if the provided process is being debugged, or false otherwise. Al-Khaser also adopts this API, and, again, BlueTracer correctly logged its invocation (\textit{Listing 4.2}). In addition, it is worth noting that the output value for the second argument (\texttt{arg 1}) is 
+false (\texttt{0x0}), thus showing once more that a debugger was not discovered.
 
 \vspace{0.5cm}
 \lstset{
@@ -288,12 +290,9 @@ Another popular Windows API for debug detection is \texttt{CheckRemoteDebuggerPr
     stringstyle=\color{red}, % string color
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
-}
+}   
 
-Its second argument is a pointer to a boolean, which is set to true if the provided process is being debugged, or false otherwise. Al-Khaser also adopts this API, and, again, BlueTracer correctly logged its invocation (\textit{Listing 4.2}). In addition, it is worth noting that the output value for the second argument (\texttt{arg 1}) is 
-false (\texttt{0x0}), thus showing once more that a debugger was not discovered.   
-
-Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. Its second parameter is utilized to specify the type of process information to be retrieved. When set to \texttt{ProcessDebugPort} (value \texttt{0x7}), the Native API provides information on whether the supplied process is being debugged. Specifically, if a debugger is present, the \texttt{ProcessInformation} output parameter is set to a non-zero port number, while, if the process is not under a debugger, this parameter is set to zero \cite{Sikorski:2012:PMA:2181153}. Al-Khaser performs this check and, once more, BlueTracer recorded it (\textit{Listing 4.3}). In particular, it can be deduced from \texttt{arg 1}'s value that \texttt{ProcessDebugPort} is adopted. Unfortunately, this time, we cannot tell from the log that a debugger has not been detected because the output paramater containing this information (\texttt{arg 2}) is a pointer to a \texttt{struct}, which changes based on the type of process information requested. BlueTracer does not yet address these complex cases and we are planning to address them in future versions of the tool.  
+Debugger detection is not only achieved through the use of Windows APIs. In fact, there are also some Native APIs which can be used for this purpose. One of them is \texttt{NtQueryInformationProcess}, which retrieves information related to the specified process. Its second parameter is utilized to specify the type of process information to be retrieved. When set to \texttt{ProcessDebugPort} (value \texttt{0x7}), the Native API provides information on whether the supplied process is being debugged. Specifically, if a debugger is present, the \texttt{ProcessInformation} output parameter is set to a non-zero port number, while, if the process is not under a debugger, this parameter is set to zero \cite{Sikorski:2012:PMA:2181153}. Al-Khaser performs this check and, once more, BlueTracer recorded it (\textit{Listing 4.3}).
 
 \vspace{0.5cm}
 \lstset{
@@ -332,6 +331,8 @@ Debugger detection is not only achieved through the use of Windows APIs. In fact
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
 }  
+
+In particular, it can be deduced from \texttt{arg 1}'s value that \texttt{ProcessDebugPort} is adopted. Unfortunately, this time, we cannot tell from the log that a debugger has not been detected because the output paramater containing this information (\texttt{arg 2}) is a pointer to a \texttt{struct}, which changes based on the type of process information requested. BlueTracer does not yet address these complex cases and we are planning to address them in future versions of the tool.  
 
 \subsubsection*{Anti-Sandbox Timing-based}
 
@@ -374,7 +375,7 @@ The \texttt{NtDelayExecution} Native API is the lowest level user mode mechanism
 
 \texttt{WaitForSingleObject} is also often used to wait until a time-out interval elapses. In input, it receives an handle to an object and a time-out interval in milliseconds. Then, it waits until the provided object is in the signaled state or the time-out runs out. Al-Khaser also adopts this API in its set of timing-based checks. Once more, BlueTracer was capable of recording its occurrence (\textit{Listing 4.5}). It is relevant to point out that the return value is \texttt{0x102}, which indicates that the API has returned because the time-out interval has elapsed, just as expected.
 
-\vspace{1cm}
+\vspace{0.5cm}
 \lstset{
     language=C++,
     frame=tb, % draw a frame at the top and bottom of the code block
@@ -407,7 +408,7 @@ The \texttt{NtDelayExecution} Native API is the lowest level user mode mechanism
     basewidth = {.48em}
 } 
 
-The most well-known API for suspending execution is surely \texttt{sleep}, that simply takes as input the number of milliseconds for which execution is to be delayed. Due to its popularity, Al-Khaser had to adopt it and, again, BlueTracer's logs showed evidence of its usage (\textit{Listing 4.6}). Specifically, from the log file, it can be deduced that \texttt{sleep} was used in a loop, as it is invoked many times subsequently.
+The most well-known API for suspending execution is surely \texttt{sleep}, that simply takes as input the number of milliseconds for which execution is to be delayed.
 
 \vspace{0.5cm}
 \lstset{
@@ -455,11 +456,13 @@ The most well-known API for suspending execution is surely \texttt{sleep}, that 
     basewidth = {.48em}
 }   
 
+Due to its popularity, Al-Khaser had to adopt it and, again, BlueTracer's logs showed evidence of its usage (\textit{Listing 4.6}). Specifically, from the log file, it can be deduced that \texttt{sleep} was used in a loop, as it is invoked many times subsequently.
+
 \subsubsection*{Human Interaction Detection}
 
 The idea behind human interaction detection checks is to uncover the presence of a sandbox based on the lack of human interaction with the system; in fact, in real environments users typically perform some detectable activities when carrying out their tasks. A classical example of such activities is moving the mouse cursor.  
 
-The mouse cursor position can be obtained through the use of the \texttt{GetCursorPos} API, which has a single output parameter containing a pointer to a \texttt{POINT struct}. Such data structure stores the retrieved position of the mouse cursor, in screen coordinates. Al-Khaser employs the \texttt{GetCursorPos} API to check if there is some kind of mouse movement in the sandbox. BlueTracer proved to work well as it traced the API's invocation (\textit{Listing 4.7}). It is interesting to notice that, from the log, it can be also deduced how the actual check is carried out by Al-Khaser. In fact, \texttt{GetCursorPos} is called, followed by a \texttt{Sleep} and another \texttt{GetCursorPos} invocation. In light of this, it is likely that an initial cursor position was first retrieved, which was later compared with the cursor position obtained after the sleep operation, with the aim of determining if the mouse cursor had moved in the mean time.
+The mouse cursor position can be obtained through the use of the \texttt{GetCursorPos} API, which has a single output parameter containing a pointer to a \texttt{POINT struct}. Such data structure stores the retrieved position of the mouse cursor, in screen coordinates. Al-Khaser employs the \texttt{GetCursorPos} API to check if there is some kind of mouse movement in the sandbox. BlueTracer proved to work well as it traced the API's invocation (\textit{Listing 4.7}).
 
 \vspace{0.5cm}
 \lstset{
@@ -503,13 +506,15 @@ The mouse cursor position can be obtained through the use of the \texttt{GetCurs
     stringstyle=\color{red}, % string color
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
-}   
+} 
+
+It is interesting to notice that, from the log, it can be also deduced how the actual check is carried out by Al-Khaser. In fact, \texttt{GetCursorPos} is called, followed by a \texttt{Sleep} and another \texttt{GetCursorPos} invocation. In light of this, it is likely that an initial cursor position was first retrieved, which was later compared with the cursor position obtained after the sleep operation, with the aim of determining if the mouse cursor had moved in the mean time.
+  
 
 \subsubsection*{Anti-Virtualization}
 Anti-virtualization checks look for a number of artifacts in the guest operating system introduced by hypervisors which are specific to virtual machines.
 
-A common way to detect virtualization is by checking Windows registry artifacts. The Windows registry is a hierarchical tree-like database containing critical data for both the Windows operating system and its applications. Each node of the tree is a \textit{key} and every key embodies \textit{subkeys} and \textit{values} \cite{Regs}. The existence of some specific registry keys is enough to reveal the presence of virtualization. For instance, the key \texttt{HKEY\_LOCAL\_MACHINE\textbackslash}\texttt{{HARDWARE}\textbackslash{ACPI}\textbackslash{DSDT}}\texttt{\textbackslash{VBOX}\textbackslash\_\_}
-gives away the presence of VirtualBox. Al-Khaser looks for these kinds of Windows registry artifacts and BlueTracer is able to record such events (\textit{Listing 4.8}). From the listing below, it can be observed that the aforementioned registry key is searched through the use of the \texttt{RegOpenKeyExW} API, which normally opens the specified registry key. However, in this case, a "file not found" error value (\texttt{0x2}) is returned since the registry key is not found, thus also confirming BlueTracer's ability to remain hidden.
+A common way to detect virtualization is by checking Windows registry artifacts. The Windows registry is a hierarchical tree-like database containing critical data for both the Windows operating system and its applications. Each node of the tree is a \textit{key} and every key embodies \textit{subkeys} and \textit{values} \cite{Regs}. 
 
 \vspace{0.5cm}
 \lstset{
@@ -552,9 +557,14 @@ gives away the presence of VirtualBox. Al-Khaser looks for these kinds of Window
     stringstyle=\color{red}, % string color
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
-}   
-\vspace{1cm}
-In addition to Windows registry artifacts, there are also many file system artifacts which can be checked in order to uncover the presence of a virtualized environment. Typically, specific files are searched. Al-Khaser, for instance, looks for a number of files, one of which is the \texttt{VboxMouse.sys} driver of Virtualbox. Once more, BlueTracer was able to trace these file-searching events, including the ones relative to \texttt{VboxMouse.sys} (\textit{Listing 4.9}). The \texttt{GetFileAttributesW} API, as the name suggests, is typically employed to obtain file attributes for the specified file. From \textit{Listing 4.9} it can be seen that the API returns -1, since the requested file was not found. Therefore, even in this situation, BlueTracer was also undetected.
+}
+
+The existence of some specific registry keys is enough to reveal the presence of virtualization. For instance, the key \texttt{HKEY\_LOCAL\_MACHINE\textbackslash}\texttt{{HARDWARE}\textbackslash{ACPI}\textbackslash{DSDT}}\texttt{\textbackslash{VBOX}\textbackslash\_\_}
+gives away the presence of VirtualBox. Al-Khaser looks for these kinds of Windows registry artifacts and BlueTracer is able to record such events (\textit{Listing 4.8}).
+
+From \textit{Listing 4.8}, it can be observed that the aforementioned registry key is searched through the use of the \texttt{RegOpenKeyExW} API, which normally opens the specified registry key. However, in this case, a "file not found" error value (\texttt{0x2}) is returned since the registry key is not found, thus also confirming BlueTracer's ability to remain hidden.
+
+In addition to Windows registry artifacts, there are also many file system artifacts which can be checked in order to uncover the presence of a virtualized environment. Typically, specific files are searched. Al-Khaser, for instance, looks for a number of files, one of which is the \texttt{VboxMouse.sys} driver of Virtualbox. Once more, BlueTracer was able to trace these file-searching events, including the ones relative to \texttt{VboxMouse.sys} (\textit{Listing 4.9}). 
 
 \vspace{0.5cm}
 \lstset{
@@ -590,7 +600,9 @@ In addition to Windows registry artifacts, there are also many file system artif
     stringstyle=\color{red}, % string color
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
-}     
+} 
+
+The \texttt{GetFileAttributesW} API, as the name suggests, is typically employed to obtain file attributes for the specified file. From \textit{Listing 4.9} it can be seen that the API returns -1, since the requested file was not found. Therefore, even in this situation, BlueTracer was also undetected.
 
 \iffalse
 -Registry Artifacts
@@ -599,7 +611,7 @@ In addition to Windows registry artifacts, there are also many file system artif
 -DLLs
 \fi
 
-A virtualized environment can be also discovered by looking for specific windows. The \texttt{FindWindow} API returns an handle of a window belonging to a specific class or having the specified name. 
+A virtualized environment can be also discovered by looking for specific windows. The \texttt{FindWindow} API returns an handle of a window belonging to a specific class or having the specified name. This API can be exploited to check for the presence of a window associated to a virtualization program. A typical example of this trick, which is implemented by Al-Khaser, is searching for a window named "VBoxTrayToolWnd", as the presence of such window indicates that VirtualBox is being utilized. BlueTracer also detected this check (\textit{Listing 4.10}). As the reader can see, the return value is \texttt{null}, meaning that the window was not found and that BlueTracer did not reveal its presence.
 
 \vspace{0.5cm}
 \lstset{
@@ -633,9 +645,7 @@ A virtualized environment can be also discovered by looking for specific windows
     basicstyle=\footnotesize\ttfamily,
     basewidth = {.48em}
 } 
-
-
-This API can be exploited to check for the presence of a window associated to a virtualization program. A typical example of this trick, which is implemented by Al-Khaser, is searching for a window named "VBoxTrayToolWnd", as the presence of such window indicates that VirtualBox is being utilized. BlueTracer also detected this check (\textit{Listing 4.10}). As the reader can see, the return value is \texttt{null}, meaning that the window was not found and that BlueTracer did not reveal its presence.   
+   
 
 \subsubsection{Anti-Analysis}
 
@@ -643,8 +653,8 @@ This API can be exploited to check for the presence of a window associated to a 
 Check for processes of common anti-analysis tools
 \fi
 
-Lastly, anti-analysis checks are aimed at detecting the existence of processes belonging to popular analysis tools. One of such tools is Process Monitor (\texttt{procmon.exe}), which is an advanced Windows monitoring tool that shows real-time file system, registry and process/thread activity \cite{procmon}. Al-Khaser looks for the processes of many analysis tools, including Process Monitor. Again, BlueTracer was also able to successfully log anti-analysis events, even the ones directed at uncovering the presence of Process Monitor (\textit{Listing 4.11}). From the listing below, it can be seen that the course of action adopted by Al-Khaser is quite straightforward. It first takes a snapshot of all the processes in the system with \texttt{CreateToolhelp32Snapshot}. Then, for each process in the snapshot, it retrieves the corresponding name, through the use of \texttt{Process32FirstW} at the beginning and \texttt{Process32NextW} afterwards, and compares it with \texttt{procmon.exe} via \texttt{StrCmpIW}. 
-\vspace{0.5cm}
+Lastly, anti-analysis checks are aimed at detecting the existence of processes belonging to popular analysis tools. One of such tools is Process Monitor (\texttt{procmon.exe}), which is an advanced Windows monitoring tool that shows real-time file system, registry and process/thread activity \cite{procmon}. Al-Khaser looks for the processes of many analysis tools, including Process Monitor. Again, BlueTracer was also able to successfully log anti-analysis events, even the ones directed at uncovering the presence of Process Monitor (\textit{Listing 4.11}). From the listing on the next page, it can be seen that the course of action adopted by Al-Khaser is quite straightforward. It first takes a snapshot of all the processes in the system with \texttt{CreateToolhelp32Snapshot}. Then, for each process in the snapshot, it retrieves the corresponding name, through the use of \texttt{Process32FirstW} at the beginning and \texttt{Process32NextW} afterwards, and compares it with \texttt{procmon.exe} via \texttt{StrCmpIW}. 
+\newpage
 \lstset{
     language=C++,
     frame=tb, % draw a frame at the top and bottom of the code block
@@ -699,10 +709,258 @@ Lastly, anti-analysis checks are aimed at detecting the existence of processes b
     basewidth = {.48em}
 }   
 
+\section{Malware Samples from Joe Security}
+
 \iffalse
-\section{JoeBox}
+An overview of which is given by Table 4.3.
+Showing each check hooked by BluePill and traced by BlueTracer.
+Remember main image
 \fi
+
+In order to assess BlueTracer's effectiveness with respect to real malware instances, we tested it with five highly-evasive samples collected by Joe Security \cite{JoeBox} having unusual evasion tricks that their specialized sandboxing products can take care of. For each sample, the evaluation of BlueTracer's tracing and stealth abilities was conducted by collecting BlueTracer's logs and checking if they were congruous with the sample's actions uncovered by Joe Sandbox, a commercial state-of-the-art stealthy analysis system \cite{JoeSandbox}. Moreover, we used Process Monitor, adequately cloaked by BluePill, as ground truth for what was carried out in the system.
+We ran each sample for one hour using BlueTracer's \textbf{Main Image} mode.
+
+An overview of the analyzed samples can be observed from \textit{Table 4.3}.
+
+
+\begin{table}[h]
+\vspace*{0.5cm}
+\begin{center}
+ \begin{tabular}{||c c c||} 
+ \hline
+ \textbf{ID} & \textbf{MD5} & \textbf{Name} \\ [0.5ex] 
+ \hline\hline
+ 1 & 0af4ef5069f47a371a0caf22ae2006a6 & \textit{trojan/banker} \\ 
+ \hline
+ 2 & 9437eabf2fe5d32101e3fbf9f6027880 & \textit{dropper} \\
+ \hline
+ 3 & cbdda646a20d95f078393506ecdc0796 & \textit{trojan}\\
+ \hline
+ 4 & cfdd16225e67471f5ef54cab9b3a5558 & Olympic\\
+ \hline
+ 5 & ef694b89ad7addb9a16bb6f26f1efaf7 & CCleaner\\ [1ex] 
+ \hline
+\end{tabular}
+\end{center}
+\caption{Tested highly-evasive malware samples}
+\end{table}
+
+Let us give a brief description for each of the above samples, based on the information from Joe Sandbox reports:
+
+\begin{itemize}
+\item \textbf{1} is an evasive \textit{trojan}, i.e., a seemingly benign malicious program, which contacts phishing domains and drops a set of malicious files on the infected system.
+\item \textbf{2} is a \textit{dropper}, that is, a type of trojan which "installs" additional malware on the targeted system. It persists itself and uses a variety of anti-evasion checks, including anti-VM and anti-sandbox controls. 
+\item \textbf{3} has a behaviour similar to \textbf{1}'s, since it is an evasive trojan that creates files on the compromised system and contacts malicious phishing domains. However, it is a bit more sophisticated as the number of created files and contacted domains is greater and, in addition, it involves the creation and injection of processes.
+\item \textbf{4} is Olympic destroyer, a data-wiping destructive malware which spread and caused damage to the computer network of the 2018 Pyeongchang Winter Olympics \cite{OlympicDestroyer}.  
+\item \textbf{5} is a highly-evasive trojanized version of the popular CCleaner utility program, which steals information from the infected system and installs a backdoor.
+\end{itemize}
+
+From the obtained results, we could deduce that BlueTracer was successful at tracing the sample's actions while remaining hidden and allowing them to perform their original malicious operations. An overview of the evasive actions executed from the sample's main executable which were tracked by BlueTracer and disabled by BluePill can be observed from \textit{Table 4.4} and \textit{Table 4.5}. In particular, the eight categories in which the actions are grouped correspond the ones adopted by BluePill. Specifically, the evasive patterns are classified as follows:
+
+\begin{itemize}
+\item \textbf{Anti-debugging (DEBUG)}, which seek to detect the presence of a debugger.
+\item \textbf{File-related (FILE)}, which involve file operations.
+\item \textbf{GUI-related (GUI)}, which deal with GUI features.
+\item \textbf{Process-related (PROC)}, aimed at collecting process information.
+\item \textbf{Hardware-related (HW)}, the objective of which is to perform hardware fingerprinting.
+\item \textbf{Registry-related (REG)}, that involve registry operations.
+\item \textbf{Time-related (TIME)}, which include timing differences and time-stalling techniques.
+\item \textbf{WMI-related (WMI)}, whose objective is to make SQL-like queries to applications and installed devices via the Windows Management Instrumentation model.
+\end{itemize}  
+
+From the tables on the next page, we can see that some of the evasion tricks previously explained in Section~\ref{Alk} were successfully traced and dismantled, i.e.,
+\texttt{GetFileAttributes}, \texttt{GetCursorPos}, \texttt{RegOpenKey} and \texttt{WaitForSingleObject}. In addition to these tricks, there are also some other disabled checks which we did not previously mention. 
+
+
+\iffalse
+2 is memory intensive, coherently with the fact that blabla
+\fi
+
+
+\begin{table}[htp]
+\begin{center}
+%\begin{sidewaystable}
+\hspace*{-0.5cm}
+\renewcommand{\arraystretch}{1.8}
+ \begin{tabular}{|c|c|c|c|c|} 
+ \hline
+ \textbf{ID} & \textbf{DEBUG} & \textbf{FILE} & \textbf{GUI} & \textbf{PROC} \\ [0.5ex] 
+ \hline\hline
+ 1 & & & & \\ 
+ \hline
+ 2 & & \makecell{FindFirstFile\\GetFileAttributes} & & \\
+ \hline
+ 3 &  &  &  & NtQuerySystemInformation\\
+ \hline
+ 4 &  &  &  & NtQuerySystemInformation\\
+ \hline
+ 5 &  &  & GetCursorPos &\\ [1ex] 
+ \hline
+\end{tabular}
+%\end{sidewaystable}
+\end{center}
+\caption{Evasive tricks dismantled by BluePill and tracked by BlueTracer. The shown evasion tricks come from the categories \textbf{DEBUG}, \textbf{FILE}, \textbf{GUI} and \textbf{PROC}.}
+%\end{table}
+
+%\begin{table}[h]
+\begin{center}
+%\begin{sidewaystable}
+\renewcommand{\arraystretch}{1.9}
+ \begin{tabular}{|c|c|c|c|c|} 
+ \hline
+ \textbf{ID} & \textbf{HW} & \textbf{REG} & \textbf{TIME} & \textbf{WMI} \\ [0.5ex] 
+ \hline\hline
+ 1 &  &  & GetTickCount & \\ 
+ \hline
+ 2 &  & RegOpenKey & \makecell{GetSystemTimeAsFileTime\\GetTickCount} & \\
+ \hline
+ 3 &  &  &  & \\
+ \hline
+ 4 &  & RegQueryValueEx  & \makecell{GetSystemTimeAsFileTime\\GetTickCount\\WaitForSingleObject} & \\
+ \hline
+ 5 &  & RegOpenKey & \makecell{GetSystemTimeAsFileTime\\GetTickCount\\SetTimer}      
+& SysAllocString\\ [1ex] 
+ \hline
+\end{tabular}
+%\end{sidewaystable}
+\end{center}
+\caption{Evasive tricks dismantled by BluePill and tracked by BlueTracer. The shown evasion tricks come from the categories \textbf{HW}, \textbf{REG}, \textbf{TIME} and \textbf{WMI}.}
+\end{table}
+
+
+\iffalse
+\centering
+%\begin{tabular}{cccccc}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+%\newcommand{\specialcell}[2][c]{%
+%  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\renewcommand{\arraystretch}{2}
+\begin{tabularx}{\linewidth}{|c|c|c|c|c|}
+
+\hline
+\hline
+   \textbf{ID} & \textbf{DEBUG} & \textbf{FILE} & \textbf{GUI} & \textbf{PROC} \\
+\hline
+1     & & & &  \\
+\hline 
+2       &  & \makecell{FindFirstFileW\\GetFileAttributesW} & &   \\
+\hline
+3       &  &  &  & NtQuerySystemInformation  \\
+\hline
+4      &  &  &  & NtQuerySystemInformation   \\
+\hline
+5      &  &  & GetCursorPos &     \\
+\hline
+\end{tabularx}
+\vspace{0.2cm}
+%\caption{Execution times of instrumented benign applications}
+
+%& \textbf{HW} & \textbf{REG} & \textbf{TIME} & \textbf{WMI}
+
+\begin{sidewaystable}[h]
+\centering
+%\begin{tabular}{cccccc}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\renewcommand{\arraystretch}{2}
+%\hspace{-1cm}
+\def\x{
+\begin{tabularx}{\linewidth}{|c|c|c|c|c|c|c|}
+
+\hline
+\hline
+   \textbf{ID} & \textbf{MD5} & \textbf{Name} & \textbf{HW} & \textbf{REG} & \textbf{TIME} & \textbf{WMI} \\
+\hline
+1      & 0af4ef5069f47a371a0caf22ae2006a6    &
+ \textit{trojan/banker} &  &  & GetTickCount &   \\
+\hline 
+2      & 9437eabf2fe5d32101e3fbf9f6027880    & \textit{dropper}  &  & RegOpenKey & \makecell{GetSystemTimeAsFileTime\\GetTickCount} &   \\
+\hline
+3      & cbdda646a20d95f078393506ecdc0796    & \textit{trojan}  &  &  &  &  \\
+\hline
+4      & cfdd16225e67471f5ef54cab9b3a5558    & Olympic  &  & RegQueryValueEx  & \makecell{GetSystemTimeAsFileTime\\GetTickCount\\WaitForSingleObject}   &    \\
+\hline
+5      & ef694b89ad7addb9a16bb6f26f1efaf7    & CCleaner  &  & RegOpenKey & \makecell{GetSystemTimeAsFileTime\\GetTickCount\\SetTimer}      
+& SysAllocString \\
+\hline
+\end{tabularx}
+}
+\scalebox{.9}{\x}
+\vspace{0.2cm}
+\caption{Execution times of instrumented benign applications}
+
+\end{sidewaystable}
+\fi
+
+
+Let us quickly go through them:
+\begin{itemize}
+\item \texttt{FindFirstFile} searches a directory for a file or subdirectory matching the provided name. 
+\item \texttt{NtQuerySystemInformation}, when its SystemInformationClass parameter is set to SystemProcessInformation (\texttt{0x5}), returns a set of data structures, one for each process running in the system, containing information related to them.
+\item \texttt{RegQueryValueEx} retrieves information relative to the provided value name, associated to an open registry key.
+\item \texttt{GetTickCount} returns the number of milliseconds elapsed since the start of the system and is typically used for calculating timing differences.
+\item \texttt{GetSystemTimeAsFileTime} returns the system's current date and time. 
+\item \texttt{SetTimer} generates a timer having the specified time-out value.
+\item \texttt{SysAllocString} creates a binary string, in this specific case containing the query to be performed through the Windows Management Instrumentation model.
+\end{itemize}
+
+In order to learn as much information as possible regarding the tested samples, for each malicious instance we recorded the size of the associated BlueTracer log, we parsed it with a Python script and we counted the total number events, differentiating between Native APIs, APIs, Callbacks and APCs (\textit{Table 4.6}). The results show how the log sizes are quite heterogeneous, ranging from the 132.5 kB of \textbf{1} to the 173.4 MB of \textbf{5}. Moreover, we can also see how, as expected, APIs are by far the most frequent type of event. Furthermore, we can also observe how callbacks occur for every sample, unlike APCs, which were never found in the logs.
+
+\begin{sidewaystable}
+\centering
+%\begin{tabular}{cccccc}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcommand{\specialcell}[2][c]{%
+  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+\begin{tabularx}{\linewidth}{|Y|Y|YYYY|Y|}
+
+\hline
+\hline
+   \textbf{ID} & \textbf{Log Size} & \textbf{Native APIs} & \textbf{APIs} & \textbf{Callbacks} & \textbf{APCs} & \textbf{Total} \\
+\hline
+1      & 132.5 kB    & 0  & 834 & 1 & 0 & 835     \\
+\hline
+2      & 87.2 MB & 1063 & 492 629 & 11 & 0 & 493 703 \\
+\hline
+3      & 4.3 MB & 4 & 11 144 & 178 & 0 & 11 326 \\
+\hline
+4      & 12.3 MB & 446 & 60 542 & 24 & 0 & 61 012 \\
+\hline
+5      & 173.4 MB & 0 & 615 268 & 5231 & 0 & 620 499 \\
+\hline
+\end{tabularx}
+\vspace{0.1cm}
+\caption{Execution times of instrumented benign applications}
+
+\vspace*{0.5cm}
+%\end{sidewaystable}
+%\begin{sidewaystable}
+
+\begin{tabularx}{\linewidth}{|Y|Y|Y|Y|Y|Y|Y|Y|Y|}
+
+\hline
+\hline
+   \textbf{ID} & \specialcell{ \textbf{File} \\ \textbf{Activities}} & \specialcell{ \textbf{Registry} \\ \textbf{Activities}} & \specialcell{ \textbf{Process} \\ \textbf{Activities}} & \specialcell{ \textbf{Thread} \\ \textbf{Activities}} & \specialcell{ \textbf{Time} \\ \textbf{Activities}} & \specialcell{ \textbf{Memory} \\ \textbf{Activities}} &  \specialcell{ \textbf{Sys. Info.} \\ \textbf{Activities}} & \specialcell{ \textbf{UI} \\ \textbf{Activities}} \\
+\hline
+1      & \specialcell{64 \\ (7.66\%)}    & \specialcell{36 \\ (4.32\%)}  &  \specialcell{5 \\ (0.60\%)} & \specialcell{1 \\ (0.12\%)} & \specialcell{20 \\ (2.39\%)} & \specialcell{40 \\ (4.79\%)} & \specialcell{9 \\ (1.08\%)} & 0   \\
+\hline
+2      &  \specialcell{4836 \\ (0.98\%)}    & \specialcell {68 \\ (0.01\%)}  &  \specialcell{123 \\ (0.02\%)} & \specialcell{54 005 \\ (10.94\%)} & \specialcell{22 629 \\ (4.58\%)} & \specialcell{45 799 \\ (9.28\%)} & \specialcell {27 \\ ($\approx0$\%)} & \specialcell {25 051 \\ (5.07\%)}   \\
+\hline
+3      & \specialcell{6759 \\ (59.68\%)}    & \specialcell{4 \\ (0.03\%)}  &  \specialcell{78 \\ (0.69\%)} & \specialcell{4 \\ (0.03\%)} & \specialcell{34 \\ (0.30\%)} & \specialcell{435 \\ (3.84\%)} & \specialcell{3 \\ (0.03\%)} & \specialcell{38 \\ (0.34\%)}   \\
+\hline
+4      & \specialcell{242 \\ (0.40\%)}    & \specialcell{361 \\ (0.59\%)}  &  \specialcell{1676 \\ (2.75\%)} & \specialcell{348 \\ (0.57\%)} & \specialcell{185 \\ (0.30\%)} & \specialcell{5758 \\ (9.44\%)} & \specialcell{57 \\ (0.09\%)} & \specialcell{0}   \\
+\hline
+5      & \specialcell{4194 \\ (0.68\%)}    & \specialcell{26 224 \\ (4.23\%)}  &  \specialcell{6035 \\ (0.97\%)} & \specialcell{3315 \\ (0.53\%)} & \specialcell{16 346 \\ (2.63\%)} & \specialcell{120 918 \\ (19.84\%)} & \specialcell{647 \\ (0.10\%)} & \specialcell{14 958 \\ (2.41\%)}   \\
+\hline
+\end{tabularx}
+\vspace{0.2cm}
+\caption{Execution times of instrumented benign applications}
+
+\end{sidewaystable}
+
+In addition to counting the sample's events from their logs, we also recorded how many events were traced for each of eight different categories, namely, file activities, registry activities, process activities, thread activities, time activities, memory activities, system information-retrieval activities and user interface activities (\textit{Table 4.7}). Such groups are the same as the ones in Joe Sandbox's reports, which were, in fact, employed to determine the appropriate category for each event. From the data in \textit{Table 4.7} we can see that, for \textbf{1} and \textbf{3}, the most common operations are file activities (7.66\% and 59.68\%), coherently with the fact that one of their main actions is to drop files on the infected system. Regarding \textbf{2}, the largest portion of events involved thread activities (10.94\%) and memory activities (9.28\%), as we are dealing with a persistent dropper. Olympic, being a data-wiping malware, also mainly performs memory activities (9.44\%). Lastly, even for CCleaner, the majority of events are memory-related (19.84\%).
 
 \section{Conclusions}
 In this chapter we have outlined the results of BlueTracer's experimental evaluation. In order to assess BlueTracer's run-time overhead, we have tested it on a number of applications performing various tasks, employing a four different modes of operation. We have also introduced the overhead per event metric as a way of quantifying the run-time overhead introduced by BlueTracer. The results showed that the typical overhead per event is in the range of 40 - 220 microseconds per operation.
-Then we validated BlueTracer with Al-Khaser, an open-source application employed to assess how stealthy an analysis system is with respect to many evasion techniques used in the wild. BlueTracer was able to remain hidden to all the checks performed by Al-Khaser, thus proving to be effective at staying undetected. Furthermore, BlueTracer's tracking abilities also turned out to be efficacious, since evidence of the vast majority of Al-Khaser's techniques was present in BlueTracer's log.
+Then we firstly validated BlueTracer with Al-Khaser, an open-source application employed to assess how stealthy an analysis system is with respect to many evasion techniques used in the wild. BlueTracer was able to remain hidden to all the checks performed by Al-Khaser, thus proving to be effective at staying undetected. Furthermore, BlueTracer's tracking abilities also turned out to be efficacious, since evidence of the vast majority of Al-Khaser's techniques was present in BlueTracer's log. Lastly, we assessed BlueTracer's capabilities by conducting tests on real highly-evasive malware samples collected by Joe Security. The obtained results showed how BlueTracer was able to track the malicious activities performed by the malware instances, without them noticing it.
