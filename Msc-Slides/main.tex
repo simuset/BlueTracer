@@ -1,0 +1,228 @@
+\documentclass[compress]{beamer}
+
+%\usepackage[latin1,utf8]{inputenc}
+
+%\usepackage[utf8]{inputenc}
+%\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+
+\usetheme{shadow}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{textpos}
+\usepackage{textcomp}
+\usepackage{color, colortbl}
+\usepackage{fancybox}
+\usepackage{boxedminipage}
+\usepackage{xcolor}
+\usepackage{lipsum}
+\usepackage{comment}
+\usepackage{rotating}
+\usepackage{xcolor}
+
+\usepackage{epsfig}
+\usepackage{amsmath,amssymb}
+\usepackage{amsthm}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{boxedminipage}
+\usepackage{latexsym}
+\usepackage{subfigure}
+\usepackage{wrapfig}
+\usepackage{algorithm} 
+\usepackage{appendixnumberbeamer}
+
+\usepackage{framed}
+
+\usetikzlibrary{shapes}
+\usetikzlibrary{arrows}
+\usetikzlibrary{automata}
+\usepackage{algorithm}
+\usepackage[noend]{algorithmic}
+\usepackage{pifont}
+\usepackage{fancybox}
+\usepackage{listings}
+\usepackage{changepage}
+
+% Daniele
+\usepackage{adjustbox}
+
+% needed if you use oopdf2eps script :)
+\epstopdfsetup{suffix=}
+
+\beamertemplatenavigationsymbolsempty 
+
+\title[BlueTracer:
+a Robust API Tracer for Evasive Malware]{BlueTracer: \\
+a Robust API Tracer for Evasive Malware}
+
+\author[Simone Nicchi]
+{
+    \textbf{\textcolor{sapienza}{Simone Nicchi}\\~\\{\vspace{-0.5em}\em\textmd{Thesis Advisor: Prof. Camil Demetrescu \\ Thesis Co-Advisors: Dr. Daniele Cono D'Elia, Dr. Emilio Coppa} }\\~\\{Master of Science in Engineering in Computer Science}}\vspace{-2em}
+}
+
+%\pgfdeclareimage[height=1.6cm]{logo}{Immagini/sapienza}
+%\logo{\centering \pgfuseimage{logo}} 
+
+%\institute[Sapienza Universit\`{a} di Roma, Italy]
+%{
+  %\inst{1}%
+  %Sapienza Universit\`{a} di Roma, Italy\\
+  %\and
+  %\vskip-2mm
+  %\inst{2}%
+  %Sapienza Universit\`{a} di Roma, Italy\\
+%  \texttt{\space crisafulli.giu@gmail.com}
+%}
+
+
+%\date{\today}
+\date{July 20, 2018}
+\newcommand{\argmax}{\operatornamewithlimits{argmax}\limits}
+\definecolor{forest}{RGB}{21,166,64}
+\newcommand\mybox[2][]{\tikz[overlay]\node[ draw=forest, fill=blue!20,inner sep=2pt, anchor=text, rectangle, rounded corners=1mm, #1] {#2};\phantom{#2}}
+
+\begin{document}
+
+\definecolor{sapienza}{rgb}{0.50,0.14,0.20}
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+\definecolor{Gray}{gray}{0.9}
+
+\newcommand\darrow{\fontsize{36pt}{36pt}\selectfont{\begin{turn}{-90}\bf {\textcolor{sapienza}{\ding{224}}}\end{turn}}}
+\newcommand\larrow{\fontsize{36pt}{36pt}\selectfont\bf {\textcolor{sapienza}{\ding{224}}}}
+\newcommand\blarrow{\fontsize{36pt}{36pt}\selectfont{\begin{turn}{-135}\bf {\textcolor{sapienza}{\ding{224}}}\end{turn}}}
+
+% insert page number
+\newcommand*\oldmacro{}
+\let\oldmacro\insertshortauthor% save previous definition
+\renewcommand*\insertshortauthor{%
+  \leftskip=.3cm% before the author could be a plus1fill ...
+  \insertframenumber\,/\,\inserttotalframenumber\hfill\oldmacro}
+
+\newcommand\emlarrow{%
+        {\bf {\textcolor{sapienza}{\ding{224}}}}%
+}
+
+\setbeamercolor*{alerted text}{bg=white,fg=sapienza}
+\setbeamercolor*{structure}{bg=white,fg=sapienza}
+
+\setbeamercolor*{palette primary}{use=structure,fg=white,bg=sapienza}
+\setbeamercolor*{palette secondary}{use=structure,fg=white}
+\setbeamercolor*{palette tertiary}{use=structure,fg=white}
+\setbeamercolor*{palette quaternary}{fg=black,bg=white}
+
+\setbeamercolor*{sidebar}{use=structure,bg=structure.fg}
+  
+\setbeamercolor*{palette sidebar primary}{use=structure}
+\setbeamercolor*{palette sidebar secondary}{fg=white}
+\setbeamercolor*{palette sidebar tertiary}{use=structure}
+\setbeamercolor*{palette sidebar quaternary}{fg=white}
+
+\setbeamercolor*{titlelike}{parent=palette primary}
+
+\setbeamercolor*{separation line}{}
+\setbeamercolor*{fine separation line}{}
+
+
+\setbeamercolor{frametitle}{fg=white,bg=sapienza!100}
+\setbeamercolor{frametitle right}{fg=white,bg=sapienza!100}
+\setbeamercolor{subsection in head/foot}{bg=sapienza}
+\setbeamercolor{title in head/foot}{bg=sapienza}
+
+
+% insert page number
+%\newcommand*\oldmacro{}
+%\let\oldmacro\insertshortauthor% save previous definition
+%\renewcommand*\insertshortauthor{%
+%  \leftskip=.3cm% before the author could be a plus1fill ...
+%  \insertframenumber\,/\,\inserttotalframenumber\hfill\oldmacro}
+
+\newcommand{\stt}{\small\tt}
+\newcommand{\word}[1]{\fontsize{10.4}{10}\textsf{#1}}        % mention of word
+\newcommand{\wordb}[2]{\fontsize{10.4}{10}\textsf{#1}$_#2$}        % mention of word
+\newcommand{\wordc}[3]{\fontsize{10.4}{10}\textsf{#1}$_#2^#3$}        % mention of word
+\newcommand{\wikipage}[1]{\textsc{#1}}        % mention of wikipage
+
+\newcommand\tab[1][0.5cm]{\hspace*{#1}}
+
+\begin{frame}
+ 
+ \begin{figure}
+     \centering
+    \vspace{0.5cm}
+     \includegraphics[scale=.40]{image/sapienza.png}\\
+    
+ \end{figure}
+ 
+\titlepage
+\end{frame}
+
+\section{Introduction}
+\subsection{Malware Analysis}
+
+\begin{frame}
+    \frametitle{Malware: an increasingly significant problem }
+
+    \begin{figure}
+        \includegraphics[scale=0.55]{image/malware2}
+    \end{figure}
+    
+\end{frame}
+
+\begin{frame}
+    \frametitle{Malware Analysis}
+
+    Two main types:
+    \medskip
+    \begin{itemize}
+        \item \textbf{Static Analysis:}\\
+        involves the inspection of the different data and code sections of a binary
+        \item \textbf{Dynamic Analysis:}\\
+        the malware sample is executed and the actions it performs on the environment are observed
+    \end{itemize}
+    \vspace{1cm}    
+        
+         \begin{beamerboxesrounded}[shadow=true]{}
+    Dynamic analysis strongly favoured as it allows to dodge \\ code obfuscations and deal with a large number of samples
+    \end{beamerboxesrounded}    
+ 
+
+\end{frame}
+
+\subsection{Function Call Monitoring}
+\begin{frame}
+    \frametitle{Function call monitoring}
+
+Functions can abstract
+implementation details providing
+a semantically richer representation of some functionality. \\\bigskip
+Example:
+    \begin{figure}
+    	\vspace{-0.4cm}
+        \includegraphics[scale=0.6]{image/fcmonitoring}
+    \end{figure}
+
+\begin{beamerboxesrounded}[shadow=true]{}
+The abstractions embodied by \textbf{system calls} and \textbf{library calls} \\ can be used to grasp the visible behavior of a malicious sample
+\end{beamerboxesrounded} 
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{API Hooking}
+	
+	    \begin{beamerboxesrounded}[shadow=true]{API Hooking}
+    Generate random values for {\tt a} and {\tt b}: execute on these inputs and track path constraints. Negate constraints on the branch in order to generate new inputs that will explore the error path.
+    \end{beamerboxesrounded}
+
+\end{frame}
+
+\subsection{Evasion}
+
+\end{document}
+
