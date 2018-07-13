@@ -261,11 +261,21 @@ retval = libcall(arg1, &arg2)
 \begin{frame}
     \frametitle{The threat posed by evasive malware}
 	
-		    \begin{beamerboxesrounded}[shadow=true]{API Hooking}
-    The interception of function calls provided by dynamically
-linked \\ libraries (DLLs)
+		    \begin{beamerboxesrounded}[shadow=true]{Evasive malware}
+Malware that conceals its harmful behaviour when detecting a
+hostile environment, such as a well-known sandbox
+solution
     \end{beamerboxesrounded}
     \bigskip
+    
+    \begin{figure}
+    	\vspace{-0.2cm}
+    	\hspace*{1cm}
+        \includegraphics[width=9cm]{image/evasive.pdf}
+    \end{figure}
+    
+    \textbf{Problem 2}: API hooking techniques in literature are not coupled with mechanisms to hide their presence from evasive malware
+
 
 \end{frame}
 
@@ -332,7 +342,9 @@ linked \\ libraries (DLLs)
 \end{frame}
 
 \begin{frame}
-	Thanks for the attention.
+\begin{center}
+{\fontsize{15}{15}\selectfont \textbf{Thank you for your attention!}}
+\end{center}
 \end{frame}
 
 \end{document}
