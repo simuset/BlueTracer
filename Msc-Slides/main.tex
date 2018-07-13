@@ -52,6 +52,8 @@
 % Daniele
 \usepackage{adjustbox}
 
+\lstset{escapeinside={<@}{@>}}
+
 % needed if you use oopdf2eps script :)
 \epstopdfsetup{suffix=}
 
@@ -214,15 +216,124 @@ The abstractions embodied by \textbf{system calls} and \textbf{library calls} \\
 \end{frame}
 
 \begin{frame}
-    \frametitle{API Hooking}
+    \frametitle{Implementation of function call monitoring}
 	
 	    \begin{beamerboxesrounded}[shadow=true]{API Hooking}
-    Generate random values for {\tt a} and {\tt b}: execute on these inputs and track path constraints. Negate constraints on the branch in order to generate new inputs that will explore the error path.
+    The interception of function calls provided by dynamically
+linked \\ libraries (DLLs)
     \end{beamerboxesrounded}
+    \bigskip
+	Three broad categories:    
+    
+    \begin{itemize}
+    \item Binary Rewriting
+    \begin{itemize}
+    \item Call Redirection
+    \item Function Rewriting
+    \end{itemize}
+    \item Virtual Machine Introspection (VMI)
+    \item \textbf{Dynamic Binary Instrumentation (DBI)}
+    \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Dynamic Binary Instrumentation (DBI)}
+	
+A dynamic binary analysis
+technique in which the behaviour of an application is inspected at run-time via the
+injection of analysis code. 
+\bigskip
+\begin{block}{}
+\begin{lstlisting}[basicstyle=\ttfamily\large,xleftmargin=50pt]
+<@\textcolor{red}{record(arg1)}@> 
+retval = libcall(arg1, &arg2)
+<@\textcolor{red}{record(retval, *arg2)}@> 
+\end{lstlisting}
+\end{block}
+\bigskip
+\textbf{Problem 1}: existing products have limited logging capabilites
 
 \end{frame}
 
 \subsection{Evasion}
+
+\begin{frame}
+    \frametitle{The threat posed by evasive malware}
+	
+		    \begin{beamerboxesrounded}[shadow=true]{API Hooking}
+    The interception of function calls provided by dynamically
+linked \\ libraries (DLLs)
+    \end{beamerboxesrounded}
+    \bigskip
+
+\end{frame}
+
+\section{BlueTracer}
+
+\begin{frame}
+    \frametitle{Our solution: BlueTracer}
+	
+
+\end{frame}
+
+\subsection{Intel Pin}
+
+\begin{frame}
+    \frametitle{Intel Pin}
+	
+
+\end{frame}
+
+\subsection{BluePill}
+
+\begin{frame}
+    \frametitle{Integration with BluePill}
+	
+
+\end{frame}
+
+\subsection{Architecture}
+
+\begin{frame}
+    \frametitle{BlueTracer's architecture}
+	
+
+\end{frame}
+
+\section{Evaluation}
+
+\subsection{Al-Khaser}
+\begin{frame}
+    \frametitle{Al-Khaser}
+	
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Sample tracked evasive check}
+	
+
+\end{frame}
+
+\subsection{Evasive malware samples}
+\begin{frame}
+    \frametitle{Evasive malware samples}
+	
+
+\end{frame}
+
+\section{Conclusions}
+
+\begin{frame}
+    \frametitle{Conclusion and future developments}
+	
+
+\end{frame}
+
+\begin{frame}
+	Thanks for the attention.
+\end{frame}
 
 \end{document}
 
