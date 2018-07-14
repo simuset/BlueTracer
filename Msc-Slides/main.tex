@@ -350,7 +350,20 @@ Key features:
 
 \begin{frame}
     \frametitle{Integration with BluePill}
+	\textbf{BluePill} is a software toolkit which:
+	\begin{itemize}
+	\item Allows the simulation of a real production environment a specific malware
+sample was intended for
+	\item Conceals any virtualization artifacts and software setup which might set off
+evasion
+	\end{itemize}
+	\medskip
 	
+	    \begin{figure}
+    	\vspace{-0.3cm}
+    	%\hspace*{1cm}
+        \includegraphics[width=7.5cm]{image/BluePill.pdf}
+    \end{figure}
 
 \end{frame}
 
@@ -373,29 +386,131 @@ Key features:
 
 \subsection{Al-Khaser}
 \begin{frame}
-    \frametitle{Al-Khaser}
-	
+    \frametitle{Evaluation with Al-Khaser}
+	\textbf{Al-Khaser} is an open-source application which performs common checks employed by malware families to determine if they are being
+executed in an analysis environment
+\\\medskip
+Checks divided in categories:
+\begin{itemize}
+\item \textbf{Anti-Debugging}
+\item \textbf{Timing-based}
+\item \textbf{Human Interaction Detection}
+\item \textbf{Anti-Virtualization}
+\item \textbf{Anti-Analysis}
+\end{itemize}
+\bigskip
+\begin{beamerboxesrounded}[shadow=true]{}
+BlueTracer was undetected with respect to all the checks!
+\end{beamerboxesrounded}
+
+    \begin{textblock*}{3cm}(7.5cm,-4.cm)
+   \includegraphics[width=2cm]{image/lights.png}% use the \includegraphics command here
+	\end{textblock*}
 
 \end{frame}
 
-\begin{frame}
-    \frametitle{Sample tracked evasive check}
+\begin{frame}[fragile]
+    \frametitle{Example of tracked evasion check}
+    
+File system artifacts can be checked in order to uncover the presence of a virtualized environment
+\vspace*{0.5cm}
+    
+    %\begin{figure}
+    %	\vspace{-0.5cm}
+    	%\hspace*{1cm}
+    %    \includegraphics[width=11cm]{image/SampleCall}
+    %\end{figure}
 	
+	\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    %keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\linespread{1.3}\footnotesize\ttfamily,
+    basewidth = {.48em},
+   escapeinside={<@}{@>}
+}
+\begin{lstlisting}
+~~3160~~ 24980 KERNELBASE.dll!GetFileAttributesW
+24980 	arg 0: <@\alert{C:Windows\textbackslash system32\textbackslash drivers\textbackslash VBoxMouse.sys}@>
+ (name=lpFileName, type=wchar_t*, size=0x2)
+24980    executed KERNELBASE.dll!GetFileAttributesW =>
+24980 	retval: 0xffffffff (name=Return value, type=DWORD, size=0x4)
+\end{lstlisting}
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+} 
+
 
 \end{frame}
 
 \subsection{Evasive malware samples}
 \begin{frame}
-    \frametitle{Evasive malware samples}
-	
+    \frametitle{Evaluation with evasive malware samples}
+    
+	Five highly evasive samples collected by Joe Security:    
+    
+    \begin{table}[h]
+\vspace*{0.1cm}
+\begin{center}
+\resizebox{9.2cm}{!}{
+ \begin{tabular}{||c c c||}
+ \hline
+ \textbf{ID} & \textbf{MD5} & \textbf{Name} \\ 
+ \hline\hline
+ 1 & 0af4ef5069f47a371a0caf22ae2006a6 & \textit{trojan/banker} \\ 
+ \hline
+ 2 & 9437eabf2fe5d32101e3fbf9f6027880 & \textit{dropper} \\
+ \hline
+ 3 & cbdda646a20d95f078393506ecdc0796 & \textit{trojan}\\
+ \hline
+ 4 & cfdd16225e67471f5ef54cab9b3a5558 & Olympic\\
+ \hline
+ 5 & ef694b89ad7addb9a16bb6f26f1efaf7 & CCleaner\\ 
+ \hline
+\end{tabular}
+}
+\end{center}
+\end{table}
+\medskip
+\begin{beamerboxesrounded}[shadow=true]{}
+The
+logs collected by BlueTracer reveal behaviors consistent with the analysis reports
+authored by Joe Security
+\end{beamerboxesrounded}	
 
 \end{frame}
 
 \section{Conclusions}
 
 \begin{frame}
-    \frametitle{Conclusion and future developments}
+    \frametitle{Conclusions}
 	
+	\textbf{\textcolor{sapienza}{Contribution:}} \\
+	\smallskip	
+	\tab Design and implementation of \textbf{BlueTracer},
+a robust library and system call tracer for Windows programs specialized in evasive
+malware.
+	\\\bigskip
+	\textbf{\textcolor{sapienza}{Future Developments:}} \\
+	\begin{itemize}
+	\item Test with a larger set of highly evasive malware samples
+	\item Improve logging capabilities
+	\item Adopt log filtering techniques
+	\end{itemize}
 
 \end{frame}
 
