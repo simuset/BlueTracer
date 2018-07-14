@@ -192,7 +192,10 @@ a Robust API Tracer for Evasive Malware}
          \begin{beamerboxesrounded}[shadow=true]{}
     Dynamic analysis strongly favoured as it allows to dodge \\ code obfuscations and deal with a large number of samples
     \end{beamerboxesrounded}    
- 
+
+    \begin{textblock*}{2cm}(9.0cm,-6.5cm)
+   \includegraphics[width=1.2cm]{image/search.png}% use the \includegraphics command here
+	\end{textblock*} 
 
 \end{frame}
 
@@ -234,6 +237,10 @@ linked \\ libraries (DLLs)
     \item Virtual Machine Introspection (VMI)
     \item \textbf{Dynamic Binary Instrumentation (DBI)}
     \end{itemize}
+    
+    \begin{textblock*}{2cm}(8.3cm,-3cm)
+   \includegraphics[width=2cm]{image/hook.png}% use the \includegraphics command here
+	\end{textblock*} 
 
 \end{frame}
 
@@ -284,14 +291,57 @@ solution
 
 \begin{frame}
     \frametitle{Our solution: BlueTracer}
-	
+
+\begin{beamerboxesrounded}[shadow=true]{}
+\textbf{BlueTracer} is a robust library and system call tracer for Windows programs specialized in evasive malware
+\end{beamerboxesrounded}
+
+\bigskip
+
+Implementation details:
+\begin{itemize}
+\item Based on the \textbf{Intel Pin} DBI framework
+\item Integrated with the \textbf{BluePill} stealthy execution framework
+\item Combines reliable external sources of prototypes information
+\end{itemize}
+
+\bigskip
+
+Key features:
+\begin{itemize}
+\item Undetected tracing of input parameters, output buffers and return values of over 17 000 system calls and library calls
+\item Logging of asynchronous events
+\item Resolution of named constants
+\end{itemize}
 
 \end{frame}
 
 \subsection{Intel Pin}
 
 \begin{frame}
-    \frametitle{Intel Pin}
+    \frametitle{Why Intel Pin ?}
+    
+	Characteristics:
+	\begin{itemize}
+	\item \textbf{User-friendliness}
+	\item \textbf{Portability}
+	\item \textbf{Transparency}
+	\item \textbf{Efficiency}
+	\end{itemize}
+	\bigskip
+	\textbf{Analysis routines:} embody the code to be inserted during the application's execution\\
+	\smallskip
+	\textbf{Instrumentation routines:} determine where the analysis code has to be placed\\
+	\bigskip
+	Different analysis and instrumentation granularities
+	\begin{itemize}
+	\item Instruction, trace, routine and image
+	\end{itemize}
+    
+    \begin{textblock*}{3cm}(6cm,-6.5cm)
+   \includegraphics[width=1.6cm]{image/pin.png}% use the \includegraphics command here
+	\end{textblock*}
+	
 	
 
 \end{frame}
@@ -308,6 +358,13 @@ solution
 
 \begin{frame}
     \frametitle{BlueTracer's architecture}
+    
+    \begin{figure}
+    	\vspace{-0.5cm}
+    	%\hspace*{1cm}
+        \includegraphics[width=11cm]{image/BlueTracer.pdf}
+    \end{figure}
+    
 	
 
 \end{frame}
