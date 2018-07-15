@@ -253,7 +253,7 @@ injection of analysis code.
 \bigskip
 \begin{block}{}
 \begin{lstlisting}[basicstyle=\ttfamily\large,xleftmargin=50pt]
-<@\textcolor{red}{record(arg1)}@> 
+<@\textcolor{red}{record(libcall, arg1)}@> 
 retval = libcall(arg1, &arg2)
 <@\textcolor{red}{record(retval, *arg2)}@> 
 \end{lstlisting}
@@ -388,7 +388,7 @@ evasion
 \begin{frame}
     \frametitle{Evaluation with Al-Khaser}
 	\textbf{Al-Khaser} is an open-source application which performs common checks employed by malware families to determine if they are being
-executed in an analysis environment
+executed in an analysis environment.
 \\\medskip
 Checks divided in categories:
 \begin{itemize}
@@ -412,7 +412,7 @@ BlueTracer was undetected with respect to all the checks!
 \begin{frame}[fragile]
     \frametitle{Example of tracked evasion check}
     
-File system artifacts can be checked in order to uncover the presence of a virtualized environment
+File system artifacts can be checked in order to uncover the presence of a virtualized environment.
 \vspace*{0.5cm}
     
     %\begin{figure}
