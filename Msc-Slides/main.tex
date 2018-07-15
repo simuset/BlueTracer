@@ -253,9 +253,9 @@ injection of analysis code.
 \bigskip
 \begin{block}{}
 \begin{lstlisting}[basicstyle=\ttfamily\large,xleftmargin=50pt]
-<@\textcolor{red}{record(libcall, arg1)}@> 
+<@\textcolor{red}{record\_before(libcall\_name, arg1)}@> 
 retval = libcall(arg1, &arg2)
-<@\textcolor{red}{record(retval, *arg2)}@> 
+<@\textcolor{red}{record\_after(retval, *arg2)}@> 
 \end{lstlisting}
 \end{block}
 \bigskip
