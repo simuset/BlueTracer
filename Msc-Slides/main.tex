@@ -167,7 +167,6 @@ a Robust API Tracer for Evasive Malware}
 
 \section{Introduction}
 
-\iffalse
 \subsection{Malware Analysis}
 
 \begin{frame}
@@ -185,23 +184,41 @@ a Robust API Tracer for Evasive Malware}
     Two main types:
     \medskip
     \begin{itemize}
-        \item \textbf{Static Analysis:}\\
+        \item \textcolor{sapienza}{\textbf{Static Analysis:}}\\
         involves the inspection of the different data and code sections of a binary
-        \item \textbf{Dynamic Analysis:}\\
+        \item \textcolor{sapienza}{\textbf{Dynamic Analysis:}}\\
         the malware sample is executed and the actions it performs on the environment are observed
     \end{itemize}
-    \vspace{1cm}    
+    \vspace{0.5cm}    
         
          \begin{beamerboxesrounded}[shadow=true]{}
     Dynamic analysis strongly favoured as it allows to dodge \\ code obfuscations and deal with a large number of samples
     \end{beamerboxesrounded}    
 
-    \begin{textblock*}{2cm}(9.0cm,-6.5cm)
+    \begin{textblock*}{2cm}(9.0cm,-6.1cm)
    \includegraphics[width=1.2cm]{image/search.png}% use the \includegraphics command here
 	\end{textblock*} 
 
 \end{frame}
-\fi
+
+\begin{frame}
+    \frametitle{The threat posed by evasive malware}
+	
+		    \begin{beamerboxesrounded}[shadow=true]{Evasive malware}
+Malware that conceals its harmful behaviour when detecting a
+hostile environment, such as a well-known sandbox
+solution
+    \end{beamerboxesrounded}
+    \bigskip
+    
+    \begin{figure}
+    	\vspace{-0.6cm}
+    	\hspace*{0.5cm}
+        \includegraphics[width=11cm]{image/evasive.pdf}
+    \end{figure}
+    
+\end{frame}
+
 
 \subsection{Function Call Monitoring}
 \begin{frame}
@@ -210,7 +227,7 @@ a Robust API Tracer for Evasive Malware}
 Functions can abstract
 implementation details providing
 a semantically richer representation of some functionality. \\\bigskip
-Example:
+\textbf{Example}:
     \begin{figure}
     	\vspace{-0.4cm}
         \includegraphics[scale=0.6]{image/fcmonitoring}
@@ -252,7 +269,7 @@ linked \\ libraries (DLLs)
     \frametitle{Dynamic Binary Instrumentation (DBI)}
 	
 A dynamic binary analysis
-technique in which the behaviour of an application is inspected at run-time via the
+technique in which the behaviour of an application is inspected at run-time, without the need of recompiling it, via the
 injection of analysis code. 
 \bigskip
 \begin{block}{}
@@ -263,55 +280,66 @@ retval = libcall(arg1, &arg2)
 \end{lstlisting}
 \end{block}
 \bigskip
-\bigskip
-\textbf{Problem 1}: existing products have limited logging capabilites
+\textcolor{sapienza}{\textbf{Problems:}}
+\begin{enumerate}
+\item Existing products have limited logging capabilites
+\item API hooking techniques in literature are not coupled with mechanisms to hide their presence from evasive malware
+\end{enumerate}
 
 \end{frame}
 
-\subsection{Evasion}
 
-\begin{frame}
-    \frametitle{The threat posed by evasive malware}
-	
-		    \begin{beamerboxesrounded}[shadow=true]{Evasive malware}
-Malware that conceals its harmful behaviour when detecting a
-hostile environment, such as a well-known sandbox
-solution
-    \end{beamerboxesrounded}
-    \bigskip
-    
-    \begin{figure}
-    	\vspace{-0.2cm}
-    	\hspace*{1cm}
-        \includegraphics[width=9cm]{image/evasive.pdf}
-    \end{figure}
-    
-    \textbf{Problem 2}: API hooking techniques in literature are not coupled with mechanisms to hide their presence from evasive malware
-
-
-\end{frame}
 
 \section{BlueTracer}
 
+\subsection{Overview}
 \begin{frame}
     \frametitle{Our solution: BlueTracer}
+
+\medskip
 
 \begin{beamerboxesrounded}[shadow=true]{}
 \textbf{BlueTracer} is a robust library and system call tracer for Windows programs specialized in evasive malware
 \end{beamerboxesrounded}
 
-\bigskip
+\medskip
 
-Implementation details:
+\textcolor{sapienza}{\textbf{Building blocks:}}
 \begin{itemize}
 \item Based on the \textbf{Intel Pin} DBI framework
 \item Integrated with the \textbf{BluePill} stealthy execution framework
-\item Combines reliable external sources of prototypes information
+%\item Combines reliable external sources of prototypes information
 \end{itemize}
 
 \bigskip
+	    \begin{figure}
+    	\vspace{-0.3cm}
+    	%\hspace*{1cm}
+        \includegraphics[width=7cm]{image/BluePill.pdf}
+    \end{figure}
 
-Key features:
+\end{frame}
+
+\begin{frame}
+    \frametitle{BlueTracer: challenges and features}
+\setbeamerfont*{itemize/enumerate subbody}{parent=itemize/enumerate body}    
+    
+\textcolor{sapienza}{\textbf{Implementation challenges:}}
+
+\begin{itemize}
+\item Heterogeneity of Windows libraries used in malware and the lack of well-structured documentation for their prototypes
+\begin{itemize}
+\item[$\rightarrow$] Integration of reliable external sources \\ (\textbf{Dr. Memory}
+and \textbf{CISCO PyREBox})
+\end{itemize}
+\item Making best use of
+Intel Pin's capabilities with respect to run-time CPU and memory costs
+\item Addressing some inherent limitations of Intel Pin
+
+\end{itemize}
+
+
+\textcolor{sapienza}{\textbf{Key features:}}
 \begin{itemize}
 \item Undetected tracing of input parameters, output buffers and return values of over 17 000 system calls and library calls
 \item Logging of asynchronous events
@@ -320,6 +348,7 @@ Key features:
 
 \end{frame}
 
+\iffalse
 \subsection{Intel Pin}
 
 \begin{frame}
@@ -331,16 +360,18 @@ Key features:
 	\item \textbf{Portability}
 	\item \textbf{Transparency}
 	\item \textbf{Efficiency}
+	\item \textbf{Robustness}
 	\end{itemize}
-	\bigskip
+	\medskip
 	\textbf{Analysis routines:} embody the code to be inserted during the application's execution\\
 	\smallskip
 	\textbf{Instrumentation routines:} determine where the analysis code has to be placed\\
 	\bigskip
-	Different analysis and instrumentation granularities
-	\begin{itemize}
-	\item Instruction, trace, routine and image
-	\end{itemize}
+
+%	Different analysis and instrumentation granularities
+%	\begin{itemize}
+%	\item Instruction, trace, routine and image
+%	\end{itemize}
     
     \begin{textblock*}{3cm}(6cm,-6.5cm)
    \includegraphics[width=1.6cm]{image/pin.png}% use the \includegraphics command here
@@ -370,6 +401,7 @@ evasion
     \end{figure}
 
 \end{frame}
+\fi
 
 \subsection{Architecture}
 
@@ -402,12 +434,16 @@ Checks divided in categories:
 \item \textbf{Anti-Virtualization}
 \item \textbf{Anti-Analysis}
 \end{itemize}
-\bigskip
+\medskip
 \begin{beamerboxesrounded}[shadow=true]{}
-BlueTracer was undetected with respect to all the checks!
+BlueTracer: 
+\begin{itemize}
+\item remained undetected thanks to its integration with BluePill
+\item managed to track all the checks
+\end{itemize}
 \end{beamerboxesrounded}
 
-    \begin{textblock*}{3cm}(7.5cm,-4.cm)
+    \begin{textblock*}{3cm}(7.5cm,-5.5cm)
    \includegraphics[width=2cm]{image/lights.png}% use the \includegraphics command here
 	\end{textblock*}
 
@@ -415,9 +451,13 @@ BlueTracer was undetected with respect to all the checks!
 
 \begin{frame}[fragile]
     \frametitle{Example of tracked evasion check}
-    
-File system artifacts can be checked in order to uncover the presence of a virtualized environment.
-\vspace*{0.5cm}
+
+\begin{beamerboxesrounded}[shadow=true]{}
+Tracing a particular action of a malware instance allows to understand in detail what the sample's intentions are
+\end{beamerboxesrounded}
+\bigskip    
+\textbf{Example}: file system artifacts can be checked in order to uncover the presence of a virtualized environment.
+\vspace*{0.3cm}
     
     %\begin{figure}
     %	\vspace{-0.5cm}
@@ -468,7 +508,7 @@ File system artifacts can be checked in order to uncover the presence of a virtu
 	Five highly evasive samples collected by Joe Security:    
     
     \begin{table}[h]
-\vspace*{0.1cm}
+\vspace*{-0.1cm}
 \begin{center}
 \resizebox{9.2cm}{!}{
  \begin{tabular}{||c c c||}
@@ -489,6 +529,12 @@ File system artifacts can be checked in order to uncover the presence of a virtu
 }
 \end{center}
 \end{table}
+\vspace{-0.1cm}
+Evaluation was done manually and is a time-consuming process:
+\begin{itemize}
+\item Check if logs are congruous with Joe Security reports
+\item Process Monitor as ground truth for system activity
+\end{itemize}
 \medskip
 \begin{beamerboxesrounded}[shadow=true]{}
 The
@@ -511,9 +557,9 @@ malware.
 	\\\bigskip
 	\textbf{\textcolor{sapienza}{Future Developments:}} \\
 	\begin{itemize}
-	\item Test with a larger set of highly evasive malware samples
-	\item Improve logging capabilities
-	\item Adopt log filtering techniques
+	\item Adoption of an automatic methodology for large-scale evaluation 
+	\item Improvement of logging capabilities
+	\item Usage of log filtering techniques
 	\end{itemize}
 
 \end{frame}

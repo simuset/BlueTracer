@@ -11,7 +11,7 @@ Finally, the tests conducted on the Al-Khaser anti-malware system stress tool an
 
 \section{Future Directions}
 
-The obvious next step in BlueTracer's development is to test it with larger a set of highly evasive malware samples, in order to further evaluate its effectiveness in a real-life scenario.
+The obvious next step in BlueTracer's development would be to introduce an automatic methodology for large-scale evaluation so that the tool can be tested with a larger a set of highly evasive malware samples, in order to further evaluate its effectiveness in a real-life scenario.
 
 A lot has to still be done in order to further improve BlueTracer's logging capabilities. In fact, the tool's ability to log the contents of complex data structures such as \texttt{structs} and \texttt{unions} is still limited and needs to be worked on. Also, the tracer does not deal with complex scenarios where there are dependencies between parameters, i.e., the type of a parameter depends on the value of another parameter. In addition, we should be able to find a way to print the arguments values for user-mode callbacks and Windows Asychronous Procedure Calls by unpacking the data structures they receive as input. On top of that, BlueTracer, as of right now, supports only 32-bit Windows operating systems and, in light of this, we would like to extend its support for 64-bit versions. It is worth noting that the tool was only tested with Windows 7, so it might be also a good a idea to evaluate it when running in other versions of the Windows operating system, even though this should not impact BlueTracer's functionalities.
 
