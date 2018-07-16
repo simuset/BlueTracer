@@ -165,7 +165,7 @@ a Robust API Tracer for Evasive Malware}
 \end{frame}
 
 
-\section{Introduction}
+\section{Intro.}
 
 \subsection{Malware Analysis}
 
@@ -201,45 +201,41 @@ a Robust API Tracer for Evasive Malware}
 
 \end{frame}
 
-\begin{frame}
-    \frametitle{The threat posed by evasive malware}
-	
-		    \begin{beamerboxesrounded}[shadow=true]{Evasive malware}
-Malware that conceals its harmful behaviour when detecting a
-hostile environment, such as a well-known sandbox
-solution
-    \end{beamerboxesrounded}
-    \bigskip
-    
-    \begin{figure}
-    	\vspace{-0.6cm}
-    	\hspace*{0.5cm}
-        \includegraphics[width=11cm]{image/evasive.pdf}
-    \end{figure}
-    
-\end{frame}
-
-
 \subsection{Function Call Monitoring}
-\begin{frame}
+\begin{frame}[fragile]
     \frametitle{Function call monitoring}
 
-Functions can abstract
+\begin{itemize}
+\item Functions can abstract
 implementation details providing
-a semantically richer representation of some functionality. \\\bigskip
-\textbf{Example}:
-    \begin{figure}
-    	\vspace{-0.4cm}
-        \includegraphics[scale=0.6]{image/fcmonitoring}
-    \end{figure}
+a semantically richer representation of some functionality
+\item The abstractions embodied by \textbf{system calls} and \textbf{library calls} \\ can be used to grasp the visible behavior of a malicious sample 
+\end{itemize}
+\medskip
+\textcolor{sapienza}{\textbf{Example}}:\\
+\bigskip
 
 \begin{beamerboxesrounded}[shadow=true]{}
-The abstractions embodied by \textbf{system calls} and \textbf{library calls} \\ can be used to grasp the visible behavior of a malicious sample
+
+\lstset{
+    language=C++,
+    stringstyle=\color{sapienza}, % string color
+    basicstyle=\linespread{1.5}\ttfamily\small,
+}
+
+\begin{lstlisting}[xleftmargin=0pt]
+RegCreateKey("...\CurrentVersion\Run\monitor") 
+CreateDirectory("C:\Windows\utils")
+CreateFile("C\Windows\utils\GFypmMVqJQOEQqy.exe")
+\end{lstlisting}
+
 \end{beamerboxesrounded} 
+
+
 
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
     \frametitle{Implementation of function call monitoring}
 	
 	    \begin{beamerboxesrounded}[shadow=true]{API Hooking}
@@ -247,24 +243,42 @@ The abstractions embodied by \textbf{system calls} and \textbf{library calls} \\
 linked \\ libraries (DLLs)
     \end{beamerboxesrounded}
     \bigskip
-	Three broad categories:    
+	
+	
+%	Three broad categories:    
     
-    \begin{itemize}
-    \item Binary Rewriting
-    \begin{itemize}
-    \item Call Redirection
-    \item Function Rewriting
-    \end{itemize}
-    \item Virtual Machine Introspection (VMI)
-    \item \textbf{Dynamic Binary Instrumentation (DBI)}
-    \end{itemize}
+%    \begin{itemize}
+%    \item Binary Rewriting
+%    \begin{itemize}
+%    \item Call Redirection
+%    \item Function Rewriting
+%    \end{itemize}
+%    \item Virtual Machine Introspection (VMI)
+%    \item \textbf{Dynamic Binary Instrumentation (DBI)}
+%    \end{itemize}
     
-    \begin{textblock*}{2cm}(8.3cm,-3cm)
-   \includegraphics[width=2cm]{image/hook.png}% use the \includegraphics command here
-	\end{textblock*} 
+%    \begin{textblock*}{2cm}(8.3cm,-3cm)
+%   \includegraphics[width=2cm]{image/hook.png}% use the \includegraphics command here
+%	\end{textblock*}
+
+One technique is \textbf{Dynamic Binary Instrumentation (DBI)}.
+\begin{itemize}
+\item[$\rightarrow$] The behaviour of an application is inspected at run-time, without the need of recompiling it, via the injection of analysis code
+\end{itemize}
+\smallskip
+
+\begin{block}{}
+\begin{lstlisting}[basicstyle=\ttfamily\large,xleftmargin=50pt]
+<@\textcolor{red}{record\_before(libcall\_name, arg1)}@> 
+retval = libcall(arg1, &arg2)
+<@\textcolor{red}{record\_after(retval, *arg2)}@> 
+\end{lstlisting}
+\end{block}
+
 
 \end{frame}
 
+\iffalse
 \begin{frame}[fragile]
     \frametitle{Dynamic Binary Instrumentation (DBI)}
 	
@@ -287,14 +301,54 @@ retval = libcall(arg1, &arg2)
 \end{enumerate}
 
 \end{frame}
+\fi
 
+\subsection{Evasion}
+\begin{frame}
+    \frametitle{The threat posed by evasive malware}
+	
+		    \begin{beamerboxesrounded}[shadow=true]{Evasive malware}
+Malware that conceals its harmful behaviour when detecting a
+hostile environment, such as a well-known sandbox
+solution
+    \end{beamerboxesrounded}
+    \bigskip
+    
+    \begin{figure}
+    	\vspace{-0.6cm}
+    	\hspace*{0.5cm}
+        \includegraphics[width=11cm]{image/evasive.pdf}
+    \end{figure}
+    
+\end{frame}
 
+\begin{frame}
+    \frametitle{Existing problems}
+
+\section{Problem}	
+Two main problems which need to be addressed:
+\\\bigskip
+\begin{enumerate}
+\item Existing API tracing tools have \textbf{limited logging capabilities}
+\smallskip
+\begin{itemize}
+\item[--] The amount of recorded information is too little
+\item[--] It is hard to distinguish the calls made directly from the sample's main executable from the ones made by libraries
+\end{itemize}
+\bigskip
+\item Current API hooking techniques are \textbf{easily detectable} and are not coupled with mechanisms to hide their presence
+from evasive malware
+\end{enumerate}
+
+    
+\end{frame}
 
 \section{BlueTracer}
 
 \subsection{Overview}
 \begin{frame}
-    \frametitle{Our solution: BlueTracer}
+    \frametitle{BlueTracer}
+    \setbeamerfont*{itemize/enumerate subbody}{parent=itemize/enumerate body} 
 
 \medskip
 
@@ -304,46 +358,56 @@ retval = libcall(arg1, &arg2)
 
 \medskip
 
-\textcolor{sapienza}{\textbf{Building blocks:}}
+\textcolor{sapienza}{\textbf{The tool possesses a remarkable logging power:}}
 \begin{itemize}
-\item Based on the \textbf{Intel Pin} DBI framework
-\item Integrated with the \textbf{BluePill} stealthy execution framework
-%\item Combines reliable external sources of prototypes information
-\end{itemize}
-
-\bigskip
-	    \begin{figure}
-    	\vspace{-0.3cm}
-    	%\hspace*{1cm}
-        \includegraphics[width=7cm]{image/BluePill.pdf}
-    \end{figure}
-
-\end{frame}
-
-\begin{frame}
-    \frametitle{BlueTracer: challenges and features}
-\setbeamerfont*{itemize/enumerate subbody}{parent=itemize/enumerate body}    
-    
-\textcolor{sapienza}{\textbf{Implementation challenges:}}
-
-\begin{itemize}
-\item Heterogeneity of Windows libraries used in malware and the lack of well-structured documentation for their prototypes
+\item Access to a source of calls related information is required
+\item Logging operations are made challenging by the heterogeneity of Windows libraries used in malware and the lack of well-structured documentation for their prototypes
 \begin{itemize}
 \item[$\rightarrow$] Integration of reliable external sources \\ (\textbf{Dr. Memory}
 and \textbf{CISCO PyREBox})
+\end{itemize} 
 \end{itemize}
-\item Making best use of
-Intel Pin's capabilities with respect to run-time CPU and memory costs
-\item Addressing some inherent limitations of Intel Pin
-
-\end{itemize}
-
 
 \textcolor{sapienza}{\textbf{Key features:}}
 \begin{itemize}
 \item Undetected tracing of input parameters, output buffers and return values of over 17 000 system calls and library calls
 \item Logging of asynchronous events
-\item Resolution of named constants
+\item Allows to trace only calls from the main executable
+\end{itemize}    
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{BlueTracer (cont'd)}
+\setbeamerfont*{itemize/enumerate subbody}{parent=itemize/enumerate body}    
+
+\textcolor{sapienza}{\textbf{Solution to the detection problem:}}
+\begin{itemize}
+\item Seamless integration with \textbf{BluePill}, a stealthy execution framework based on \textbf{Intel Pin}
+%\item Combines reliable external sources of prototypes information
+\end{itemize}
+
+
+%\textcolor{sapienza}{\textbf{Building blocks:}}
+%\begin{itemize}
+%\item Based on the \textbf{Intel Pin} DBI framework
+%\item Integrated with the \textbf{BluePill} stealthy execution framework
+%\item Combines reliable external sources of prototypes information
+%\end{itemize}
+
+\bigskip
+	    \begin{figure}
+    	\vspace{-0.3cm}
+    	%\hspace*{1cm}
+        \includegraphics[width=6cm]{image/BluePill.pdf}
+    \end{figure}
+
+\textcolor{sapienza}{\textbf{Faced implementation challenges:}}
+\begin{itemize}
+\item Making best use of
+Intel Pin's capabilities with respect to run-time CPU and memory costs
+\item Addressing some inherent limitations of Intel Pin
+
 \end{itemize}
 
 \end{frame}
@@ -449,58 +513,6 @@ BlueTracer:
 
 \end{frame}
 
-\begin{frame}[fragile]
-    \frametitle{Example of tracked evasion check}
-
-\begin{beamerboxesrounded}[shadow=true]{}
-Tracing a particular action of a malware instance allows to understand in detail what the sample's intentions are
-\end{beamerboxesrounded}
-\bigskip    
-\textbf{Example}: file system artifacts can be checked in order to uncover the presence of a virtualized environment.
-\vspace*{0.3cm}
-    
-    %\begin{figure}
-    %	\vspace{-0.5cm}
-    	%\hspace*{1cm}
-    %    \includegraphics[width=11cm]{image/SampleCall}
-    %\end{figure}
-	
-	\lstset{
-    language=C++,
-    frame=tb, % draw a frame at the top and bottom of the code block
-    tabsize=4, % tab space width
-    showstringspaces=false, % don't mark spaces in strings
-    numbers=none, % display line numbers on the left
-    commentstyle=\color{ao}, % comment color
-    %keywordstyle=\color{blue}, % keyword color
-    stringstyle=\color{red}, % string color
-    basicstyle=\linespread{1.3}\footnotesize\ttfamily,
-    basewidth = {.48em},
-   escapeinside={<@}{@>}
-}
-\begin{lstlisting}
-~~3160~~ 24980 KERNELBASE.dll!GetFileAttributesW
-24980 	arg 0: <@\alert{C:Windows\textbackslash system32\textbackslash drivers\textbackslash VBoxMouse.sys}@>
- (name=lpFileName, type=wchar_t*, size=0x2)
-24980    executed KERNELBASE.dll!GetFileAttributesW =>
-24980 	retval: 0xffffffff (name=Return value, type=DWORD, size=0x4)
-\end{lstlisting}
-\lstset{
-    language=C++,
-    frame=tb, % draw a frame at the top and bottom of the code block
-    tabsize=4, % tab space width
-    showstringspaces=false, % don't mark spaces in strings
-    numbers=left, % display line numbers on the left
-    commentstyle=\color{ao}, % comment color
-    keywordstyle=\color{blue}, % keyword color
-    stringstyle=\color{red}, % string color
-    basicstyle=\footnotesize\ttfamily,
-    basewidth = {.48em}
-} 
-
-
-\end{frame}
-
 \subsection{Evasive malware samples}
 \begin{frame}
     \frametitle{Evaluation with evasive malware samples}
@@ -515,7 +527,7 @@ Tracing a particular action of a malware instance allows to understand in detail
  \hline
  \textbf{ID} & \textbf{MD5} & \textbf{Name} \\ 
  \hline\hline
- 1 & 0af4ef5069f47a371a0caf22ae2006a6 & \textit{trojan/banker} \\ 
+ 1 & 0af4ef5069f47a371a0caf22ae2006a6 & \textit{banker} \\ 
  \hline
  2 & 9437eabf2fe5d32101e3fbf9f6027880 & \textit{dropper} \\
  \hline
@@ -544,6 +556,80 @@ authored by Joe Security
 
 \end{frame}
 
+\begin{frame}[fragile]
+    \frametitle{Example of tracked malevolent action}
+
+\begin{beamerboxesrounded}[shadow=true]{}
+Tracing a particular action of a malware instance allows to understand in detail what the sample's intentions are
+\end{beamerboxesrounded}
+\bigskip    
+\textbf{Example}: dropping a malicious executable
+\vspace*{0.3cm}
+    
+    %\begin{figure}
+    %	\vspace{-0.5cm}
+    	%\hspace*{1cm}
+    %    \includegraphics[width=11cm]{image/SampleCall}
+    %\end{figure}
+	
+	\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=none, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    %keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\linespread{1.3}\footnotesize\ttfamily,
+    basewidth = {.48em},
+   escapeinside={<@}{@>}
+}
+
+\begin{lstlisting}
+~~1116~~ 138 kernel32.dll!CopyFileA
+138 	arg 0: c:\Users\Simuset\Desktop\sample1.exe 
+(name=lpExistingFileName, type=char*, size=0x1)
+138 	arg 1: <@\alert{C:\textbackslash Windows\textbackslash system32\textbackslash $\dagger$\textbackslash ffpb6966.exe}@> 
+(name=lpNewFileName, type=char*, size=0x1)
+138 	arg 2: 0x0 (name=bFailIfExists, type=(long/int), size=0x4)
+138    executed kernel32.dll!CopyFileA =>
+138 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+\end{lstlisting}
+
+\iffalse
+\begin{lstlisting}
+~~972~~ 1397 kernel32.dll!CreateFileW
+1397 	arg 0: <@\alert{C:\textbackslash Windows  GFypmMVqJQOEQqy.exe}@> 
+(name=lpFileName, type=wchar_t*, size=0x2)
+1397 	arg 1: 0x40000000 (name=dwDesiredAccess, type=DWORD, size=0x4)
+1397 	arg 2: 0x1 (name=dwShareMode, type=DWORD, size=0x4)
+1397 	arg 3: 0x00000000 (name=lpSecurityAttributes, type=struct*|_SECURITY_ATTRIBUTES, size=0x60)
+1397 	arg 4: 0x2 
+(name=dwCreationDisposition, type=DWORD, size=0x4)
+1397 	arg 5: 0x0 (name=dwFlagsAndAttributes, type=DWORD, size=0x4)
+1397 	arg 6: 0x0 (name=hTemplateFile, type=DWORD, size=0x4)
+1397    executed kernel32.dll!CreateFileW =>
+1397 	retval: 0x128 (name=Return value, type=DWORD, size=0x4))
+\end{lstlisting}
+\fi
+
+\lstset{
+    language=C++,
+    frame=tb, % draw a frame at the top and bottom of the code block
+    tabsize=4, % tab space width
+    showstringspaces=false, % don't mark spaces in strings
+    numbers=left, % display line numbers on the left
+    commentstyle=\color{ao}, % comment color
+    keywordstyle=\color{blue}, % keyword color
+    stringstyle=\color{red}, % string color
+    basicstyle=\footnotesize\ttfamily,
+    basewidth = {.48em}
+} 
+
+
+\end{frame}
+
 \section{Conclusions}
 
 \begin{frame}
@@ -557,7 +643,7 @@ malware.
 	\\\bigskip
 	\textbf{\textcolor{sapienza}{Future Developments:}} \\
 	\begin{itemize}
-	\item Adoption of an automatic methodology for large-scale evaluation 
+	\item Automatic methodology for large-scale evaluation 
 	\item Improvement of logging capabilities
 	\item Usage of log filtering techniques
 	\end{itemize}
