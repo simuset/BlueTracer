@@ -169,6 +169,7 @@ a Robust API Tracer for Evasive Malware}
 
 \subsection{Malware Analysis}
 
+\iffalse
 \begin{frame}
     \frametitle{Malware: an increasingly significant problem }
 
@@ -177,11 +178,15 @@ a Robust API Tracer for Evasive Malware}
     \end{figure}
     
 \end{frame}
+\fi
+
 
 \begin{frame}
     \frametitle{Malware Analysis}
 
-    Two main types:
+	Malware is an ever-growing threat
+	
+    %Two main types:
     \medskip
     \begin{itemize}
         \item \textcolor{sapienza}{\textbf{Static Analysis:}}\\
@@ -192,10 +197,10 @@ a Robust API Tracer for Evasive Malware}
     \vspace{0.5cm}    
         
          \begin{beamerboxesrounded}[shadow=true]{}
-    Dynamic analysis strongly favoured as it allows to dodge \\ code obfuscations and deal with a large number of samples
+    Dynamic analysis strongly favoured as it allows to dodge most code obfuscations and deal with a large number of samples
     \end{beamerboxesrounded}    
 
-    \begin{textblock*}{2cm}(9.0cm,-6.1cm)
+    \begin{textblock*}{2cm}(8.0cm,-6.1cm)
    \includegraphics[width=1.2cm]{image/search.png}% use the \includegraphics command here
 	\end{textblock*} 
 
@@ -235,8 +240,9 @@ CreateFile("C\Windows\utils\GFypmMVqJQOEQqy.exe")
 
 \end{frame}
 
+\iffalse
 \begin{frame}[fragile]
-    \frametitle{Implementation of function call monitoring}
+    \frametitle{Implementing function call monitoring}
 	
 	    \begin{beamerboxesrounded}[shadow=true]{API Hooking}
     The interception of function calls provided by dynamically
@@ -263,7 +269,7 @@ linked \\ libraries (DLLs)
 
 One technique is \textbf{Dynamic Binary Instrumentation (DBI)}.
 \begin{itemize}
-\item[$\rightarrow$] The behaviour of an application is inspected at run-time, without the need of recompiling it, via the injection of analysis code
+\item[$\rightarrow$] The behaviour of an application is inspected at run time, without the need of recompiling it - by injecting analysis code
 \end{itemize}
 \smallskip
 
@@ -277,6 +283,7 @@ retval = libcall(arg1, &arg2)
 
 
 \end{frame}
+\fi
 
 \iffalse
 \begin{frame}[fragile]
@@ -303,6 +310,72 @@ retval = libcall(arg1, &arg2)
 \end{frame}
 \fi
 
+\subsection{Problems}
+\begin{frame}[fragile]
+    \frametitle{Problem 1: limited logging capabilities}
+
+Available API tracing tools have \textbf{limited logging capabilities}
+%\begin{itemize}
+%\item[--] The amount of recorded information is too little
+%\end{itemize}
+\medskip
+	\begin{block}{}
+\begin{lstlisting}[basicstyle=\ttfamily\large,xleftmargin=50pt]
+<@\textcolor{red}{record\_before(libcall\_name, arg1)}@> 
+retval = libcall(arg1, &arg2)
+<@\textcolor{red}{record\_after(retval, *arg2)}@> 
+\end{lstlisting}
+\end{block}	
+\medskip
+\begin{itemize}
+\item Access to a source of calls related information is required
+\begin{itemize}
+\item[--] Prototype (number of arguments, data types, input/output)
+%\item[--] Extraction
+\end{itemize}
+\medskip
+\item \textbf{Challenge:} heterogeneity of Windows libraries used in malware and lack of well-structured documentation for their prototypes
+\end{itemize}
+	
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Problem 2: logging only calls made by sample}
+
+It is hard to distinguish the calls made directly by the sample from the ones made within libraries
+\begin{itemize}
+\item Resulting logs are large and full of irrelevant information
+\end{itemize}
+
+    \begin{figure}
+    	\vspace{-0.2cm}
+    	\hspace*{-1cm}
+        \includegraphics[width=12cm]{image/MainImage1.pdf}
+    \end{figure}
+
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Problem 3: evasive malware}
+    
+     \begin{beamerboxesrounded}[shadow=true]{Evasive malware}
+Malware that conceals its harmful behaviour when detecting a
+hostile environment, such as a well-known sandbox
+solution
+    \end{beamerboxesrounded}
+    \bigskip
+    \bigskip
+    \begin{figure}
+    	\vspace{-0.8cm}
+    	\hspace*{0.5cm}
+        \includegraphics[width=10cm]{image/evasive.pdf}
+    \end{figure}
+\vspace{-0.3cm}
+Current tracing techniques are \textbf{easily detectable} and are not coupled with mechanisms to hide their presence
+
+\end{frame}
+
+\iffalse
 \subsection{Evasion}
 \begin{frame}
     \frametitle{The threat posed by evasive malware}
@@ -317,23 +390,25 @@ solution
     \begin{figure}
     	\vspace{-0.6cm}
     	\hspace*{0.5cm}
-        \includegraphics[width=11cm]{image/evasive.pdf}
+        \includegraphics[width=12cm]{image/evasive.pdf}
     \end{figure}
     
 \end{frame}
+\fi
 
+\iffalse
 \begin{frame}
     \frametitle{Existing problems}
 
 \section{Problem}	
-Two main problems which need to be addressed:
+Two main problems to address:
 \\\bigskip
 \begin{enumerate}
 \item Available API tracing tools have \textbf{limited logging capabilities}
 \smallskip
 \begin{itemize}
 \item[--] The amount of recorded information is too little
-\item[--] It is hard to distinguish the calls made directly from the sample's main executable from the ones made by libraries
+\item[--] It is hard to distinguish the calls made directly by the sample from the ones made within libraries
 \end{itemize}
 \bigskip
 \item Current API hooking techniques are \textbf{easily detectable} and are not coupled with mechanisms to hide their presence
@@ -342,48 +417,51 @@ from evasive malware
 
     
 \end{frame}
+\fi
 
 \section{BlueTracer}
 
 \subsection{Overview}
 \begin{frame}
-    \frametitle{BlueTracer}
+    \frametitle{BlueTracer: accurate API logging}
     \setbeamerfont*{itemize/enumerate subbody}{parent=itemize/enumerate body} 
 
 \medskip
 
 \begin{beamerboxesrounded}[shadow=true]{}
-\textbf{BlueTracer} is a robust library and system call tracer for Windows programs specialized in evasive malware
+\textbf{BlueTracer} is a robust library and system call tracer for Windows programs specialized in evasive malware based on Intel Pin
 \end{beamerboxesrounded}
 
-\medskip
+\bigskip
 
 \textcolor{sapienza}{\textbf{The tool possesses a remarkable logging power:}}
 \begin{itemize}
-\item Access to a source of calls related information is required
-\item Logging operations are made challenging by the heterogeneity of Windows libraries used in malware and the lack of well-structured documentation for their prototypes
-\begin{itemize}
-\item[$\rightarrow$] Integration of reliable external sources \\ (\textbf{Dr. Memory}
+%\item Integration of reliable external sources \\ (\textbf{Dr. %Memory}
+%and \textbf{CISCO PyREBox})
+%\item Logging operations are challenging 
+%by the heterogeneity of Windows libraries used in malware and the lack of well-structured documentation for their prototypes
+%\begin{itemize}
+\item Integration of reliable external sources \\ (\textbf{Dr. Memory}
 and \textbf{CISCO PyREBox})
-\end{itemize} 
-\end{itemize}
+%\end{itemize} 
+%\end{itemize}
 
-\textcolor{sapienza}{\textbf{Key features:}}
-\begin{itemize}
-\item Undetected tracing of input parameters, output buffers and return values of over 17 000 system calls and library calls
+%\textcolor{sapienza}{\textbf{Key features:}}
+%\begin{itemize}
+\item Stealthy tracing of input parameters, output buffers and return values of over 17,000 system calls and library calls
 \item Logging of asynchronous events
-\item Allows to trace only calls from the main executable
+%\item Allows to trace only calls from the main executable
 \end{itemize}    
 
 \end{frame}
 
 \begin{frame}
-    \frametitle{BlueTracer (cont'd)}
+    \frametitle{BlueTracer: robust against evasive malware}
 \setbeamerfont*{itemize/enumerate subbody}{parent=itemize/enumerate body}    
 
 \textcolor{sapienza}{\textbf{Solution to the detection problem:}}
 \begin{itemize}
-\item Seamless integration with \textbf{BluePill}, a stealthy execution framework based on \textbf{Intel Pin}
+\item Seamless integration with the \textbf{BluePill} stealthy execution framework
 %\item Combines reliable external sources of prototypes information
 \end{itemize}
 
@@ -396,19 +474,36 @@ and \textbf{CISCO PyREBox})
 %\end{itemize}
 
 \bigskip
+\bigskip
+	    \begin{figure}
+    	\vspace{-0.8cm}
+    	%\hspace*{1cm}
+        \includegraphics[width=8cm]{image/BluePill.pdf}
+    \end{figure}
+
+%\textcolor{sapienza}{\textbf{Faced implementation challenges:}}
+%\begin{itemize}
+%\item Optimal use of
+%Intel Pin's capabilities with respect to run-time CPU and memory costs
+%\item Addressing some inherent limitations of Intel Pin
+%\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{BlueTracer: focussed tracing of the sample's actions}
+\setbeamerfont*{itemize/enumerate subbody}{parent=itemize/enumerate body}
+
+Only calls made directly by the sample are recorded through the use of context-sensitive introspection
+\begin{itemize}
+\item Stack pointer inspection
+\end{itemize}    
+\medskip
 	    \begin{figure}
     	\vspace{-0.3cm}
     	%\hspace*{1cm}
-        \includegraphics[width=6cm]{image/BluePill.pdf}
+        \includegraphics[width=10cm]{image/MainImageTree.pdf}
     \end{figure}
-
-\textcolor{sapienza}{\textbf{Faced implementation challenges:}}
-\begin{itemize}
-\item Making best use of
-Intel Pin's capabilities with respect to run-time CPU and memory costs
-\item Addressing some inherent limitations of Intel Pin
-
-\end{itemize}
 
 \end{frame}
 
@@ -482,21 +577,23 @@ evasion
 
 \end{frame}
 
-\section{Evaluation}
+\section{Validation}
 
 \subsection{Al-Khaser}
 \begin{frame}
-    \frametitle{Evaluation with Al-Khaser}
+    \frametitle{Validation (1) with Al-Khaser}
+    \begin{beamerboxesrounded}[shadow=true]{}
 	\textbf{Al-Khaser} is an open-source application which performs common checks employed by malware families to determine if they are being
 executed in an analysis environment.
-\\\medskip
+\end{beamerboxesrounded}
+\medskip
 Checks divided in categories:
 \begin{itemize}
 \item \textbf{Anti-Debugging}
 \item \textbf{Timing-based}
 \item \textbf{Human Interaction Detection}
 \item \textbf{Anti-Virtualization}
-\item \textbf{Anti-Analysis}
+\item \textbf{Detection of Analysis Tools}
 \end{itemize}
 \medskip
 \begin{beamerboxesrounded}[shadow=true]{}
@@ -515,7 +612,7 @@ BlueTracer:
 
 \subsection{Evasive malware samples}
 \begin{frame}
-    \frametitle{Evaluation with evasive malware samples}
+    \frametitle{Validation (2) with highly evasive malware samples}
     
 	Five highly evasive samples collected by Joe Security:    
     
@@ -645,7 +742,7 @@ malware.
 	\begin{itemize}
 	\item Automatic methodology for large-scale evaluation 
 	\item Improvement of logging capabilities
-	\item Usage of log filtering techniques
+	\item Usage of log filtering and aggregation techniques
 	\end{itemize}
 
 \end{frame}
