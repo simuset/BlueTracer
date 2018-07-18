@@ -192,7 +192,7 @@ a Robust API Tracer for Evasive Malware}
         \item \textcolor{sapienza}{\textbf{Static Analysis:}}\\
         involves the inspection of the different data and code sections of a binary
         \item \textcolor{sapienza}{\textbf{Dynamic Analysis:}}\\
-        the malware sample is executed and the actions it performs on the environment are observed
+        a malware sample is executed and the actions it performs on the environment are observed
     \end{itemize}
     \vspace{0.5cm}    
         
@@ -214,7 +214,7 @@ a Robust API Tracer for Evasive Malware}
 \item Functions can abstract
 implementation details providing
 a semantically richer representation of some functionality
-\item The abstractions embodied by \textbf{system calls} and \textbf{library calls} \\ can be used to grasp the visible behavior of a malicious sample 
+\item The abstractions embodied by \textbf{system calls} and \\ \textbf{library functions} can be used to grasp the visible behavior of a malicious sample 
 \end{itemize}
 \medskip
 \textcolor{sapienza}{\textbf{Example}}:\\
@@ -328,10 +328,10 @@ retval = libcall(arg1, &arg2)
 \end{block}	
 \medskip
 \begin{itemize}
-\item Access to a source of calls related information is required
+\item Access to calls related information is required
 \begin{itemize}
 \item[--] Prototype (number of arguments, data types, input/output)
-%\item[--] Extraction
+\item[--] Need to know their run-time locations
 \end{itemize}
 \medskip
 \item \textbf{Challenge:} heterogeneity of Windows libraries used in malware and lack of well-structured documentation for their prototypes
@@ -349,8 +349,8 @@ It is hard to distinguish the calls made directly by the sample from the ones ma
 
     \begin{figure}
     	\vspace{-0.2cm}
-    	\hspace*{-1cm}
-        \includegraphics[width=12cm]{image/MainImage1.pdf}
+    	\hspace*{-0.2cm}
+        \includegraphics[width=10cm]{image/MainImage11.pdf}
     \end{figure}
 
 \end{frame}
@@ -441,7 +441,7 @@ from evasive malware
 %\item Logging operations are challenging 
 %by the heterogeneity of Windows libraries used in malware and the lack of well-structured documentation for their prototypes
 %\begin{itemize}
-\item Integration of reliable external sources \\ (\textbf{Dr. Memory}
+\item Integration of rich, reliable external sources \\ (\textbf{Dr. Memory}
 and \textbf{CISCO PyREBox})
 %\end{itemize} 
 %\end{itemize}
@@ -496,7 +496,7 @@ and \textbf{CISCO PyREBox})
 
 Only calls made directly by the sample are recorded through the use of context-sensitive introspection
 \begin{itemize}
-\item Stack pointer inspection
+\item Stack pointer and return address analysis
 \end{itemize}    
 \medskip
 	    \begin{figure}
@@ -565,7 +565,7 @@ evasion
 \subsection{Architecture}
 
 \begin{frame}
-    \frametitle{BlueTracer's architecture}
+    \frametitle{Architecture of BlueTracer}
     
     \begin{figure}
     	\vspace{-0.5cm}
@@ -581,9 +581,9 @@ evasion
 
 \subsection{Al-Khaser}
 \begin{frame}
-    \frametitle{Validation (1) with Al-Khaser}
+    \frametitle{Validation (1): Al-Khaser}
     \begin{beamerboxesrounded}[shadow=true]{}
-	\textbf{Al-Khaser} is an open-source application which performs common checks employed by malware families to determine if they are being
+	\textbf{Al-Khaser} is an open-source application which performs checks \\ popular in malware samples spotted in the wild to determine if they are being
 executed in an analysis environment.
 \end{beamerboxesrounded}
 \medskip
@@ -600,7 +600,7 @@ Many implemented techniques:
 BlueTracer: 
 \begin{itemize}
 \item remained undetected thanks to its integration with BluePill
-\item managed to track all the checks
+\item managed to track all arguments used to trigger evasion
 \end{itemize}
 \end{beamerboxesrounded}
 
@@ -639,7 +639,8 @@ BlueTracer:
 \end{center}
 \end{table}
 \vspace{-0.1cm}
-Evaluation was done manually and is a time-consuming process:
+Manual validation of all relevant actions performed by each sample:
+\vspace{-0.5cm}
 \begin{itemize}
 \item Check if logs are congruous with Joe Security reports
 \item Process Monitor as ground truth for system activity
@@ -685,13 +686,13 @@ Tracing a particular action of a malware instance allows to understand in detail
 
 \begin{lstlisting}
 ~~1116~~ 138 kernel32.dll!CopyFileA
-138 	arg 0: c:\Users\Simuset\Desktop\sample1.exe 
+138 	arg 0: <@\alert{C:\textbackslash Users\textbackslash Simuset\textbackslash Desktop\textbackslash sample1.exe}@> 
 (name=lpExistingFileName, type=char*, size=0x1)
 138 	arg 1: <@\alert{C:\textbackslash Windows\textbackslash system32\textbackslash $\dagger$\textbackslash ffpb6966.exe}@> 
 (name=lpNewFileName, type=char*, size=0x1)
-138 	arg 2: 0x0 (name=bFailIfExists, type=(long/int), size=0x4)
+138 	arg 2: <@\alert{0x0}@> (name=bFailIfExists, type=(long/int), size=0x4)
 138    executed kernel32.dll!CopyFileA =>
-138 	retval: 0x1 (name=Return value, type=(long/int), size=0x4)
+138 	retval:<@\alert{0x1}@> (name=Return value, type=(long/int), size=0x4)
 \end{lstlisting}
 
 \iffalse
@@ -735,14 +736,14 @@ Tracing a particular action of a malware instance allows to understand in detail
 	\textbf{\textcolor{sapienza}{Contribution:}} \\
 	\smallskip	
 	\tab Design and implementation of \textbf{BlueTracer},
-a robust library and system call tracer for Windows programs specialized in evasive
-malware.
+a robust library and \tab system call tracer for Windows programs specialized in evasive
+\tab malware.
 	\\\bigskip
 	\textbf{\textcolor{sapienza}{Future Developments:}} \\
 	\begin{itemize}
 	\item Automatic methodology for large-scale evaluation 
 	\item Improvement of logging capabilities
-	\item Usage of log filtering and aggregation techniques
+	\item Log filtering and aggregation techniques
 	\end{itemize}
 
 \end{frame}
