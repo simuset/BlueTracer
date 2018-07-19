@@ -165,7 +165,7 @@ a Robust API Tracer for Evasive Malware}
 \end{frame}
 
 
-\section{Intro.}
+\section{Introduction}
 
 \subsection{Malware Analysis}
 
@@ -197,7 +197,7 @@ a Robust API Tracer for Evasive Malware}
     \vspace{0.5cm}    
         
          \begin{beamerboxesrounded}[shadow=true]{}
-    Dynamic analysis strongly favoured as it allows to dodge most code obfuscations and deal with a large number of samples
+    Dynamic analysis strongly favoured as it allows us to dodge most code obfuscations and deal with a large number of samples
     \end{beamerboxesrounded}    
 
     \begin{textblock*}{2cm}(8.0cm,-6.1cm)
@@ -328,10 +328,9 @@ retval = libcall(arg1, &arg2)
 \end{block}	
 \medskip
 \begin{itemize}
-\item Access to calls related information is required
+\item Access to function calls information is required
 \begin{itemize}
 \item[--] Prototype (number of arguments, data types, input/output)
-\item[--] Need to know their run-time locations
 \end{itemize}
 \medskip
 \item \textbf{Challenge:} heterogeneity of Windows libraries used in malware and lack of well-structured documentation for their prototypes
@@ -441,17 +440,34 @@ from evasive malware
 %\item Logging operations are challenging 
 %by the heterogeneity of Windows libraries used in malware and the lack of well-structured documentation for their prototypes
 %\begin{itemize}
-\item Integration of rich, reliable external sources \\ (\textbf{Dr. Memory}
+\item Integration of rich, reliable external sources of function prototypes information  \\ (\textbf{Dr. Memory}
 and \textbf{CISCO PyREBox})
 %\end{itemize} 
 %\end{itemize}
 
 %\textcolor{sapienza}{\textbf{Key features:}}
 %\begin{itemize}
-\item Stealthy tracing of input parameters, output buffers and return values of over 17,000 system calls and library calls
+\item Stealthy tracing of input parameters, output buffers and return values of all system calls and of over 17,000 library calls
 \item Logging of asynchronous events
 %\item Allows to trace only calls from the main executable
 \end{itemize}    
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{BlueTracer: focussed tracing of the sample's actions}
+\setbeamerfont*{itemize/enumerate subbody}{parent=itemize/enumerate body}
+
+Only calls made directly by the sample are recorded through the use of context-sensitive introspection
+\begin{itemize}
+\item Stack pointer and return address analysis
+\end{itemize}    
+\medskip
+	    \begin{figure}
+    	\vspace{-0.3cm}
+    	%\hspace*{1cm}
+        \includegraphics[width=10cm]{image/MainImageTree.pdf}
+    \end{figure}
 
 \end{frame}
 
@@ -487,23 +503,6 @@ and \textbf{CISCO PyREBox})
 %Intel Pin's capabilities with respect to run-time CPU and memory costs
 %\item Addressing some inherent limitations of Intel Pin
 %\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-    \frametitle{BlueTracer: focussed tracing of the sample's actions}
-\setbeamerfont*{itemize/enumerate subbody}{parent=itemize/enumerate body}
-
-Only calls made directly by the sample are recorded through the use of context-sensitive introspection
-\begin{itemize}
-\item Stack pointer and return address analysis
-\end{itemize}    
-\medskip
-	    \begin{figure}
-    	\vspace{-0.3cm}
-    	%\hspace*{1cm}
-        \includegraphics[width=10cm]{image/MainImageTree.pdf}
-    \end{figure}
 
 \end{frame}
 
@@ -643,7 +642,6 @@ Manual validation of all relevant actions performed by each sample:
 \vspace{-0.5cm}
 \begin{itemize}
 \item Check if logs are congruous with Joe Security reports
-\item Process Monitor as ground truth for system activity
 \end{itemize}
 \medskip
 \begin{beamerboxesrounded}[shadow=true]{}
@@ -685,14 +683,15 @@ Tracing a particular action of a malware instance allows to understand in detail
 }
 
 \begin{lstlisting}
-~~1116~~ 138 kernel32.dll!CopyFileA
-138 	arg 0: <@\alert{C:\textbackslash Users\textbackslash Simuset\textbackslash Desktop\textbackslash sample1.exe}@> 
-(name=lpExistingFileName, type=char*, size=0x1)
-138 	arg 1: <@\alert{C:\textbackslash Windows\textbackslash system32\textbackslash $\dagger$\textbackslash ffpb6966.exe}@> 
-(name=lpNewFileName, type=char*, size=0x1)
-138 	arg 2: <@\alert{0x0}@> (name=bFailIfExists, type=(long/int), size=0x4)
-138    executed kernel32.dll!CopyFileA =>
-138 	retval:<@\alert{0x1}@> (name=Return value, type=(long/int), size=0x4)
+[PID: 1116] kernel32.dll!CopyFileA
+arg 0:  <@\alert{C:\textbackslash Users\textbackslash Simuset\textbackslash Desktop\textbackslash sample1.exe}@> 
+        (name=lpExistingFileName, type=char*, size=0x1)
+arg 1:  <@\alert{C:\textbackslash Windows\textbackslash system32\textbackslash $\dagger$\textbackslash ffpb6966.exe}@> 
+        (name=lpNewFileName, type=char*, size=0x1)
+arg 2:  <@\alert{0x0}@> 
+        (name=bFailIfExists, type=(long/int), size=0x4)
+retval: <@\alert{0x1}@> 
+        (name=Return value, type=(long/int), size=0x4)
 \end{lstlisting}
 
 \iffalse
